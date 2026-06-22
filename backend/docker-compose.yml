@@ -1,0 +1,10 @@
+services:
+    backend:
+        build: .
+        container_name: eduquiz_backend
+        ports:
+            - "8000:8000"
+        volumes:
+            - .:/app
+        working_dir: /app
+        command: php artisan serve --host=0.0.0.0 --port=8000

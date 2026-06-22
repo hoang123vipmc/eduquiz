@@ -1,0 +1,80 @@
+Câu 1: Câu 1: Mô hình tường lửa ISA là viết tắt của?
+A. A. Microsoft International Security and Acceleration
+B. B. Manager Internet Security and Association
+C. C. Microsoft Internet Security and Acceleration
+D. D. Microsoft Internet System and Acknowledgement
+=> Đáp án đúng: C. C. Microsoft Internet Security and Acceleration
+--------------------------------------------------
+
+Câu 2: Câu 2: Khi cấu hình cho dịch vụ DNS mục Reverse Lookup Zone là?
+A. A. Chứa toàn bộ zone của DNS
+B. B. Vùng ánh xạ từ địa chỉ tên miền thành địa chỉ IP
+C. C. Vùng ánh xạ từ địa chỉ IP thành địa chỉ tên miền
+D. D. Chứa các zone không sử dụng
+=> Đáp án đúng: C. C. Vùng ánh xạ từ địa chỉ IP thành địa chỉ tên miền
+--------------------------------------------------
+
+Câu 3: Câu 1: Group policy trên Hệ điều hành Window là gì?
+A. A. Lưu giữ thông tin về tài khoản và mật khẩu đã tạo trên máy cục bộ
+B. B. Lưu giữ thông tin về quyền chia sẻ và bảo mật dữ liệu
+C. C. Dùng để tạo chính sách nhóm và là tệp ứng dụng được tạo ra bởi công cụ MMC
+D. D. Thông tin về tài khoản người dùng quản lý trên máy chủ
+=> Đáp án đúng: C. C. Dùng để tạo chính sách nhóm và là tệp ứng dụng được tạo ra bởi công cụ MMC
+--------------------------------------------------
+
+Câu 4: Câu 2: Microsoft Exchange Server 2003 tồn tại mấy phiên bản chính?
+A. A. 1
+B. B. 2
+C. C. 3
+D. D. 4
+=> Đáp án đúng: C. C. 3
+--------------------------------------------------
+
+Câu 5: Câu 66: Giao thức nào được hỗ trợ bởi Exchange 2003 để các ứng dụng nhận Mail có thể truy xuất Mail trên máy chủ Exchange và tải các thư điện tử này về?
+A. A. POP3
+B. B. PPTP
+C. C. BITS
+D. D. SMTP
+=> Đáp án đúng: D. D. SMTP
+--------------------------------------------------
+
+Câu 6: Câu 67: Trên máy Client, bạn không thể kết nối vào mạng Internet. Bạn dùng lệnh PING vẫn có thể kết nối tới địa chỉ 172.28.220.1, đây là địa chỉ của một máy chủ ở trong mạng của bạn. Bạn thử PING tên một Website và nhận được thông báo lỗi sau: "PING REQUEST COULD NOT FIND HOST". Bạn nên kiểm tra gì trước?
+A. A. Máy chủ DNS
+B. B. Card mạng
+C. C. Máy chủ Web
+D. D. Máy chủ DHCP
+=> Đáp án đúng: A. A. Máy chủ DNS
+--------------------------------------------------
+
+Câu 7: Câu 1: Để nâng cao bảo mật trong mạng bạn thực hiện chính sách Maximum Password Age là 7 ngày. Chính sách này sẽ yêu cầu người sử dụng phải đổi mật khẩu hàng tuần. Tuy nhiên sau một thời gian bạn nhận thấy có một vài người sử dụng sau khi đổi sang mật khẩu mới lại đổi ngay về mật khẩu cũ. Bạn sẽ dùng chính sách nào dưới đây để tránh tình trạng này?
+A. A. Minimum Password Age
+B. B. Store Passwords Using Reversible Encryption
+C. C. Enforce Password History
+D. D. Maximum Password Age
+=> Đáp án đúng: C. C. Enforce Password History
+--------------------------------------------------
+
+Câu 8: Câu 1: Hãy cho biết mục ‘Reverse lookup Zone’ trong DNS Manager là gì?
+A. A. Là vùng ánh xạ từ địa chỉ IP thành địa chỉ tên miền.
+B. B. Là vùng ánh xạ từ địa chỉ tên miền thành địa chỉ IP.
+C. C. Là vùng chứa các zone không sử dụng.
+D. D. Là vùng chứa toàn bộ zone của DNS.
+=> Đáp án đúng: A. A. Là vùng ánh xạ từ địa chỉ IP thành địa chỉ tên miền.
+--------------------------------------------------
+
+Câu 9: Câu 1: Hãy chọn phương án đúng cho biết thứ tự các tầng của mô hình OSI là thế nào?
+A. A. Physical, Data-Link, Network, Transport, Session, Presentation, Application.
+B. B. Physical, Data-Link, Transport, Network, Session, Presentation, Application.
+C. C. Physical, Data-Link, Network, Session, Transport, Presentation, Application.
+D. D. Physical, Data-Link, Network, Transport, Presentation, Session, Application.
+=> Đáp án đúng: A. A. Physical, Data-Link, Network, Transport, Session, Presentation, Application.
+--------------------------------------------------
+
+Câu 10: Câu 61: Một mạng con lớp A mượn 1 bit để chia Subnet thì Subnet Mask sẽ là?
+A. A. 255.255.128.0
+B. B. 255.255.255.240
+C. C. 255.128.0.0
+D. D. 255.255.128.0
+=> Đáp án đúng: C. C. 255.128.0.0
+--------------------------------------------------
+

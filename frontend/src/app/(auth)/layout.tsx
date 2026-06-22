@@ -1,0 +1,64 @@
+import React from "react";
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] text-slate-100">
+      {/* Cột trái: Hình ảnh/Branding */}
+      <div className="relative hidden md:flex w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#071026] via-[#0f172a] to-[#071026] p-12 overflow-hidden border-r border-white/5">
+        
+        {/* Glowing dots & Ambient background */}
+        <div className="absolute top-[20%] left-[20%] w-2 h-2 rounded-full bg-blue-400 blur-[1px] animate-pulse"></div>
+        <div className="absolute bottom-[30%] right-[25%] w-3 h-3 rounded-full bg-indigo-500 blur-[2px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-[60%] left-[15%] w-1.5 h-1.5 rounded-full bg-emerald-400 blur-[1px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Soft gradient orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        {/* Floating Quiz Cards Illustration */}
+        <div className="relative w-full max-w-md h-64 mb-12 flex items-center justify-center">
+          {/* Card 1 */}
+          <div className="absolute z-10 w-64 h-32 bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-2xl -rotate-6 translate-x-[-40px] translate-y-[-20px] animate-[float_6s_ease-in-out_infinite]">
+            <div className="w-1/3 h-3 bg-slate-700 rounded-full mb-4"></div>
+            <div className="w-full h-2 bg-slate-800 rounded-full mb-2"></div>
+            <div className="w-5/6 h-2 bg-slate-800 rounded-full mb-4"></div>
+            <div className="flex gap-2 mt-auto">
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500/50"></div>
+              <div className="w-6 h-6 rounded-full bg-slate-800"></div>
+              <div className="w-6 h-6 rounded-full bg-slate-800"></div>
+            </div>
+          </div>
+          {/* Card 2 */}
+          <div className="absolute z-20 w-72 h-36 bg-[#18233b] border border-white/10 rounded-2xl p-6 shadow-2xl rotate-3 translate-x-[40px] translate-y-[20px] animate-[float_8s_ease-in-out_infinite_reverse]">
+            <div className="w-1/4 h-3 bg-blue-500/50 rounded-full mb-4"></div>
+            <div className="w-full h-2 bg-slate-700 rounded-full mb-2"></div>
+            <div className="w-4/5 h-2 bg-slate-700 rounded-full mb-6"></div>
+            <div className="w-full h-10 bg-blue-600 rounded-xl"></div>
+          </div>
+        </div>
+        
+        {/* Typography */}
+        <div className="relative z-10 text-center max-w-md mt-8">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <span className="text-2xl font-bold text-white tracking-tighter">EQ</span>
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold mb-4 tracking-tight text-white">EduQuiz</h1>
+          <p className="text-base text-slate-400 font-normal leading-relaxed">
+            Learn smarter. Practice faster. Achieve more.
+          </p>
+        </div>
+      </div>
+
+      {/* Cột phải: Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-[#020617] relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/5 via-[#020617] to-[#020617] pointer-events-none"></div>
+        {children}
+      </div>
+    </div>
+  );
+}
