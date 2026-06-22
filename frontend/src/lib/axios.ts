@@ -6,8 +6,7 @@ const axiosInstance = axios.create({
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-    },
-    withCredentials: true, // Hỗ trợ nhận cookie từ Sanctum
+    }
 });
 
 // Interceptor gắn Bearer Token vào Request
