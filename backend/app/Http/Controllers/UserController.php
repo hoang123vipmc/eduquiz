@@ -12,13 +12,15 @@ class UserController extends Controller
     {
         $userId = $request->user()->id;
 
-        $results = Result::whereHas('attempt', function ($query) use ($userId) {
+        $stats = Result::whereHas('attempt', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->get();
-        
-        $totalQuizzes = $results->count();
-        $avgAccuracy = $totalQuizzes > 0 ? $results->avg('accuracy') : 0;
-        $totalTimeSeconds = $results->sum('time_taken_seconds');
+        })
+        ->selectRaw('COUNT(*) as total_quizzes, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds')
+        ->first();
+
+        $totalQuizzes = $stats->total_quizzes ?? 0;
+        $avgAccuracy = $stats->avg_accuracy ?? 0;
+        $totalTimeSeconds = $stats->total_time_seconds ?? 0;
 
         // Tính chuỗi ngày học liên tiếp (Streak) - Đơn giản hóa: Trả về số ngày phân biệt đã làm bài
         $streak = Result::whereHas('attempt', function ($query) use ($userId) {
@@ -49,6 +51,7 @@ class UserController extends Controller
                 $query->where('user_id', $userId);
             })
             ->orderBy('created_at', 'desc')
+            ->take(15)
             ->get()
             ->map(function ($result) {
                 // Đưa quiz ra cấp độ root của history item để Frontend dễ sử dụng
