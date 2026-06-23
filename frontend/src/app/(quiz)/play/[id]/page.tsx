@@ -123,7 +123,7 @@ export default function QuizPlayerPage() {
     try {
       const result = await submitQuiz();
       if (result) {
-        router.push(`/dashboard/history/${result.id}`);
+        router.push(`/result/${result.id}`);
       }
     } catch (error: any) {
       alert(`Failed to submit quiz: ${error.message}`);
