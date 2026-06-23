@@ -142,6 +142,7 @@ class QuizImportController extends Controller
                 'visibility' => 'public',
             ]);
 
+            $optionsToInsert = [];
             foreach ($questionsData as $qIdx => $qData) {
                 $question = Question::create([
                     'quiz_id' => $quiz->id,
@@ -152,13 +153,20 @@ class QuizImportController extends Controller
                 ]);
 
                 foreach ($qData['options'] as $oIdx => $opt) {
-                    Option::create([
+                    $optionsToInsert[] = [
                         'question_id' => $question->id,
                         'option_text' => $opt['text'],
-                        'is_correct' => $opt['is_correct'],
-                        'order' => $oIdx + 1
-                    ]);
+                        'is_correct' => $opt['is_correct'] ? true : false,
+                        'order' => $oIdx + 1,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
                 }
+            }
+            
+            // Bulk insert Options
+            foreach (array_chunk($optionsToInsert, 200) as $chunk) {
+                Option::insert($chunk);
             }
             DB::commit();
 
