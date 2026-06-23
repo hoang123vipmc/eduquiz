@@ -189,7 +189,7 @@ class AttemptController extends Controller
             $skippedCount = $questions->count() - $answers->count();
             $score = $totalPoints > 0 ? ($correctPoints / $totalPoints) * 100 : 0;
             $accuracy = $questions->count() > 0 ? ($correctCount / $questions->count()) * 100 : 0;
-            $timeTaken = now()->diffInSeconds($attempt->started_at);
+            $timeTaken = (int) abs(now()->diffInSeconds($attempt->started_at));
 
             $result = Result::create([
                 'attempt_id' => $attempt->id,
