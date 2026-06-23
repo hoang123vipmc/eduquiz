@@ -182,8 +182,8 @@ export default function QuizPlayerPage() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {/* Ambient background glow */}
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+        {/* Ambient background glow - Optimized for GPU */}
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[800px] h-[800px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)' }}></div>
 
         {/* LEFT/CENTER: Question Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 relative z-10 scrollbar-hide">

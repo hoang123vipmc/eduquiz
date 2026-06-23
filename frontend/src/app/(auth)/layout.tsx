@@ -15,8 +15,8 @@ export default function AuthLayout({
         <div className="absolute bottom-[30%] right-[25%] w-3 h-3 rounded-full bg-indigo-500 blur-[2px] animate-pulse" style={{ animationDelay: '1s' }}></div>
         <div className="absolute top-[60%] left-[15%] w-1.5 h-1.5 rounded-full bg-emerald-400 blur-[1px] animate-pulse" style={{ animationDelay: '2s' }}></div>
         
-        {/* Soft gradient orb */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* Soft gradient orb - Optimized for GPU */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.05) 0%, transparent 70%)' }}></div>
 
         {/* Floating Quiz Cards Illustration */}
         <div className="relative w-full max-w-md h-64 mb-12 flex items-center justify-center">

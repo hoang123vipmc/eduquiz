@@ -72,8 +72,8 @@ export default function DashboardPage() {
       
       {/* Hero Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-[#0f172a] to-[#071026] border border-white/5 relative overflow-hidden">
-        {/* Ambient glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+        {/* Ambient glow - Optimized for GPU */}
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)' }}></div>
         
         <div className="relative z-10">
           <h2 className="text-3xl font-bold tracking-tight text-white mb-2">
