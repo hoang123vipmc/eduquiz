@@ -15,7 +15,7 @@ class QuestionResource extends JsonResource
                 'quiz_id' => $this->quiz_id,
                 'question_text' => $this->question_text,
                 'question_image' => $this->question_image,
-                'explanation' => $this->when($request->routeIs('*.edit') || $request->user()?->role === 'admin' || $request->user()?->id === $this->quiz->user_id || $request->attributes->get('is_practice_mode') === true, $this->explanation),
+                'explanation' => $this->when($request->routeIs('*.edit') || $request->user()?->role === 'admin' || $request->user()?->id === ($request->attributes->get('quiz_owner_id') ?? ($this->relationLoaded('quiz') ? $this->quiz->user_id : null)) || $request->attributes->get('is_practice_mode') === true, $this->explanation),
                 'type' => $this->type,
                 'difficulty' => $this->difficulty,
                 'points' => $this->points,

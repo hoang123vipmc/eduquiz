@@ -15,6 +15,7 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quizId);
         $questions = $quiz->questions()->with('options')->orderBy('order')->get();
+        $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
         return response()->json([
             'success' => true,
@@ -41,6 +42,8 @@ class QuestionController extends Controller
             }
 
             DB::commit();
+
+            $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
             return response()->json([
                 'success' => true,

@@ -48,6 +48,7 @@ class AttemptController extends Controller
         if ($attempt->mode === 'practice') {
             $request->attributes->set('is_practice_mode', true);
         }
+        $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
         // Trả về trạng thái bắt đầu và danh sách câu hỏi
         return response()->json([
@@ -78,6 +79,8 @@ class AttemptController extends Controller
         if ($attempt->mode === 'practice') {
             $request->attributes->set('is_practice_mode', true);
         }
+        
+        $request->attributes->set('quiz_owner_id', $attempt->quiz->user_id);
 
         if ($attempt->remaining_time !== null) {
             // Tính toán lại thời gian
@@ -258,6 +261,7 @@ class AttemptController extends Controller
             $request->attributes->set('is_practice_mode', true);
 
             $quiz = $newAttempt->quiz;
+            $request->attributes->set('quiz_owner_id', $quiz->user_id);
             return response()->json([
                 'success' => true,
                 'message' => 'Bắt đầu làm lại các câu sai.',
