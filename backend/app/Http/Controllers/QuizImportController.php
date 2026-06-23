@@ -143,13 +143,11 @@ class QuizImportController extends Controller
             ]);
 
             foreach ($questionsData as $qIdx => $qData) {
-                $points = 100 / count($questionsData);
-
                 $question = Question::create([
                     'quiz_id' => $quiz->id,
                     'question_text' => $qData['q'],
                     'type' => 'single_choice',
-                    'points' => round($points, 2),
+                    'points' => 1,
                     'order' => $qIdx + 1
                 ]);
 
