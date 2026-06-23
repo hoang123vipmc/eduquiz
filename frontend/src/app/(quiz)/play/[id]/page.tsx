@@ -99,7 +99,7 @@ export default function QuizPlayerPage() {
             autoNextDelay: Number(params.get('delay')) || 0,
             unlimitedTime: params.get('unlimited') === '1'
           };
-          await startQuiz(Number(id), config);
+          await startQuiz(Number(id), config.mode, config.unlimitedTime);
         }
       } catch (error: any) {
         if (error.response?.status !== 401) {
