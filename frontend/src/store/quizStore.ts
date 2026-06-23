@@ -140,10 +140,10 @@ export const useQuizStore = create<QuizState>()(
                         set({ status: 'submitted' });
                         return data.data; // Trả về object result
                     }
-                } catch (e) {
+                } catch (e: any) {
                     console.error("Lỗi nộp bài", e);
+                    throw new Error(e.response?.data?.message || e.message || "Lỗi nộp bài");
                 }
-                return null;
             },
 
             tick: () => {

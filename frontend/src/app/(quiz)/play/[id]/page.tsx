@@ -125,8 +125,8 @@ export default function QuizPlayerPage() {
       if (result) {
         router.push(`/dashboard/history/${result.id}`);
       }
-    } catch (error) {
-      alert("Failed to submit quiz.");
+    } catch (error: any) {
+      alert(`Failed to submit quiz: ${error.message}`);
     } finally {
       setSubmitting(false);
     }

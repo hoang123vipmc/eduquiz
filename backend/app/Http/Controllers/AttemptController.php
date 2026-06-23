@@ -210,7 +210,7 @@ class AttemptController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Lỗi nộp bài.'], 500);
+            return response()->json(['success' => false, 'message' => 'Lỗi nộp bài: ' . $e->getMessage() . ' at line ' . $e->getLine()], 500);
         }
     }
 
