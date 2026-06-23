@@ -167,6 +167,7 @@ class AttemptController extends Controller
 
             $answers = UserAnswer::where('attempt_id', $attempt->id)->get();
             $questions = $attempt->quiz->questions;
+            $questionsMap = $questions->keyBy('id');
 
             $totalPoints = $questions->sum('points');
             $correctPoints = 0;
@@ -176,7 +177,10 @@ class AttemptController extends Controller
             foreach ($answers as $answer) {
                 if ($answer->is_correct) {
                     $correctCount++;
-                    $correctPoints += $answer->question->points;
+                    $q = $questionsMap->get($answer->question_id);
+                    if ($q) {
+                        $correctPoints += $q->points;
+                    }
                 } else {
                     $wrongCount++;
                 }
