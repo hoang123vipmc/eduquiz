@@ -27,7 +27,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password, // Laravel 11 tự động hash vì có cast 'hashed' trong User model
         ]);
 
         return response()->json([
