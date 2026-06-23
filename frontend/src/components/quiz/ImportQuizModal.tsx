@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Upload, FileText, Loader2, Edit3, ArrowLeft, HelpCircle } from 'lucide-react';
+import { X, Upload, FileText, Loader2, Edit3, ArrowLeft, HelpCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/axios';
 import { FormatGuideModal } from './FormatGuideModal';
+import { parseQuizText } from '@/lib/utils/quizParser';
 
 interface ImportQuizModalProps {
   isOpen: boolean;
@@ -18,6 +19,11 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showGuide, setShowGuide] = useState(false);
+
+  const parsedQuestions = React.useMemo(() => {
+    if (step === 2) return parseQuizText(rawText);
+    return [];
+  }, [rawText, step]);
 
   if (!isOpen) return null;
 
@@ -119,8 +125,8 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
         className={cn(
-          "bg-[#0f172a] rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-white/10 overflow-hidden flex flex-col w-full max-w-[560px] transition-all",
-          step === 2 ? "h-[85vh] max-h-[800px]" : "h-auto"
+          "bg-[#0f172a] rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-white/10 overflow-hidden flex flex-col w-full transition-all",
+          step === 2 ? "h-[90vh] max-h-[850px] max-w-5xl" : "h-auto max-w-[560px]"
         )}
       >
         
@@ -233,19 +239,71 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               <strong>Guide:</strong> Review your text format. Each question must be separated by <strong>1 blank line</strong>. Correct answer must have a <strong>*</strong> prefix (e.g. <i>*A. Answer</i>).
             </div>
             
-            <div className="flex-1 p-5 flex flex-col min-h-0 relative bg-[#071026]">
-              <textarea 
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="Paste your quiz content here..."
-                className="flex-1 w-full bg-[#18233b] border border-white/5 focus:border-[#4F7CFF] text-slate-200 rounded-xl p-5 outline-none transition-all resize-none font-mono text-sm leading-relaxed"
-                disabled={loading}
-              />
-              {error && (
-                <div className="absolute bottom-8 left-8 right-8 text-[#EF4444] text-sm bg-[#0f172a]/90 border border-[#EF4444]/50 rounded-xl p-4 backdrop-blur-md shadow-2xl font-medium">
-                  {error}
+            <div className="flex-1 flex min-h-0 relative bg-[#071026]">
+              {/* Left Column: Textarea */}
+              <div className="w-1/2 p-5 flex flex-col border-r border-white/5 relative">
+                <textarea 
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder="Paste your quiz content here..."
+                  className="flex-1 w-full bg-[#18233b] border border-white/5 focus:border-[#4F7CFF] text-slate-200 rounded-xl p-5 outline-none transition-all resize-none font-mono text-sm leading-relaxed"
+                  disabled={loading}
+                />
+                {error && (
+                  <div className="absolute bottom-8 left-8 right-8 text-[#EF4444] text-sm bg-[#0f172a]/90 border border-[#EF4444]/50 rounded-xl p-4 backdrop-blur-md shadow-2xl font-medium">
+                    {error}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Live Preview */}
+              <div className="w-1/2 flex flex-col bg-[#0f172a]">
+                <div className="px-5 py-3 border-b border-white/5 bg-[#18233b]/30 flex items-center justify-between shrink-0">
+                  <span className="font-semibold text-white text-sm">Live Preview</span>
+                  <span className="px-3 py-1 bg-[#10B981]/10 text-[#10B981] text-xs font-bold rounded-full border border-[#10B981]/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                    Đã nhận diện: {parsedQuestions.length} câu
+                  </span>
                 </div>
-              )}
+                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                  {parsedQuestions.length === 0 ? (
+                    <div className="text-center text-slate-500 py-10 flex flex-col items-center">
+                      <HelpCircle className="w-10 h-10 mb-3 opacity-20" />
+                      <p>Chưa nhận diện được câu hỏi nào.<br/>Hãy bắt đầu gõ hoặc dán nội dung ở cột bên trái.</p>
+                    </div>
+                  ) : parsedQuestions.map((q, idx) => {
+                    const hasCorrect = q.options.some(o => o.isCorrect);
+                    return (
+                      <div key={idx} className={cn("p-4 bg-[#18233b] border rounded-xl transition-all", hasCorrect ? "border-white/5" : "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.1)]")}>
+                        <p className="text-sm font-semibold text-white mb-3 break-words whitespace-pre-wrap">
+                          <span className="text-[#4F7CFF] mr-2">Câu {idx + 1}:</span>
+                          {q.questionText}
+                        </p>
+                        <div className="space-y-2">
+                          {q.options.map((opt, oIdx) => (
+                            <div 
+                              key={oIdx} 
+                              className={cn(
+                                "text-[13px] px-3 py-2 rounded-lg border",
+                                opt.isCorrect 
+                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-medium" 
+                                  : "bg-[#071026] border-white/5 text-slate-400"
+                              )}
+                            >
+                              {opt.text}
+                            </div>
+                          ))}
+                        </div>
+                        {!hasCorrect && (
+                          <p className="text-xs text-amber-500 mt-3 flex items-center gap-1.5 font-medium">
+                            <AlertCircle className="w-4 h-4" /> Câu này chưa có đáp án đúng (thiếu dấu *)
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
             </div>
           </div>
         )}
