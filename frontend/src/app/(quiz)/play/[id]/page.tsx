@@ -71,6 +71,7 @@ export default function QuizPlayerPage() {
   const startQuiz = useQuizStore(s => s.startQuiz);
   const selectAnswer = useQuizStore(s => s.selectAnswer);
   const submitQuiz = useQuizStore(s => s.submitQuiz);
+  const retryWrong = useQuizStore(s => s.retryWrong);
   const clearWrongAnswers = useQuizStore(s => s.clearWrongAnswers);
   const status = useQuizStore(s => s.status);
   const questions = useQuizStore(s => s.questions);
@@ -90,7 +91,7 @@ export default function QuizPlayerPage() {
 
       try {
         if (retryAttemptId) {
-          await startQuiz(Number(id), {}, Number(retryAttemptId));
+          await retryWrong(Number(retryAttemptId));
         } else {
           const config = {
             mode: params.get('mode') || 'exam',
@@ -111,7 +112,7 @@ export default function QuizPlayerPage() {
       }
     };
     initQuiz();
-  }, [id, startQuiz, router]);
+  }, [id, startQuiz, retryWrong, router]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
