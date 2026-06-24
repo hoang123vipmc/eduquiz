@@ -17,6 +17,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   const [file, setFile] = useState<File | null>(null);
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
   const [error, setError] = useState('');
   const [showGuide, setShowGuide] = useState(false);
 
@@ -56,6 +57,17 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
 
     setLoading(true);
     setError('');
+    setLoadingText('Đang tải file lên...');
+    
+    // Rotate loading text to keep user engaged since extracting can take a while
+    const loadingInterval = setInterval(() => {
+      setLoadingText(prev => {
+        if (prev === 'Đang tải file lên...') return 'Hệ thống đang đọc dữ liệu...';
+        if (prev === 'Hệ thống đang đọc dữ liệu...') return 'Đang xử lý nội dung văn bản...';
+        if (prev === 'Đang xử lý nội dung văn bản...') return 'Sắp xong rồi, vui lòng đợi thêm chút...';
+        return prev;
+      });
+    }, 4000);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -74,7 +86,9 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đọc file Word.');
     } finally {
+      clearInterval(loadingInterval);
       setLoading(false);
+      setLoadingText('');
     }
   };
 
@@ -239,14 +253,14 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               <strong>Guide:</strong> Review your text format. Each question must be separated by <strong>1 blank line</strong>. Correct answer must have a <strong>*</strong> prefix (e.g. <i>*A. Answer</i>).
             </div>
             
-            <div className="flex-1 flex min-h-0 relative bg-[#071026]">
+            <div className="flex-1 flex flex-col md:flex-row min-h-0 relative bg-[#071026] overflow-y-auto md:overflow-hidden">
               {/* Left Column: Textarea */}
-              <div className="w-1/2 p-5 flex flex-col border-r border-white/5 relative">
+              <div className="w-full md:w-1/2 p-4 md:p-5 flex flex-col border-b md:border-b-0 md:border-r border-white/5 relative min-h-[300px] md:min-h-0 shrink-0">
                 <textarea 
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
                   placeholder="Paste your quiz content here..."
-                  className="flex-1 w-full bg-[#18233b] border border-white/5 focus:border-[#4F7CFF] text-slate-200 rounded-xl p-5 outline-none transition-all resize-none font-mono text-sm leading-relaxed"
+                  className="flex-1 w-full bg-[#18233b] border border-white/5 focus:border-[#4F7CFF] text-slate-200 rounded-xl p-4 md:p-5 outline-none transition-all resize-none font-mono text-[13px] md:text-sm leading-relaxed"
                   disabled={loading}
                 />
                 {error && (
@@ -257,7 +271,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               </div>
 
               {/* Right Column: Live Preview */}
-              <div className="w-1/2 flex flex-col bg-[#0f172a]">
+              <div className="w-full md:w-1/2 flex flex-col bg-[#0f172a] min-h-[400px] md:min-h-0 shrink-0">
                 <div className="px-5 py-3 border-b border-white/5 bg-[#18233b]/30 flex items-center justify-between shrink-0">
                   <span className="font-semibold text-white text-sm">Live Preview</span>
                   <span className="px-3 py-1 bg-[#10B981]/10 text-[#10B981] text-xs font-bold rounded-full border border-[#10B981]/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
@@ -325,7 +339,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               className="flex-[2] bg-[#4F7CFF] hover:bg-[#6D91FF] disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(79,124,255,0.2)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.3)] active:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
             >
               {loading ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> Extracting...</>
+                <><Loader2 className="w-5 h-5 animate-spin" /> {loadingText || 'Extracting...'}</>
               ) : (
                 'Continue'
               )}

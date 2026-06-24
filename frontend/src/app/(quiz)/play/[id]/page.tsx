@@ -276,8 +276,8 @@ export default function QuizPlayerPage() {
         </main>
 
         {/* RIGHT: Question Navigator */}
-        <aside className="w-full md:w-[320px] border-t md:border-t-0 md:border-l border-white/5 bg-[#071026]/80 backdrop-blur-md flex flex-col shrink-0 z-20">
-          <div className="p-6 font-bold border-b border-white/5 flex items-center justify-between bg-[#0f172a]/50">
+        <aside className="w-full max-h-[40vh] md:max-h-none md:w-[320px] border-t md:border-t-0 md:border-l border-white/5 bg-[#071026]/80 backdrop-blur-md flex flex-col shrink-0 z-20">
+          <div className="p-4 md:p-6 font-bold border-b border-white/5 flex items-center justify-between bg-[#0f172a]/50">
             <span className="text-white text-[15px]">Bảng câu hỏi</span>
             
             {isPractice && Object.keys(answers).length > 0 && (
@@ -307,8 +307,8 @@ export default function QuizPlayerPage() {
             )}
           </div>
           
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-            <div className="grid grid-cols-5 gap-3">
+          <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-6 scrollbar-hide">
+            <div className="grid grid-cols-5 gap-2 md:gap-3">
               {questions.map((q, idx) => {
                 const isAnswered = !!answers[q.id];
                 let isCorrect = false;
@@ -338,7 +338,7 @@ export default function QuizPlayerPage() {
           </div>
           
           {/* Navigator Footer Stats */}
-          <div className="p-6 border-t border-white/5 bg-[#0f172a]/80 grid grid-cols-2 gap-4 text-sm font-medium">
+          <div className="p-4 md:p-6 border-t border-white/5 bg-[#0f172a]/80 grid grid-cols-2 gap-4 text-sm font-medium shrink-0">
             <div className="flex flex-col gap-1">
               <span className="text-slate-500 text-[11px] uppercase tracking-wider">Đã làm</span>
               <span className="text-white text-lg">{Object.keys(answers).length}</span>
