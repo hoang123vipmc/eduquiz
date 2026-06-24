@@ -113,6 +113,22 @@ export default function QuizPlayerPage() {
     initQuiz();
   }, [id, startQuiz, router]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Bỏ qua nếu người dùng đang nhập liệu (nếu có input/textarea nào đó trên màn hình)
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+
+      if (e.key === 'ArrowLeft') {
+        setCurrentQuestionIndex(prev => Math.max(0, prev - 1));
+      } else if (e.key === 'ArrowRight') {
+        setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [questions.length]);
+
   const handleSelectOption = (optionId: number) => {
     selectAnswer(questions[currentQuestionIndex].id, optionId);
   };
