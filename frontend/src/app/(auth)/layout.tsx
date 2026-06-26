@@ -18,10 +18,15 @@ export default function AuthLayout({
         {/* Soft gradient orb - Optimized for GPU */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.05) 0%, transparent 70%)' }}></div>
 
+        {/* Geometric Background Elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 border border-white/5 rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-20 right-10 w-48 h-48 border border-white/5 rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] border border-blue-500/5 rounded-full animate-spin-slow pointer-events-none border-dashed"></div>
+
         {/* Floating Quiz Cards Illustration */}
         <div className="relative w-full max-w-md h-64 mb-12 flex items-center justify-center">
           {/* Card 1 */}
-          <div className="absolute z-10 w-64 h-32 bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-2xl -rotate-6 translate-x-[-40px] translate-y-[-20px] animate-[float_6s_ease-in-out_infinite]">
+          <div className="absolute z-10 w-64 h-32 bg-[#0f172a] border border-white/10 rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-float">
             <div className="w-1/3 h-3 bg-slate-700 rounded-full mb-4"></div>
             <div className="w-full h-2 bg-slate-800 rounded-full mb-2"></div>
             <div className="w-5/6 h-2 bg-slate-800 rounded-full mb-4"></div>
@@ -32,11 +37,18 @@ export default function AuthLayout({
             </div>
           </div>
           {/* Card 2 */}
-          <div className="absolute z-20 w-72 h-36 bg-[#18233b] border border-white/10 rounded-2xl p-6 shadow-2xl rotate-3 translate-x-[40px] translate-y-[20px] animate-[float_8s_ease-in-out_infinite_reverse]">
-            <div className="w-1/4 h-3 bg-blue-500/50 rounded-full mb-4"></div>
+          <div className="absolute z-20 w-72 h-36 bg-[#18233b] border border-blue-500/20 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-float-reverse">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-1/4 h-3 bg-blue-500/50 rounded-full"></div>
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/50">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+            </div>
             <div className="w-full h-2 bg-slate-700 rounded-full mb-2"></div>
             <div className="w-4/5 h-2 bg-slate-700 rounded-full mb-6"></div>
-            <div className="w-full h-10 bg-blue-600 rounded-xl"></div>
+            <div className="w-full h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-1/3 h-2 bg-white/30 rounded-full"></div>
+            </div>
           </div>
         </div>
         
