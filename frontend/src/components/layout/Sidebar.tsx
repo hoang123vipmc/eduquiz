@@ -46,17 +46,17 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-[260px] bg-[#071026] border-r border-white/5 hidden md:flex flex-col h-full text-slate-300">
+    <div className="w-[260px] bg-secondary border-r border-border hidden md:flex flex-col h-full text-foreground">
       
       {/* Brand & Slogan */}
       <div className="pt-8 pb-6 px-6">
-        <div className="flex items-center gap-3 text-white font-bold text-2xl tracking-tight mb-1">
+        <div className="flex items-center gap-3 text-foreground font-bold text-2xl tracking-tight mb-1">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F7CFF] to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
             <span className="text-sm">EQ</span>
           </div>
           EduQuiz
         </div>
-        <div className="text-[13px] text-slate-500 font-medium pl-13">
+        <div className="text-[13px] text-muted-foreground font-medium pl-13">
           Học tập thông minh.
         </div>
       </div>
@@ -76,8 +76,8 @@ export function Sidebar() {
               className={cn(
                 "group relative flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-all duration-250 ease-in-out",
                 reallyActive 
-                  ? "bg-[#18233b] text-white" 
-                  : "text-slate-400 hover:bg-[#18233b]/50 hover:text-white"
+                  ? "bg-muted text-foreground" 
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               )}
             >
               {/* Active Indicator Bar */}
@@ -87,7 +87,7 @@ export function Sidebar() {
               
               <Icon className={cn(
                 "w-5 h-5 transition-transform duration-250 ease-in-out group-hover:translate-x-[2px]", 
-                reallyActive ? "text-[#4F7CFF]" : "text-slate-500 group-hover:text-slate-300"
+                reallyActive ? "text-[#4F7CFF]" : "text-muted-foreground group-hover:text-foreground"
               )} />
               {link.name}
             </Link>
@@ -96,22 +96,22 @@ export function Sidebar() {
       </div>
 
       {/* Bottom User Card */}
-      <div className="p-4 mt-auto border-t border-white/5">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#0f172a] border border-white/5 hover:bg-[#18233b] transition-colors duration-250 group">
+      <div className="p-4 mt-auto border-t border-border">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors duration-250 group">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
-            <User className="w-5 h-5 text-white" />
+            <User className="w-5 h-5 text-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-white truncate">
+            <div className="text-sm font-semibold text-foreground truncate">
               {user?.name || "Student User"}
             </div>
-            <div className="text-[13px] text-slate-500 truncate">
+            <div className="text-[13px] text-muted-foreground truncate">
               {user?.role === 'admin' ? 'Administrator' : 'Student Pro'}
             </div>
           </div>
           <button 
             onClick={handleLogout}
-            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
             title="Logout"
           >
             <LogOut className="w-4 h-4" />

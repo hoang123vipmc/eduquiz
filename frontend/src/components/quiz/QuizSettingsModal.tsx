@@ -51,10 +51,10 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
         
         {/* Header */}
         <div className="relative flex items-center justify-center p-4 border-b border-gray-700/50">
-          <h2 className="text-white font-bold text-lg">Chọn chế độ luyện thi</h2>
+          <h2 className="text-foreground font-bold text-lg">Chọn chế độ luyện thi</h2>
           <button 
             onClick={onClose}
-            className="absolute right-4 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+            className="absolute right-4 p-1.5 text-gray-400 hover:text-foreground hover:bg-white/10 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -74,7 +74,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
               <label className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 cursor-pointer transition-all",
                 examMode === 'practice' 
-                  ? "border-blue-500 bg-blue-500/10 text-white" 
+                  ? "border-blue-500 bg-blue-500/10 text-foreground" 
                   : "border-gray-600 text-gray-400 hover:border-gray-500"
               )}>
                 <input 
@@ -95,7 +95,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
               <label className={cn(
                 "flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 cursor-pointer transition-all",
                 examMode === 'exam' 
-                  ? "border-blue-500 bg-blue-500/10 text-white" 
+                  ? "border-blue-500 bg-blue-500/10 text-foreground" 
                   : "border-gray-600 text-gray-400 hover:border-gray-500"
               )}>
                 <input 
@@ -146,7 +146,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
 
           {/* Khu vực 2: Cài đặt đề thi */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white font-medium">
+            <div className="flex items-center gap-2 text-foreground font-medium">
               <Settings className="w-4 h-4 text-gray-400" />
               <h3>Cài đặt đề thi</h3>
             </div>
@@ -156,7 +156,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
                   "w-5 h-5 flex items-center justify-center rounded border transition-colors",
                   shuffleQuestions ? "bg-blue-500 border-blue-500" : "border-gray-500 group-hover:border-gray-400"
                 )}>
-                  {shuffleQuestions && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                  {shuffleQuestions && <CheckCircle2 className="w-3.5 h-3.5 text-foreground" />}
                 </div>
                 <input 
                   type="checkbox" 
@@ -172,7 +172,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
                   "w-5 h-5 flex items-center justify-center rounded border transition-colors",
                   shuffleOptions ? "bg-blue-500 border-blue-500" : "border-gray-500 group-hover:border-gray-400"
                 )}>
-                  {shuffleOptions && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                  {shuffleOptions && <CheckCircle2 className="w-3.5 h-3.5 text-foreground" />}
                 </div>
                 <input 
                   type="checkbox" 
@@ -205,7 +205,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
             <select 
               value={autoNextDelay}
               onChange={(e) => setAutoNextDelay(e.target.value)}
-              className="bg-[#1F1F22] border border-gray-600 text-white text-sm rounded-md px-3 py-2 outline-none focus:border-blue-500 transition-colors"
+              className="bg-[#1F1F22] border border-gray-600 text-foreground text-sm rounded-md px-3 py-2 outline-none focus:border-blue-500 transition-colors"
             >
               <option value="off">Tắt</option>
               <option value="1s">1s</option>
@@ -222,7 +222,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle }: Qui
         <div className="p-4 border-t border-gray-700/50">
           <button 
             onClick={handleConfirm}
-            className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold py-3.5 rounded-lg transition-colors shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+            className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-foreground font-bold py-3.5 rounded-lg transition-colors shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
           >
             Xác nhận vào thi
           </button>

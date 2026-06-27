@@ -71,12 +71,12 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       
       {/* Hero Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-[#0f172a] to-[#071026] border border-white/5 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-[#0f172a] to-[#071026] border border-border relative overflow-hidden">
         {/* Ambient glow - Optimized for GPU */}
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)' }}></div>
         
         <div className="relative z-10">
-          <h2 className="text-3xl font-bold tracking-tight text-white mb-2">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
             Chào mừng trở lại, {user?.name?.split(' ')[0] || 'Học viên'}! 👋
           </h2>
           <p className="text-[#94a3b8] text-[15px]">
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         </div>
         <button 
           onClick={() => router.push('/dashboard/quizzes')}
-          className="relative z-10 shrink-0 flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+          className="relative z-10 shrink-0 flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0"
         >
           <Sparkles className="w-4 h-4" /> Bắt đầu học
         </button>
@@ -93,54 +93,54 @@ export default function DashboardPage() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-6 rounded-[20px] bg-[#0f172a] border border-white/5 hover:border-white/10 hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-400">Tổng đề thi</span>
+            <span className="text-sm font-medium text-muted-foreground">Tổng đề thi</span>
           </div>
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-white">{stats.total_quizzes}</div>
+            <div className="text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
             <span className="text-xs font-medium text-emerald-400">+5 tuần này</span>
           </div>
         </div>
         
-        <div className="p-6 rounded-[20px] bg-[#0f172a] border border-white/5 hover:border-white/10 hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
               <Target className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-400">Điểm trung bình</span>
+            <span className="text-sm font-medium text-muted-foreground">Điểm trung bình</span>
           </div>
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-white">{stats.accuracy}%</div>
+            <div className="text-3xl font-bold text-foreground">{stats.accuracy}%</div>
             <span className="text-xs font-medium text-emerald-400">+4%</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-[#0f172a] border border-white/5 hover:border-white/10 hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
               <Clock className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-400">Thời gian học</span>
+            <span className="text-sm font-medium text-muted-foreground">Thời gian học</span>
           </div>
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-white">{formatTime(stats.total_time_seconds)}</div>
-            <span className="text-xs font-medium text-slate-500">Tháng này</span>
+            <div className="text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
+            <span className="text-xs font-medium text-muted-foreground">Tháng này</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-[#0f172a] border border-white/5 hover:border-white/10 hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
               <Flame className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-400">Chuỗi học tập</span>
+            <span className="text-sm font-medium text-muted-foreground">Chuỗi học tập</span>
           </div>
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-white">{stats.streak_days} ngày</div>
+            <div className="text-3xl font-bold text-foreground">{stats.streak_days} ngày</div>
             <span className="text-xs font-medium text-orange-400">Tuyệt vời!</span>
           </div>
         </div>
@@ -149,9 +149,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Activity Timeline */}
-        <div className="col-span-1 lg:col-span-2 bg-[#0f172a] rounded-[20px] border border-white/5 p-6 flex flex-col">
+        <div className="col-span-1 lg:col-span-2 bg-card rounded-[20px] border border-border p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white">Hoạt động gần đây</h3>
+            <h3 className="text-xl font-bold text-foreground">Hoạt động gần đây</h3>
             <button className="text-sm font-medium text-[#4F7CFF] hover:text-[#6D91FF] transition-colors flex items-center gap-1" onClick={() => router.push('/dashboard/history')}>
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </button>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           
           <div className="flex-1">
             {history.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-10">
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10">
                 <Clock className="w-10 h-10 mb-3 opacity-20" />
                 <p>Chưa có hoạt động nào.</p>
               </div>
@@ -174,22 +174,22 @@ export default function DashboardPage() {
                   return (
                     <div key={h.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                       {/* Timeline dot */}
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#0f172a] bg-[#18233b] text-slate-400 group-hover:text-white group-hover:bg-[#4F7CFF] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm transition-colors z-10">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#0f172a] bg-muted text-muted-foreground group-hover:text-foreground group-hover:bg-[#4F7CFF] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm transition-colors z-10">
                         <CheckCircleIcon />
                       </div>
                       
                       {/* Content Card */}
-                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-white/5 bg-[#071026]/50 hover:bg-[#18233b]/50 transition-colors">
+                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-secondary/50 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-slate-500">{dateStr} • {timeStr}</span>
+                          <span className="text-xs font-semibold text-muted-foreground">{dateStr} • {timeStr}</span>
                           <span className={cn("text-xs font-bold px-2 py-1 rounded-md border", scoreColor)}>
                             {h.score} pts
                           </span>
                         </div>
-                        <h4 className="text-[15px] font-semibold text-slate-200 line-clamp-1 mb-1">
+                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1">
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </h4>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           Đúng {h.correct_answers} / {h.quiz?.total_questions || '-'} câu
                         </p>
                       </div>
@@ -202,17 +202,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Recommended Quizzes */}
-        <div className="col-span-1 bg-[#0f172a] rounded-[20px] border border-white/5 p-6 flex flex-col">
-          <h3 className="text-xl font-bold text-white mb-6">Gợi ý cho bạn</h3>
+        <div className="col-span-1 bg-card rounded-[20px] border border-border p-6 flex flex-col">
+          <h3 className="text-xl font-bold text-foreground mb-6">Gợi ý cho bạn</h3>
           <div className="flex-1 flex flex-col gap-3">
             {quizzes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 py-10">
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10">
                 <p>Không có đề thi nào.</p>
               </div>
             ) : quizzes.map((q) => (
               <div 
                 key={q.id} 
-                className="group flex flex-col p-4 rounded-xl border border-white/5 bg-[#071026] hover:bg-[#18233b] hover:border-white/10 transition-all cursor-pointer"
+                className="group flex flex-col p-4 rounded-xl border border-border bg-secondary hover:bg-muted hover:border-border transition-all cursor-pointer"
                 onClick={() => setSelectedQuiz(q)}
               >
                 <div className="flex items-center gap-3 mb-3">
@@ -220,15 +220,15 @@ export default function DashboardPage() {
                     {q.title.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-[15px] font-semibold text-slate-200 truncate group-hover:text-white transition-colors">
+                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-foreground transition-colors">
                       {q.title}
                     </h4>
-                    <p className="text-[13px] text-slate-500 truncate">
+                    <p className="text-[13px] text-muted-foreground truncate">
                       {q.category?.name || 'Tự do'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-[13px] text-slate-400">
+                <div className="flex items-center justify-between text-[13px] text-muted-foreground">
                   <div className="flex items-center gap-1.5">
                     <Target className="w-3.5 h-3.5" /> {q.total_questions} câu
                   </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use App\Models\Result;
 use App\Models\QuizAttempt;
 
@@ -63,6 +64,56 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $history
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = $request->user();
+        $user->name = $request->name;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật thông tin thành công.',
+            'data' => $user
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        // Kiểm tra xem người dùng có đăng nhập bằng provider ngoài (Google) không
+        if ($user->provider_id && !$user->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tài khoản đăng nhập qua dịch vụ ngoài không thể đổi mật khẩu.'
+            ], 400);
+        }
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mật khẩu hiện tại không chính xác.'
+            ], 400);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đổi mật khẩu thành công.'
         ]);
     }
 }

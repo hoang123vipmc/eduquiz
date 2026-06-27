@@ -23,6 +23,8 @@ Route::prefix('v1')->group(function () {
         
         Route::get('/user/stats', [\App\Http\Controllers\UserController::class, 'stats']);
         Route::get('/user/history', [\App\Http\Controllers\UserController::class, 'history']);
+        Route::put('/user/profile', [\App\Http\Controllers\UserController::class, 'updateProfile']);
+        Route::put('/user/password', [\App\Http\Controllers\UserController::class, 'changePassword']);
         
         // Quản lý danh mục (Admin)
         Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->middleware('role:admin');

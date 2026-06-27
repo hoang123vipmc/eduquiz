@@ -20,9 +20,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80": variant === "secondary",
             "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
             "text-primary underline-offset-4 hover:underline": variant === "link",
-            "bg-[var(--color-quiz-correct)] text-white shadow-md hover:brightness-110": variant === "correct",
-            "bg-[var(--color-quiz-wrong)] text-white shadow-md hover:brightness-110": variant === "wrong",
-            "bg-[var(--color-quiz-current)] text-white shadow-md hover:brightness-110": variant === "current",
+            "bg-[var(--color-quiz-correct)] text-foreground shadow-md hover:brightness-110": variant === "correct",
+            "bg-[var(--color-quiz-wrong)] text-foreground shadow-md hover:brightness-110": variant === "wrong",
+            "bg-[var(--color-quiz-current)] text-foreground shadow-md hover:brightness-110": variant === "current",
             
             "h-9 px-4 py-2": size === "default",
             "h-8 rounded-md px-3 text-xs": size === "sm",

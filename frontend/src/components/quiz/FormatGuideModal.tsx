@@ -101,7 +101,7 @@ export function FormatGuideModal({ isOpen, onClose }: FormatGuideModalProps) {
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-2 text-sm font-medium rounded-full transition-colors border ${
                     activeTab === tab 
-                      ? 'bg-blue-600 text-white border-blue-600' 
+                      ? 'bg-blue-600 text-foreground border-blue-600' 
                       : 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50'
                   }`}
                 >
@@ -120,7 +120,7 @@ export function FormatGuideModal({ isOpen, onClose }: FormatGuideModalProps) {
               <div className="mt-3 flex justify-end">
                 <button 
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-foreground bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-sm"
                 >
                   {copied ? (
                     <>

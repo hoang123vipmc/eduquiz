@@ -24,7 +24,7 @@ const QuizTimer = () => {
       "flex items-center gap-2 font-mono text-[15px] font-bold px-4 py-2 rounded-full border shadow-sm transition-all duration-300",
       isPulse 
         ? "text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/20 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
-        : "text-slate-200 bg-[#0f172a] border-white/5"
+        : "text-foreground bg-card border-border"
     )}>
       <Clock className="w-4 h-4" />
       {formatQuizDuration(timeToDisplay * 1000, 'colon')}
@@ -40,7 +40,7 @@ const QuestionGridButton = React.memo(({
   isWrong, 
   onSelect 
 }: any) => {
-  let gridClass = "bg-[#18233b] text-slate-400 hover:bg-[#18233b]/80 border-transparent";
+  let gridClass = "bg-muted text-muted-foreground hover:bg-muted/80 border-transparent";
   
   if (isAnswered) {
     gridClass = "bg-[#4F7CFF]/20 text-[#4F7CFF] border-[#4F7CFF]/30";
@@ -48,7 +48,7 @@ const QuestionGridButton = React.memo(({
   if (isCorrect) {
     gridClass = "bg-[#10B981] text-[#020617] border-[#10B981] font-bold shadow-[0_2px_8px_rgba(16,185,129,0.3)]";
   } else if (isWrong) {
-    gridClass = "bg-[#EF4444] text-white border-[#EF4444] font-bold shadow-[0_2px_8px_rgba(239,68,68,0.3)]";
+    gridClass = "bg-[#EF4444] text-foreground border-[#EF4444] font-bold shadow-[0_2px_8px_rgba(239,68,68,0.3)]";
   }
 
   return (
@@ -56,7 +56,7 @@ const QuestionGridButton = React.memo(({
       onClick={() => onSelect(idx)}
       className={cn(
         "h-10 rounded-[10px] font-medium text-[13px] flex items-center justify-center transition-all duration-200 hover:scale-105 border-2",
-        isCurrent ? "border-white bg-[#0f172a] text-white ring-2 ring-[#4F7CFF]/50 ring-offset-2 ring-offset-[#071026] shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : gridClass
+        isCurrent ? "border-white bg-card text-foreground ring-2 ring-[#4F7CFF]/50 ring-offset-2 ring-offset-[#071026] shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : gridClass
       )}
     >
       {idx + 1}
@@ -163,27 +163,27 @@ export default function QuizPlayerPage() {
 
   if (loading || !currentQuestion) {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#020617] z-50">
-        <div className="w-12 h-12 border-4 border-white/10 border-t-[#4F7CFF] rounded-full animate-spin mb-4"></div>
-        <p className="text-slate-400 font-medium">Đang tải đề thi...</p>
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-50">
+        <div className="w-12 h-12 border-4 border-border border-t-[#4F7CFF] rounded-full animate-spin mb-4"></div>
+        <p className="text-muted-foreground font-medium">Đang tải đề thi...</p>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#020617] text-slate-200 z-50 overflow-hidden font-sans">
+    <div className="fixed inset-0 flex flex-col bg-background text-foreground z-50 overflow-hidden font-sans">
       
       {/* Top Area */}
-      <header className="h-[72px] shrink-0 bg-[#0f172a]/90 backdrop-blur-md border-b border-white/5 flex flex-col justify-center px-6 shadow-sm z-20">
+      <header className="h-[72px] shrink-0 bg-card/90 backdrop-blur-md border-b border-border flex flex-col justify-center px-6 shadow-sm z-20">
         <div className="flex items-center justify-between w-full relative z-10 mb-1">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.push('/dashboard')}
-              className="p-2 -ml-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+              className="p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
-            <h1 className="font-bold text-[17px] text-white hidden md:block tracking-tight">Đang làm bài #{id}</h1>
+            <h1 className="font-bold text-[17px] text-foreground hidden md:block tracking-tight">Đang làm bài #{id}</h1>
           </div>
           
           <div className="flex items-center gap-5">
@@ -214,13 +214,13 @@ export default function QuizPlayerPage() {
         {/* LEFT/CENTER: Question Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 relative z-10 scrollbar-hide">
           <div className="max-w-4xl mx-auto flex flex-col h-full">
-            <div className="flex items-center justify-between text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6">
+            <div className="flex items-center justify-between text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-6">
               <span>Câu hỏi {currentQuestionIndex + 1} / {questions.length}</span>
-              <span className="bg-[#18233b] px-3 py-1 rounded-full border border-white/5 text-[#4F7CFF]">1 Điểm</span>
+              <span className="bg-muted px-3 py-1 rounded-full border border-border text-[#4F7CFF]">1 Điểm</span>
             </div>
             
-            <div className="bg-[#0f172a] rounded-[20px] border border-white/5 p-8 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] mb-8 shrink-0">
-              <h2 className="text-[24px] font-semibold leading-[1.6] text-white">
+            <div className="bg-card rounded-[20px] border border-border p-8 md:p-10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] mb-8 shrink-0">
+              <h2 className="text-[24px] font-semibold leading-[1.6] text-foreground">
                 {currentQuestion.question_text}
               </h2>
             </div>
@@ -231,14 +231,14 @@ export default function QuizPlayerPage() {
                 const hasAnswered = !!answers[currentQuestion.id];
                 const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
                 
-                let boxClass = "border-white/5 bg-[#0f172a] hover:border-[#4F7CFF]/50 hover:bg-[#18233b]";
-                let iconClass = "bg-[#18233b] text-slate-400 group-hover:bg-[#4F7CFF]/20 group-hover:text-[#4F7CFF]";
-                let textClass = "text-slate-300";
+                let boxClass = "border-border bg-card hover:border-[#4F7CFF]/50 hover:bg-muted";
+                let iconClass = "bg-muted text-muted-foreground group-hover:bg-[#4F7CFF]/20 group-hover:text-[#4F7CFF]";
+                let textClass = "text-foreground";
 
                 if (isSelected) {
                   boxClass = "border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-[0_4px_15px_rgba(79,124,255,0.15)]";
-                  iconClass = "bg-[#4F7CFF] text-white shadow-md shadow-blue-500/30";
-                  textClass = "text-white font-medium";
+                  iconClass = "bg-[#4F7CFF] text-foreground shadow-md shadow-blue-500/30";
+                  textClass = "text-foreground font-medium";
                 }
 
                 if (isPractice && hasAnswered) {
@@ -249,12 +249,12 @@ export default function QuizPlayerPage() {
                     textClass = "text-[#10B981] font-semibold";
                   } else if (isSelected && !isCorrect) {
                     boxClass = "border-[#EF4444] bg-[#EF4444]/10 shadow-[0_4px_15px_rgba(239,68,68,0.15)]";
-                    iconClass = "bg-[#EF4444] text-white font-bold shadow-md shadow-red-500/30";
+                    iconClass = "bg-[#EF4444] text-foreground font-bold shadow-md shadow-red-500/30";
                     textClass = "text-[#EF4444] font-semibold";
                   } else {
-                    boxClass = "border-white/5 bg-[#071026] opacity-50 pointer-events-none";
-                    iconClass = "bg-[#0f172a] text-slate-600";
-                    textClass = "text-slate-500";
+                    boxClass = "border-border bg-secondary opacity-50 pointer-events-none";
+                    iconClass = "bg-card text-slate-600";
+                    textClass = "text-muted-foreground";
                   }
                 }
                 
@@ -286,7 +286,7 @@ export default function QuizPlayerPage() {
               <button 
                 disabled={currentQuestionIndex === 0}
                 onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-white/10 text-slate-300 font-semibold hover:bg-white/5 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-border text-foreground font-semibold hover:bg-white/5 hover:text-foreground transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronLeft className="w-5 h-5" /> Câu trước
               </button>
@@ -302,9 +302,9 @@ export default function QuizPlayerPage() {
         </main>
 
         {/* RIGHT: Question Navigator */}
-        <aside className="w-full max-h-[40vh] md:max-h-none md:w-[320px] border-t md:border-t-0 md:border-l border-white/5 bg-[#071026]/80 backdrop-blur-md flex flex-col shrink-0 z-20">
-          <div className="p-4 md:p-6 font-bold border-b border-white/5 flex items-center justify-between bg-[#0f172a]/50">
-            <span className="text-white text-[15px]">Bảng câu hỏi</span>
+        <aside className="w-full max-h-[40vh] md:max-h-none md:w-[320px] border-t md:border-t-0 md:border-l border-border bg-secondary/80 backdrop-blur-md flex flex-col shrink-0 z-20">
+          <div className="p-4 md:p-6 font-bold border-b border-border flex items-center justify-between bg-card/50">
+            <span className="text-foreground text-[15px]">Bảng câu hỏi</span>
             
             {isPractice && Object.keys(answers).length > 0 && (
               <button 
@@ -364,14 +364,14 @@ export default function QuizPlayerPage() {
           </div>
           
           {/* Navigator Footer Stats */}
-          <div className="p-4 md:p-6 border-t border-white/5 bg-[#0f172a]/80 grid grid-cols-2 gap-4 text-sm font-medium shrink-0">
+          <div className="p-4 md:p-6 border-t border-border bg-card/80 grid grid-cols-2 gap-4 text-sm font-medium shrink-0">
             <div className="flex flex-col gap-1">
-              <span className="text-slate-500 text-[11px] uppercase tracking-wider">Đã làm</span>
-              <span className="text-white text-lg">{Object.keys(answers).length}</span>
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Đã làm</span>
+              <span className="text-foreground text-lg">{Object.keys(answers).length}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-slate-500 text-[11px] uppercase tracking-wider">Còn lại</span>
-              <span className="text-white text-lg">{questions.length - Object.keys(answers).length}</span>
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Còn lại</span>
+              <span className="text-foreground text-lg">{questions.length - Object.keys(answers).length}</span>
             </div>
           </div>
         </aside>

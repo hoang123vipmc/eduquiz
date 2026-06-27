@@ -50,8 +50,8 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-[420px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 z-10">
       <div className="text-center md:text-left">
-        <h2 className="text-3xl font-bold tracking-tight text-white">Welcome back</h2>
-        <p className="text-sm text-slate-400 mt-2 font-normal">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
+        <p className="text-sm text-muted-foreground mt-2 font-normal">
           Please enter your details to sign in.
         </p>
       </div>
@@ -65,33 +65,33 @@ export default function LoginPage() {
         
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">Email</label>
+            <label className="block text-sm font-medium text-foreground">Email</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="h-12 bg-[#0f172a] border-white/5 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
+              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-300">Password</label>
+            <label className="block text-sm font-medium text-foreground">Password</label>
             <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="h-12 bg-[#0f172a] border-white/5 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
+              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <input type="checkbox" id="remember" className="h-4 w-4 rounded bg-[#0f172a] border-white/10 text-blue-600 focus:ring-blue-500 focus:ring-offset-[#020617]" />
-            <label htmlFor="remember" className="ml-2 block text-sm text-slate-400">
+            <input type="checkbox" id="remember" className="h-4 w-4 rounded bg-card border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-[#020617]" />
+            <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
               Remember me
             </label>
           </div>
@@ -102,16 +102,16 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-semibold bg-[#4F7CFF] hover:bg-[#6D91FF] text-white rounded-xl shadow-[0_4px_12px_rgba(79,124,255,0.2)] transition-all" disabled={loading}>
+        <Button type="submit" className="w-full h-12 text-base font-semibold bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground rounded-xl shadow-[0_4px_12px_rgba(79,124,255,0.2)] transition-all" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </Button>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/5"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
-          <div className="relative flex justify-center text-xs font-medium text-slate-500">
-            <span className="px-2 bg-[#020617]">OR CONTINUE WITH</span>
+          <div className="relative flex justify-center text-xs font-medium text-muted-foreground">
+            <span className="px-2 bg-background">OR CONTINUE WITH</span>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-slate-400 mt-8">
+      <p className="text-center text-sm text-muted-foreground mt-8">
         Don't have an account?{" "}
         <Link href="/register" className="font-semibold text-blue-500 hover:text-blue-400 transition-colors">
           Sign up
