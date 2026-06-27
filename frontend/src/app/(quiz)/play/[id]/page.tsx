@@ -82,6 +82,7 @@ export default function QuizPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [autoNextDelay, setAutoNextDelay] = useState(0);
 
   useEffect(() => {
     const initQuiz = async () => {
@@ -100,7 +101,8 @@ export default function QuizPlayerPage() {
             autoNextDelay: Number(params.get('delay')) || 0,
             unlimitedTime: params.get('unlimited') === '1'
           };
-          await startQuiz(Number(id), config.mode, config.unlimitedTime);
+          setAutoNextDelay(config.autoNextDelay);
+          await startQuiz(Number(id), config.mode, config.unlimitedTime, config.shuffleQuestions, config.shuffleOptions);
         }
       } catch (error: any) {
         if (error.response?.status !== 401) {
@@ -132,6 +134,13 @@ export default function QuizPlayerPage() {
 
   const handleSelectOption = (optionId: number) => {
     selectAnswer(questions[currentQuestionIndex].id, optionId);
+    
+    // Tự động chuyển câu nếu được cấu hình
+    if (autoNextDelay > 0) {
+      setTimeout(() => {
+        setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
+      }, autoNextDelay * 1000);
+    }
   };
 
   const handleSubmit = async () => {

@@ -25,7 +25,7 @@ interface QuizState {
     status: 'idle' | 'doing' | 'submitted';
     isPractice: boolean;
     
-    startQuiz: (quizId: number, mode: string, unlimited?: boolean) => Promise<void>;
+    startQuiz: (quizId: number, mode: string, unlimited?: boolean, shuffleQuestions?: boolean, shuffleOptions?: boolean) => Promise<void>;
     retryWrong: (oldAttemptId: number) => Promise<any>;
     clearWrongAnswers: () => Promise<void>;
     resumeQuiz: (attemptId: number) => Promise<void>;
@@ -46,12 +46,33 @@ export const useQuizStore = create<QuizState>()(
             status: 'idle',
             isPractice: false,
 
-            startQuiz: async (quizId, mode, unlimited = false) => {
+            startQuiz: async (quizId, mode, unlimited = false, shuffleQuestions = false, shuffleOptions = false) => {
                 const { data } = await api.post('/attempts/start', { quiz_id: quizId, mode, unlimited });
                 if (data.success) {
+                    let questions = [...data.data.questions];
+                    
+                    // Frontend shuffling
+                    if (shuffleQuestions) {
+                        for (let i = questions.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [questions[i], questions[j]] = [questions[j], questions[i]];
+                        }
+                    }
+                    
+                    if (shuffleOptions) {
+                        questions = questions.map(q => {
+                            const options = [...(q.options || [])];
+                            for (let i = options.length - 1; i > 0; i--) {
+                                const j = Math.floor(Math.random() * (i + 1));
+                                [options[i], options[j]] = [options[j], options[i]];
+                            }
+                            return { ...q, options };
+                        });
+                    }
+
                     set({
                         attemptId: data.data.attempt_id,
-                        questions: data.data.questions,
+                        questions: questions,
                         remainingTime: data.data.remaining_time,
                         elapsedTime: data.data.elapsed_time || 0,
                         answers: {},
