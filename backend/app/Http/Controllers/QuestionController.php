@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
-    public function index($quizId)
+    public function index(Request $request, $quizId)
     {
         $quiz = Quiz::findOrFail($quizId);
         $questions = $quiz->questions()->with('options')->orderBy('order')->get();
@@ -58,5 +58,38 @@ class QuestionController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function bank(Request $request)
+    {
+        $userId = $request->user()->id;
+        $search = $request->query('search', '');
+        $difficulty = $request->query('difficulty', '');
+        
+        $query = Question::with('quiz:id,title', 'options')
+            ->whereHas('quiz', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+
+        if ($search) {
+            $query->where('question_text', 'like', "%{$search}%");
+        }
+
+        if ($difficulty) {
+            $query->where('difficulty', $difficulty);
+        }
+
+        $questions = $query->orderBy('created_at', 'desc')->paginate(15);
+        $request->attributes->set('quiz_owner_id', $userId);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => QuestionResource::collection($questions->items()),
+                'current_page' => $questions->currentPage(),
+                'last_page' => $questions->lastPage(),
+                'total' => $questions->total()
+            ]
+        ]);
     }
 }
