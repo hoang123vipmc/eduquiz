@@ -32,13 +32,34 @@ class UserController extends Controller
             ->get()
             ->count();
 
+        // Lấy dữ liệu trend 7 ngày gần nhất
+        $sevenDaysAgo = now()->subDays(6)->startOfDay();
+        
+        $trend = Result::whereHas('attempt', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->where('created_at', '>=', $sevenDaysAgo)
+            ->selectRaw('DATE(created_at) as date, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds, COUNT(*) as quizzes_count')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => \Carbon\Carbon::parse($item->date)->format('d/m'),
+                    'accuracy' => round($item->avg_accuracy, 1),
+                    'time_minutes' => round($item->total_time_seconds / 60, 1),
+                    'quizzes' => $item->quizzes_count
+                ];
+            });
+
         return response()->json([
             'success' => true,
             'data' => [
                 'total_quizzes' => $totalQuizzes,
                 'accuracy' => round($avgAccuracy, 1),
                 'total_time_seconds' => $totalTimeSeconds,
-                'streak_days' => $streak
+                'streak_days' => $streak,
+                'trend' => $trend
             ]
         ]);
     }
