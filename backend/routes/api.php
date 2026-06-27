@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/user/password', [\App\Http\Controllers\UserController::class, 'changePassword']);
         
         Route::get('/bank/questions', [\App\Http\Controllers\QuestionController::class, 'bank']);
+        Route::get('/leaderboard', [\App\Http\Controllers\LeaderboardController::class, 'index']);
         
         // Quản lý danh mục (Admin)
         Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->middleware('role:admin');
