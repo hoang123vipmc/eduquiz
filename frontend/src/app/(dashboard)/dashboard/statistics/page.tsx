@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { Target, Clock, Flame, Loader2, Trophy, BrainCircuit } from "lucide-react";
+import { Target, Clock, Flame, Loader2, Trophy, BrainCircuit, BarChart2 } from "lucide-react";
 import api from "@/lib/axios";
 
 export default function StatisticsPage() {

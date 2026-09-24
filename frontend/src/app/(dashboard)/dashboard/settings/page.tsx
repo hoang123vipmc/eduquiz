@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2 } from "lucide-react";
+import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useTheme } from "next-themes";
 import api from "@/lib/axios";
@@ -156,18 +156,24 @@ export default function SettingsPage() {
                 </div>
 
                 {profileMessage.text && (
-                  <div className={cn("p-3 rounded-lg text-sm flex items-center gap-2", 
-                    profileMessage.type === "success" ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                  <div className={cn("p-3 rounded-xl text-sm flex items-center gap-2.5 transition-all duration-200", 
+                    profileMessage.type === "success" 
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20" 
+                      : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
                   )}>
-                    {profileMessage.type === "success" && <CheckCircle2 className="w-4 h-4" />}
-                    {profileMessage.text}
+                    {profileMessage.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                    )}
+                    <span>{profileMessage.text}</span>
                   </div>
                 )}
 
                 <button 
                   type="submit" 
                   disabled={isUpdatingProfile || !name}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 shadow-sm"
                 >
                   {isUpdatingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : "Lưu thay đổi"}
                 </button>
@@ -217,18 +223,24 @@ export default function SettingsPage() {
                 </div>
 
                 {passwordMessage.text && (
-                  <div className={cn("p-3 rounded-lg text-sm flex items-center gap-2", 
-                    passwordMessage.type === "success" ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                  <div className={cn("p-3 rounded-xl text-sm flex items-center gap-2.5 transition-all duration-200", 
+                    passwordMessage.type === "success" 
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20" 
+                      : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
                   )}>
-                    {passwordMessage.type === "success" && <CheckCircle2 className="w-4 h-4" />}
-                    {passwordMessage.text}
+                    {passwordMessage.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                    )}
+                    <span>{passwordMessage.text}</span>
                   </div>
                 )}
 
                 <button 
                   type="submit" 
                   disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold px-6 py-3 rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 shadow-sm"
                 >
                   {isChangingPassword ? <Loader2 className="w-5 h-5 animate-spin" /> : "Đổi mật khẩu"}
                 </button>

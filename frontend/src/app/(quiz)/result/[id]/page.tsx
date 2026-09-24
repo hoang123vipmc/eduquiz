@@ -25,6 +25,7 @@ export default function QuizResultPage() {
   const router = useRouter();
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showReview, setShowReview] = useState(true);
   const [filterMode, setFilterMode] = useState<"all" | "wrong" | "correct">("all");
 
@@ -34,9 +35,12 @@ export default function QuizResultPage() {
         const { data } = await api.get(`/results/${id}`);
         if (data.success) {
           setResult(data.data);
+        } else {
+          setError(data.message || "Không thể tải kết quả bài thi.");
         }
-      } catch (error) {
-        console.error("Lỗi lấy kết quả", error);
+      } catch (err: any) {
+        console.error("Lỗi lấy kết quả", err);
+        setError(err.response?.data?.message || "Không tìm thấy kết quả hoặc bài thi chưa kết thúc.");
       } finally {
         setLoading(false);
       }
@@ -44,11 +48,31 @@ export default function QuizResultPage() {
     fetchResult();
   }, [id]);
 
-  if (loading || !result) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-        <div className="w-12 h-12 border-4 border-border border-t-[#4F7CFF] rounded-full animate-spin mb-4"></div>
-        <p className="text-muted-foreground font-medium">Đang tải kết quả bài thi...</p>
+        <div className="w-12 h-12 border-4 border-border border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-muted-foreground font-medium text-sm">Đang tải kết quả bài thi...</p>
+      </div>
+    );
+  }
+
+  if (error || !result) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-foreground mb-2">Không thể tải kết quả</h2>
+        <p className="text-muted-foreground max-w-md mb-6 text-sm">
+          {error || "Không tìm thấy dữ liệu kết quả thi cho lượt làm này."}
+        </p>
+        <button 
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm"
+        >
+          <Home className="w-4 h-4" /> Về trang tổng quan
+        </button>
       </div>
     );
   }
@@ -156,20 +180,20 @@ export default function QuizResultPage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button 
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-sm transition-all"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
           >
             <Home className="w-4 h-4" /> Về trang chủ
           </button>
           <button 
             onClick={() => router.push(`/play/${result.attempt?.quiz_id || id}`)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#4F7CFF] hover:bg-[#6D91FF] text-white font-semibold text-sm transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)]"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold text-sm transition-all shadow-md shadow-primary/20"
           >
             <RefreshCcw className="w-4 h-4" /> Thi lại từ đầu
           </button>
           {result.wrong_answers > 0 && (
             <button 
               onClick={() => router.push(`/play/${result.attempt?.quiz_id}?retry_attempt=${result.attempt_id}`)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
             >
               <AlertCircle className="w-4 h-4" /> Làm lại {result.wrong_answers} câu sai
             </button>
@@ -181,7 +205,7 @@ export default function QuizResultPage() {
           <div className="space-y-4 pt-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#4F7CFF]">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Eye className="w-5 h-5" />
                 </div>
                 <div>
@@ -214,7 +238,18 @@ export default function QuizResultPage() {
             </div>
 
             {/* Questions List */}
-            <div className="space-y-4">
+            {filteredQuestions.length === 0 ? (
+              <div className="p-8 text-center bg-card border border-border rounded-2xl">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {filterMode === "wrong" 
+                    ? "Tuyệt vời! Bạn không làm sai câu nào trong bài thi này." 
+                    : filterMode === "correct" 
+                    ? "Chưa có câu trả lời chính xác nào." 
+                    : "Không có câu hỏi nào để hiển thị."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
               {filteredQuestions.map((q, idx) => {
                 const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -250,7 +285,7 @@ export default function QuizResultPage() {
                     </div>
 
                     {/* Question text */}
-                    <p className="text-[16px] font-semibold text-foreground mb-5 leading-relaxed">
+                    <p className="text-[16px] font-semibold text-foreground mb-5 leading-relaxed break-words">
                       {q.question_text}
                     </p>
 
@@ -275,15 +310,15 @@ export default function QuizResultPage() {
                           <div 
                             key={opt.id || optIdx}
                             className={cn(
-                              "flex items-center justify-between p-3.5 rounded-xl border text-sm transition-all",
+                              "flex items-center justify-between p-3.5 rounded-xl border text-sm transition-all gap-3",
                               optClass
                             )}
                           >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
                               <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0", badgeClass)}>
                                 {letters[optIdx] || optIdx + 1}
                               </span>
-                              <span>{opt.option_text?.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim()}</span>
+                              <span className="break-words min-w-0 flex-1">{opt.option_text?.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim()}</span>
                             </div>
                             <div className="shrink-0 text-xs font-bold pl-2">
                               {isOptCorrect && <span className="text-emerald-700 dark:text-emerald-400">Đáp án đúng</span>}
@@ -305,6 +340,7 @@ export default function QuizResultPage() {
                 );
               })}
             </div>
+            )}
           </div>
         )}
 

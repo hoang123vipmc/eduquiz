@@ -38,30 +38,30 @@ export default function LeaderboardPage() {
   }, []);
 
   const getRankStyle = (rank: number | string) => {
-    if (rank === 1) return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.2)]";
-    if (rank === 2) return "bg-slate-300/10 text-slate-400 border-slate-300/20";
-    if (rank === 3) return "bg-amber-700/10 text-amber-600 border-amber-700/20";
-    return "bg-muted text-muted-foreground border-transparent";
+    if (rank === 1) return "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.25)]";
+    if (rank === 2) return "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-400/30";
+    if (rank === 3) return "bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30";
+    return "bg-muted text-muted-foreground border-border";
   };
 
   const getRankIcon = (rank: number | string) => {
-    if (rank === 1) return <Trophy className="w-5 h-5 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-5 h-5 text-slate-400" />;
-    if (rank === 3) return <Medal className="w-5 h-5 text-amber-600" />;
-    return <span className="font-bold text-sm">{rank}</span>;
+    if (rank === 1) return <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
+    if (rank === 2) return <Medal className="w-4 h-4 text-slate-600 dark:text-slate-300" />;
+    if (rank === 3) return <Medal className="w-4 h-4 text-orange-600 dark:text-orange-400" />;
+    return <span className="font-bold text-xs">{rank}</span>;
   };
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Đang tải bảng xếp hạng...</p>
+        <p className="text-muted-foreground font-medium">Đang tải bảng xếp hạng...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
@@ -69,16 +69,16 @@ export default function LeaderboardPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              Bảng xếp hạng <Sparkles className="w-5 h-5 text-yellow-500" />
+              Bảng xếp hạng <Sparkles className="w-5 h-5 text-amber-500" />
             </h1>
             <p className="text-muted-foreground text-sm">Vinh danh những người có thành tích học tập xuất sắc nhất</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm relative">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs relative">
         {/* Header */}
-        <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-muted/50 text-sm font-semibold text-muted-foreground">
+        <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-secondary/50 text-sm font-semibold text-muted-foreground">
           <div className="col-span-2 md:col-span-1 text-center">Hạng</div>
           <div className="col-span-5 md:col-span-4 pl-2">Người dùng</div>
           <div className="col-span-5 md:col-span-3 text-center">Câu đúng</div>
@@ -89,8 +89,10 @@ export default function LeaderboardPage() {
         {/* List */}
         <div className="divide-y divide-border">
           {leaderboard.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground">
-              Chưa có ai tham gia làm bài.
+            <div className="p-16 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <Trophy className="w-10 h-10 mb-3 opacity-20 text-primary" />
+              <p className="font-semibold text-foreground">Chưa có ai tham gia bảng xếp hạng</p>
+              <p className="text-xs text-muted-foreground mt-1">Hãy là người đầu tiên hoàn thành đề thi để ghi tên lên bảng vinh danh!</p>
             </div>
           ) : (
             leaderboard.map((user) => (
@@ -115,13 +117,13 @@ export default function LeaderboardPage() {
                       <UserIcon className="w-5 h-5" />
                     </div>
                   )}
-                  <span className={cn("font-medium truncate", user.rank === 1 ? "text-yellow-500 font-bold" : "text-foreground")}>
+                  <span className={cn("font-medium truncate", user.rank === 1 ? "text-amber-700 dark:text-amber-400 font-bold" : "text-foreground")}>
                     {user.name}
                   </span>
                 </div>
 
                 <div className="col-span-5 md:col-span-3 flex items-center justify-center gap-1">
-                  <Target className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-bold text-foreground text-lg">{user.total_correct}</span>
                 </div>
 

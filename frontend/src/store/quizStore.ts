@@ -75,7 +75,7 @@ export const useQuizStore = create<QuizState>()(
                         questions: questions,
                         remainingTime: data.data.remaining_time,
                         elapsedTime: data.data.elapsed_time || 0,
-                        answers: {},
+                        answers: data.data.answers ? { ...data.data.answers } : {},
                         status: 'doing',
                         isPractice: data.data.mode === 'practice',
                     });

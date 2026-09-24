@@ -93,55 +93,55 @@ export default function DashboardPage() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#4F7CFF] group-hover:scale-110 transition-transform">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Tổng đề thi</span>
+            <span className="text-sm font-medium text-muted-foreground">Tổng đề thi đã làm</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
-            <span className="text-xs font-medium text-emerald-400">+5 tuần này</span>
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Hoàn thành</span>
           </div>
         </div>
         
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
               <Target className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Điểm trung bình</span>
+            <span className="text-sm font-medium text-muted-foreground">Độ chính xác TB</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.accuracy}%</div>
-            <span className="text-xs font-medium text-emerald-400">+4%</span>
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Mục tiêu 80%+</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#4F7CFF] group-hover:scale-110 transition-transform">
               <Clock className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Thời gian học</span>
+            <span className="text-sm font-medium text-muted-foreground">Thời gian rèn luyện</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
-            <span className="text-xs font-medium text-muted-foreground">Tháng này</span>
+            <span className="text-xs font-medium text-muted-foreground">Tích lũy</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-border hover:-translate-y-[3px] transition-all duration-250 group">
+        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
               <Flame className="w-5 h-5" />
             </div>
             <span className="text-sm font-medium text-muted-foreground">Chuỗi học tập</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.streak_days} ngày</div>
-            <span className="text-xs font-medium text-orange-400">Tuyệt vời!</span>
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Liên tục!</span>
           </div>
         </div>
       </div>
@@ -149,9 +149,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Activity Timeline */}
-        <div className="col-span-1 lg:col-span-2 bg-card rounded-[20px] border border-border p-6 flex flex-col">
+        <div className="col-span-1 lg:col-span-2 bg-card rounded-[20px] border border-border p-6 flex flex-col shadow-xs">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-foreground">Hoạt động gần đây</h3>
+            <div>
+              <h3 className="text-xl font-bold text-foreground">Hoạt động gần đây</h3>
+              <p className="text-xs text-muted-foreground">Lịch sử các bài thi bạn đã nộp kết quả</p>
+            </div>
             <button className="text-sm font-medium text-[#4F7CFF] hover:text-[#6D91FF] transition-colors flex items-center gap-1" onClick={() => router.push('/dashboard/history')}>
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </button>
@@ -159,13 +162,20 @@ export default function DashboardPage() {
           
           <div className="flex-1">
             {history.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10">
-                <Clock className="w-10 h-10 mb-3 opacity-20" />
-                <p>Chưa có hoạt động nào.</p>
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-12 text-center">
+                <Clock className="w-10 h-10 mb-3 opacity-30 text-primary" />
+                <p className="font-semibold text-foreground">Chưa có bài thi nào</p>
+                <p className="text-xs text-muted-foreground mt-1 mb-4">Hãy bắt đầu ôn luyện ngay để theo dõi tiến độ</p>
+                <button 
+                  onClick={() => router.push('/dashboard/quizzes')}
+                  className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-xl transition-colors"
+                >
+                  Khám phá kho đề thi
+                </button>
               </div>
             ) : (
-              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-800 before:to-transparent">
-                {history.map((h, i) => {
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                {history.map((h) => {
                   const scoreColor = getScoreColor(h.score);
                   const dateObj = new Date(h.created_at);
                   const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -174,7 +184,7 @@ export default function DashboardPage() {
                   return (
                     <div key={h.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                       {/* Timeline dot */}
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-[#0f172a] bg-muted text-muted-foreground group-hover:text-foreground group-hover:bg-[#4F7CFF] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm transition-colors z-10">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-muted text-muted-foreground group-hover:text-white group-hover:bg-[#4F7CFF] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xs transition-colors z-10">
                         <CheckCircleIcon />
                       </div>
                       
@@ -184,15 +194,15 @@ export default function DashboardPage() {
                         tabIndex={0}
                         onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/result/${h.id || h.attempt_id}`); } }}
-                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/40 transition-all cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-semibold text-muted-foreground">{dateStr} • {timeStr}</span>
-                          <span className={cn("text-xs font-bold px-2 py-1 rounded-md border", scoreColor)}>
+                          <span className={cn("text-xs font-bold px-2 py-0.5 rounded-md border", scoreColor)}>
                             {h.score} pts
                           </span>
                         </div>
-                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-primary transition-colors">
+                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-primary transition-colors" title={h.quiz?.title}>
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </h4>
                         <p className="text-xs text-muted-foreground">
@@ -209,18 +219,22 @@ export default function DashboardPage() {
 
         {/* Recommended Quizzes */}
         <div className="col-span-1 bg-card rounded-[20px] border border-border p-6 flex flex-col shadow-xs">
-          <h3 className="text-xl font-bold text-foreground mb-6">Gợi ý cho bạn</h3>
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-foreground">Gợi ý cho bạn</h3>
+            <p className="text-xs text-muted-foreground">Các đề thi nổi bật nên thử sức</p>
+          </div>
           <div className="flex-1 flex flex-col gap-3">
             {quizzes.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10">
-                <p>Không có đề thi nào.</p>
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10 text-center">
+                <BookOpen className="w-8 h-8 mb-2 opacity-30 text-primary" />
+                <p className="text-sm font-medium">Chưa có đề thi gợi ý</p>
               </div>
             ) : quizzes.map((q) => (
               <div 
                 key={q.id} 
                 role="button"
                 tabIndex={0}
-                className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:bg-muted/60 hover:border-primary/30 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+                className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
                 onClick={() => setSelectedQuiz(q)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
               >
@@ -229,7 +243,7 @@ export default function DashboardPage() {
                     {q.title.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-primary transition-colors" title={q.title}>
                       {q.title}
                     </h4>
                     <p className="text-[13px] text-muted-foreground truncate">
