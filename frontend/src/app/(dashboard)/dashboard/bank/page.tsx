@@ -58,10 +58,10 @@ export default function QuestionBankPage() {
 
   const getDifficultyColor = (diff: string) => {
     switch(diff) {
-      case 'easy': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'medium': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
-      case 'hard': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+      case 'easy': return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20';
+      case 'medium': return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
+      case 'hard': return 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -96,6 +96,7 @@ export default function QuestionBankPage() {
               placeholder="Tìm kiếm câu hỏi..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label="Tìm kiếm câu hỏi"
               className="pl-9 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-primary transition-colors w-full sm:w-[250px]"
             />
           </div>
@@ -106,6 +107,7 @@ export default function QuestionBankPage() {
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
+              aria-label="Lọc theo độ khó"
               className="pl-9 pr-8 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:border-primary transition-colors appearance-none cursor-pointer"
             >
               <option value="">Tất cả độ khó</option>
@@ -186,14 +188,16 @@ export default function QuestionBankPage() {
               <button 
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1 || loading}
-                className="p-2 rounded-lg border border-border bg-background text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Trang trước"
+                className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg border border-border bg-background text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button 
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages || loading}
-                className="p-2 rounded-lg border border-border bg-background text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Trang tiếp theo"
+                className="p-2 min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg border border-border bg-background text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

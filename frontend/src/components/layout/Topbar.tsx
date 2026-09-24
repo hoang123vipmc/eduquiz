@@ -31,6 +31,7 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
           variant="ghost" 
           size="icon" 
           onClick={onOpenMobile}
+          aria-label="Mở menu điều hướng"
           className="md:hidden text-muted-foreground hover:text-foreground"
         >
           <Menu className="w-5 h-5" />
@@ -42,29 +43,33 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Tìm kiếm đề thi..." 
-            className="h-10 w-full rounded-full border border-border/50 bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+            aria-label="Tìm kiếm đề thi"
+            className="h-10 w-full rounded-full border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
           />
         </form>
       </div>
 
       <div className="flex items-center gap-5">
-        <button className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-white/5">
+        <button 
+          aria-label="Thông báo hệ thống" 
+          className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary"
+        >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-[#020617]"></span>
+          <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
         </button>
 
-        <div className="h-6 w-px bg-white/10"></div>
+        <div className="h-6 w-px bg-border"></div>
 
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="flex flex-col items-end">
-            <span className="text-sm font-semibold text-foreground group-hover:text-foreground transition-colors">{user?.name || "Học viên"}</span>
+            <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{user?.name || "Học viên"}</span>
             <span className="text-[11px] text-muted-foreground capitalize">{user?.role === 'admin' ? 'Quản trị viên' : 'Tài khoản miễn phí'}</span>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-[#0f172a] flex items-center justify-center overflow-hidden shadow-sm shadow-black/20">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F7CFF] to-blue-600 border-2 border-border flex items-center justify-center overflow-hidden shadow-sm shadow-blue-500/20 text-white">
             {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              <img src={user.avatar} alt={user?.name || "Avatar"} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-sm font-bold text-foreground">{user?.name?.charAt(0) || "S"}</span>
+              <span className="text-sm font-bold">{user?.name?.charAt(0) || "S"}</span>
             )}
           </div>
         </div>

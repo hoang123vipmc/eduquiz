@@ -149,18 +149,20 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
           {step === 2 && (
             <button 
               onClick={() => setStep(1)}
-              className="absolute left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full transition-colors flex items-center gap-1.5 text-sm font-medium pr-3"
+              aria-label="Quay lại bước 1"
+              className="absolute left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors flex items-center gap-1.5 text-sm font-medium pr-3"
               disabled={loading}
             >
-              <ArrowLeft className="w-4 h-4" /> Back
+              <ArrowLeft className="w-4 h-4" /> Quay lại
             </button>
           )}
           <h2 className="text-foreground font-bold text-lg">
-            {step === 1 ? 'Create New Quiz' : 'Preview & Edit Content'}
+            {step === 1 ? 'Tạo đề thi mới' : 'Xem trước & Chỉnh sửa'}
           </h2>
           <button 
             onClick={onClose}
-            className="absolute right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-[#EF4444]/20 hover:text-red-400 rounded-full transition-colors"
+            aria-label="Đóng"
+            className="absolute right-4 p-2 text-muted-foreground hover:text-foreground hover:bg-destructive/15 hover:text-destructive rounded-full transition-colors"
             disabled={loading}
           >
             <X className="w-5 h-5" />
@@ -183,16 +185,17 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Upload Word File (.docx)</label>
+              <label className="text-sm font-medium text-foreground">Tải lên file Word (.docx)</label>
               <div className={cn(
                 "relative border-2 border-dashed rounded-2xl p-8 transition-colors flex flex-col items-center justify-center gap-4 text-center cursor-pointer",
-                file ? "border-[#4F7CFF] bg-[#4F7CFF]/5" : "border-slate-700 hover:border-slate-500 bg-secondary/50",
+                file ? "border-[#4F7CFF] bg-[#4F7CFF]/5" : "border-border hover:border-primary/50 bg-secondary/40",
                 loading && "opacity-50 pointer-events-none"
               )}>
                 <input 
                   type="file" 
                   accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={handleFileChange}
+                  aria-label="Chọn file Word"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   disabled={loading}
                 />
@@ -204,7 +207,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                     </div>
                     <div>
                       <p className="text-foreground font-semibold text-[15px] line-clamp-1 px-4">{file.name}</p>
-                      <p className="text-[#10B981] font-medium text-xs mt-1">{(file.size / 1024).toFixed(1)} KB • Ready to extract</p>
+                      <p className="text-emerald-600 dark:text-[#10B981] font-medium text-xs mt-1">{(file.size / 1024).toFixed(1)} KB • Sẵn sàng đọc dữ liệu</p>
                     </div>
                   </>
                 ) : (
@@ -213,8 +216,8 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                       <Upload className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-foreground font-semibold text-[15px]">Drop your file here or browse</p>
-                      <p className="text-muted-foreground text-xs mt-1 font-medium">Supported format: .docx</p>
+                      <p className="text-foreground font-semibold text-[15px]">Kéo thả file vào đây hoặc bấm để chọn</p>
+                      <p className="text-muted-foreground text-xs mt-1 font-medium">Hỗ trợ định dạng: .docx</p>
                     </div>
                   </>
                 )}
@@ -222,16 +225,16 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
             </div>
 
             <div className="flex items-center justify-center gap-4">
-              <div className="h-px bg-white/5 flex-1"></div>
-              <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">OR</span>
-              <div className="h-px bg-white/5 flex-1"></div>
+              <div className="h-px bg-border flex-1"></div>
+              <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">HOẶC</span>
+              <div className="h-px bg-border flex-1"></div>
             </div>
 
             <button 
               onClick={handleManualText}
-              className="w-full py-3.5 rounded-xl border border-border text-foreground hover:text-foreground hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 font-semibold"
+              className="w-full py-3.5 rounded-xl border border-border text-foreground hover:bg-muted transition-all flex items-center justify-center gap-2 font-semibold"
             >
-              <Edit3 className="w-4 h-4" /> Create manually
+              <Edit3 className="w-4 h-4" /> Soạn thảo thủ công
             </button>
 
             <button 
@@ -299,7 +302,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                               className={cn(
                                 "text-[13px] px-3 py-2 rounded-lg border",
                                 opt.isCorrect 
-                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-medium" 
+                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-medium" 
                                   : "bg-secondary border-border text-muted-foreground"
                               )}
                             >
@@ -308,7 +311,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                           ))}
                         </div>
                         {!hasCorrect && (
-                          <p className="text-xs text-amber-500 mt-3 flex items-center gap-1.5 font-medium">
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mt-3 flex items-center gap-1.5 font-medium">
                             <AlertCircle className="w-4 h-4" /> Câu này chưa có đáp án đúng (thiếu dấu *)
                           </p>
                         )}
@@ -326,34 +329,34 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
         <div className="p-5 border-t border-border flex gap-3 shrink-0 bg-card">
           <button 
             onClick={onClose}
-            className="flex-1 py-3.5 rounded-xl font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+            className="flex-1 py-3.5 rounded-xl font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
             disabled={loading}
           >
-            Cancel
+            Hủy
           </button>
           
           {step === 1 ? (
             <button 
               onClick={handleExtractText}
               disabled={loading || !file || !title.trim()}
-              className="flex-[2] bg-[#4F7CFF] hover:bg-[#6D91FF] disabled:bg-slate-800 disabled:text-muted-foreground text-foreground font-semibold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(79,124,255,0.2)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.3)] active:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
+              className="flex-[2] bg-[#4F7CFF] hover:bg-[#6D91FF] disabled:bg-muted disabled:text-muted-foreground text-white font-semibold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(79,124,255,0.2)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.3)] active:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
             >
               {loading ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> {loadingText || 'Extracting...'}</>
+                <><Loader2 className="w-5 h-5 animate-spin" /> {loadingText || 'Đang xử lý...'}</>
               ) : (
-                'Continue'
+                'Tiếp tục'
               )}
             </button>
           ) : (
             <button 
               onClick={handleImportText}
               disabled={loading || !rawText.trim() || !title.trim()}
-              className="flex-[2] bg-[#10B981] hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-muted-foreground text-[#020617] font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.3)] active:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
+              className="flex-[2] bg-[#10B981] hover:bg-emerald-400 disabled:bg-muted disabled:text-muted-foreground text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(16,185,129,0.2)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.3)] active:translate-y-0 disabled:shadow-none flex items-center justify-center gap-2"
             >
               {loading ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</>
+                <><Loader2 className="w-5 h-5 animate-spin" /> Đang lưu...</>
               ) : (
-                'Save Quiz'
+                'Lưu đề thi'
               )}
             </button>
           )}

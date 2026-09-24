@@ -101,7 +101,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {/* Bottom User Card */}
       <div className="p-4 mt-auto border-t border-border">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors duration-250 group">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 text-white">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F7CFF] to-blue-600 flex items-center justify-center shrink-0 text-white shadow-sm shadow-blue-500/20">
             <User className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
@@ -114,7 +114,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
           <button 
             onClick={handleLogout}
-            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-80 hover:opacity-100"
+            aria-label="Đăng xuất tài khoản"
+            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-80 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-red-400"
             title="Đăng xuất"
           >
             <LogOut className="w-4 h-4" />

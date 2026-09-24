@@ -1,0 +1,7 @@
+# Editor and local tools
+.claude/
+.codex/
+.cursor/
+.impeccable/
+.vscode/
+.idea/

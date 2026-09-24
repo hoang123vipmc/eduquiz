@@ -61,31 +61,31 @@ export default function DashboardPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/20";
-    if (score >= 70) return "text-[#4F7CFF] bg-[#4F7CFF]/10 border-[#4F7CFF]/20";
-    if (score >= 50) return "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/20";
-    return "text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/20";
+    if (score >= 90) return "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+    if (score >= 70) return "text-blue-700 dark:text-blue-400 bg-blue-500/10 border-blue-500/20";
+    if (score >= 50) return "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20";
+    return "text-rose-700 dark:text-rose-400 bg-rose-500/10 border-rose-500/20";
   };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       
       {/* Hero Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-[#0f172a] to-[#071026] border border-border relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-blue-50/70 via-card to-indigo-50/40 dark:from-[#0f172a] dark:to-[#071026] border border-border relative overflow-hidden shadow-xs">
         {/* Ambient glow - Optimized for GPU */}
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)' }}></div>
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none opacity-50 dark:opacity-100" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)' }}></div>
         
         <div className="relative z-10">
           <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
             Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}! 👋
           </h2>
-          <p className="text-[#94a3b8] text-[15px]">
+          <p className="text-muted-foreground text-[15px]">
             Tiếp tục hành trình học tập của bạn hôm nay. Bạn đang làm rất tốt!
           </p>
         </div>
         <button 
           onClick={() => router.push('/dashboard/quizzes')}
-          className="relative z-10 shrink-0 flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+          className="relative z-10 shrink-0 flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Sparkles className="w-4 h-4" /> Bắt đầu học
         </button>
@@ -180,8 +180,11 @@ export default function DashboardPage() {
                       
                       {/* Content Card */}
                       <div 
+                        role="button"
+                        tabIndex={0}
                         onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
-                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-secondary/50 hover:bg-muted/50 hover:border-primary/40 transition-all cursor-pointer group/card"
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/result/${h.id || h.attempt_id}`); } }}
+                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/40 transition-all cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-semibold text-muted-foreground">{dateStr} • {timeStr}</span>
@@ -189,7 +192,7 @@ export default function DashboardPage() {
                             {h.score} pts
                           </span>
                         </div>
-                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-[#4F7CFF] transition-colors">
+                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-primary transition-colors">
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </h4>
                         <p className="text-xs text-muted-foreground">
@@ -205,7 +208,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recommended Quizzes */}
-        <div className="col-span-1 bg-card rounded-[20px] border border-border p-6 flex flex-col">
+        <div className="col-span-1 bg-card rounded-[20px] border border-border p-6 flex flex-col shadow-xs">
           <h3 className="text-xl font-bold text-foreground mb-6">Gợi ý cho bạn</h3>
           <div className="flex-1 flex flex-col gap-3">
             {quizzes.length === 0 ? (
@@ -215,15 +218,18 @@ export default function DashboardPage() {
             ) : quizzes.map((q) => (
               <div 
                 key={q.id} 
-                className="group flex flex-col p-4 rounded-xl border border-border bg-secondary hover:bg-muted hover:border-border transition-all cursor-pointer"
+                role="button"
+                tabIndex={0}
+                className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:bg-muted/60 hover:border-primary/30 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
                 onClick={() => setSelectedQuiz(q)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
                     {q.title.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-foreground transition-colors">
+                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                       {q.title}
                     </h4>
                     <p className="text-[13px] text-muted-foreground truncate">

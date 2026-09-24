@@ -43,20 +43,21 @@ const QuestionGridButton = React.memo(({
   let gridClass = "bg-muted text-muted-foreground hover:bg-muted/80 border-transparent";
   
   if (isAnswered) {
-    gridClass = "bg-[#4F7CFF]/20 text-[#4F7CFF] border-[#4F7CFF]/30";
+    gridClass = "bg-primary/15 text-primary border-primary/30";
   }
   if (isCorrect) {
-    gridClass = "bg-[#10B981] text-[#020617] border-[#10B981] font-bold shadow-[0_2px_8px_rgba(16,185,129,0.3)]";
+    gridClass = "bg-emerald-500 text-white border-emerald-500 font-bold shadow-[0_2px_8px_rgba(16,185,129,0.3)]";
   } else if (isWrong) {
-    gridClass = "bg-[#EF4444] text-foreground border-[#EF4444] font-bold shadow-[0_2px_8px_rgba(239,68,68,0.3)]";
+    gridClass = "bg-rose-500 text-white border-rose-500 font-bold shadow-[0_2px_8px_rgba(239,68,68,0.3)]";
   }
 
   return (
     <button
       onClick={() => onSelect(idx)}
+      aria-label={`Câu hỏi ${idx + 1}`}
       className={cn(
-        "h-10 rounded-[10px] font-medium text-[13px] flex items-center justify-center transition-all duration-200 hover:scale-105 border-2",
-        isCurrent ? "border-white bg-card text-foreground ring-2 ring-[#4F7CFF]/50 ring-offset-2 ring-offset-[#071026] shadow-[0_4px_12px_rgba(0,0,0,0.5)]" : gridClass
+        "min-h-[44px] rounded-xl font-semibold text-[13px] flex items-center justify-center transition-all duration-200 hover:scale-105 border-2 focus-visible:ring-2 focus-visible:ring-primary",
+        isCurrent ? "border-primary bg-card text-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-background shadow-md" : gridClass
       )}
     >
       {idx + 1}

@@ -37,10 +37,10 @@ export default function HistoryPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score === 100) return "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/20";
-    if (score >= 80) return "text-[#4F7CFF] bg-[#4F7CFF]/10 border-[#4F7CFF]/20";
-    if (score >= 60) return "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/20";
-    return "text-[#EF4444] bg-[#EF4444]/10 border-[#EF4444]/20";
+    if (score === 100) return "text-emerald-700 dark:text-[#10B981] bg-emerald-500/10 border-emerald-500/20";
+    if (score >= 80) return "text-blue-700 dark:text-[#4F7CFF] bg-blue-500/10 border-blue-500/20";
+    if (score >= 60) return "text-amber-700 dark:text-[#F59E0B] bg-amber-500/10 border-amber-500/20";
+    return "text-rose-700 dark:text-[#EF4444] bg-rose-500/10 border-rose-500/20";
   };
 
   return (
@@ -48,7 +48,7 @@ export default function HistoryPage() {
       
       {/* Header Area */}
       <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4F7CFF] to-indigo-600 flex items-center justify-center text-foreground shadow-lg shadow-blue-500/20">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4F7CFF] to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
           <History className="w-7 h-7" />
         </div>
         <div>
@@ -77,13 +77,13 @@ export default function HistoryPage() {
           </p>
           <button 
             onClick={() => router.push('/dashboard/quizzes')}
-            className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5"
+            className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5"
           >
             Khám phá đề thi
           </button>
         </div>
       ) : (
-        <div className="bg-card rounded-[20px] border border-border shadow-[0_8px_30px_rgba(0,0,0,0.4)] overflow-hidden">
+        <div className="bg-card rounded-[20px] border border-border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[15px] text-left border-collapse">
               <thead className="bg-secondary text-muted-foreground font-semibold border-b border-border">
@@ -96,14 +96,14 @@ export default function HistoryPage() {
                   <th className="px-6 py-5 text-right">Hành động</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {history.map((h) => {
                   const scoreColor = getScoreColor(h.score);
                   const isPass = h.score >= 50;
                   return (
-                    <tr key={h.id} className="hover:bg-muted transition-colors group">
+                    <tr key={h.id} className="hover:bg-muted/40 transition-colors group">
                       <td className="px-6 py-5">
-                        <div className="font-semibold text-foreground max-w-[250px] truncate group-hover:text-foreground transition-colors" title={h.quiz?.title}>
+                        <div className="font-semibold text-foreground max-w-[250px] truncate group-hover:text-primary transition-colors" title={h.quiz?.title}>
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </div>
                       </td>
@@ -118,9 +118,9 @@ export default function HistoryPage() {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
                           {isPass ? (
-                            <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-[#10B981]" />
                           ) : (
-                            <XCircle className="w-4 h-4 text-[#EF4444]" />
+                            <XCircle className="w-4 h-4 text-rose-600 dark:text-[#EF4444]" />
                           )}
                           <span className="text-foreground font-medium">
                             {h.correct_answers} <span className="text-muted-foreground text-xs">/ {h.total_questions || h.quiz?.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))}</span>
@@ -133,7 +133,7 @@ export default function HistoryPage() {
                       <td className="px-6 py-5 text-right">
                         <button 
                           onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
-                          className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-medium transition-colors"
+                          className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-secondary hover:bg-muted text-foreground border border-border font-medium transition-colors"
                         >
                           Chi tiết <ChevronRight className="w-4 h-4" />
                         </button>

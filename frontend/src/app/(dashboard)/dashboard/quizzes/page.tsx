@@ -97,7 +97,7 @@ export default function QuizzesPage() {
         </div>
         <button 
           onClick={() => setShowImportModal(true)}
-          className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 shrink-0"
+          className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 shrink-0"
         >
           <FileUp className="w-4 h-4" /> Import Đề thi
         </button>
@@ -111,13 +111,15 @@ export default function QuizzesPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Tìm kiếm theo tên đề thi"
             placeholder="Tìm kiếm theo tên đề thi..."
             className="w-full bg-secondary border border-border rounded-xl pl-10 pr-8 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
           />
           {search && (
             <button 
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+              aria-label="Xóa từ khóa tìm kiếm"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs p-1"
             >
               ✕
             </button>
@@ -153,7 +155,7 @@ export default function QuizzesPage() {
           </p>
           <button 
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)]"
+            className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)]"
           >
             Tạo đề thi đầu tiên
           </button>
@@ -161,7 +163,7 @@ export default function QuizzesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quizzes.map((quiz) => (
-            <div key={quiz.id} className="group flex flex-col bg-card rounded-[20px] overflow-hidden border border-border hover:border-border hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all duration-300">
+            <div key={quiz.id} className="group flex flex-col bg-card rounded-[20px] overflow-hidden border border-border hover:border-primary/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all duration-300">
               
               {/* TOP: Banner */}
               <div className="h-32 relative bg-gradient-to-br from-[#1e293b] to-[#0f172a] flex items-end p-4 border-b border-border">
@@ -170,17 +172,18 @@ export default function QuizzesPage() {
                 
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-foreground bg-blue-500/80 backdrop-blur-md rounded-md">
+                  <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white bg-blue-500/80 backdrop-blur-md rounded-md">
                     {quiz.category?.name || 'Tự do'}
                   </span>
-                  <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 backdrop-blur-md rounded-md">
+                  <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-md rounded-md">
                     Cơ bản
                   </span>
                 </div>
 
                 <button 
                   onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
-                  className="absolute top-4 right-4 z-20 p-2 bg-[#EF4444]/20 text-red-200 hover:bg-[#EF4444] hover:text-foreground rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
+                  className="absolute top-4 right-4 z-20 p-2 bg-destructive/15 text-rose-500 hover:bg-destructive hover:text-white rounded-full transition-all duration-300 opacity-90 sm:opacity-0 group-hover:opacity-100"
+                  aria-label={`Xóa đề thi ${quiz.title}`}
                   title="Xóa đề thi"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -189,7 +192,7 @@ export default function QuizzesPage() {
 
               {/* MIDDLE: Content */}
               <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-lg font-bold text-foreground line-clamp-1 mb-2 group-hover:text-[#4F7CFF] transition-colors" title={quiz.title}>
+                <h3 className="text-lg font-bold text-foreground line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={quiz.title}>
                   {quiz.title}
                 </h3>
                 <p className="text-[14px] text-muted-foreground line-clamp-2 mb-6 flex-1 leading-relaxed">
@@ -202,15 +205,15 @@ export default function QuizzesPage() {
                     <HelpCircle className="w-4 h-4 text-[#4F7CFF]" /> {quiz.total_questions} câu
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-[#F59E0B]" /> {quiz.duration_minutes} phút
+                    <Clock className="w-4 h-4 text-amber-600 dark:text-[#F59E0B]" /> {quiz.duration_minutes} phút
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-[#10B981]" /> 1.2k+
+                    <Users className="w-4 h-4 text-emerald-600 dark:text-[#10B981]" /> 1.2k+
                   </div>
                 </div>
 
                 <button 
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#4F7CFF] to-blue-600 hover:from-[#6D91FF] hover:to-blue-500 text-foreground font-semibold py-3.5 rounded-xl transition-all duration-300 hover:scale-[1.03] shadow-[0_4px_12px_rgba(79,124,255,0.2)] hover:shadow-[0_8px_20px_rgba(79,124,255,0.4)]" 
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#4F7CFF] to-blue-600 hover:from-[#6D91FF] hover:to-blue-500 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_12px_rgba(79,124,255,0.2)] hover:shadow-[0_8px_20px_rgba(79,124,255,0.4)]" 
                   onClick={() => setSelectedQuiz(quiz)}
                 >
                   Bắt đầu làm <ChevronRightIcon />

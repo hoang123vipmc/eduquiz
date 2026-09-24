@@ -162,14 +162,14 @@ export default function QuizResultPage() {
           </button>
           <button 
             onClick={() => router.push(`/play/${result.attempt?.quiz_id || id}`)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground font-semibold text-sm transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)]"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#4F7CFF] hover:bg-[#6D91FF] text-white font-semibold text-sm transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)]"
           >
             <RefreshCcw className="w-4 h-4" /> Thi lại từ đầu
           </button>
           {result.wrong_answers > 0 && (
             <button 
               onClick={() => router.push(`/play/${result.attempt?.quiz_id}?retry_attempt=${result.attempt_id}`)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
             >
               <AlertCircle className="w-4 h-4" /> Làm lại {result.wrong_answers} câu sai
             </button>
@@ -200,13 +200,13 @@ export default function QuizResultPage() {
                 </button>
                 <button
                   onClick={() => setFilterMode("wrong")}
-                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "wrong" ? "bg-card text-rose-500 shadow-sm" : "text-muted-foreground hover:text-rose-500")}
+                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "wrong" ? "bg-card text-rose-700 dark:text-rose-400 shadow-sm" : "text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400")}
                 >
                   Câu sai ({questionsDetail.filter(q => !q.is_correct).length})
                 </button>
                 <button
                   onClick={() => setFilterMode("correct")}
-                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "correct" ? "bg-card text-emerald-400 shadow-sm" : "text-muted-foreground hover:text-emerald-400")}
+                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "correct" ? "bg-card text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400")}
                 >
                   Câu đúng ({questionsDetail.filter(q => q.is_correct).length})
                 </button>
@@ -233,15 +233,15 @@ export default function QuizResultPage() {
                           Câu {idx + 1}
                         </span>
                         {q.is_correct ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                             <CheckCircle2 className="w-3.5 h-3.5" /> Đúng
                           </span>
                         ) : !q.is_answered ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                             <AlertCircle className="w-3.5 h-3.5" /> Bỏ qua
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">
                             <XCircle className="w-3.5 h-3.5" /> Sai
                           </span>
                         )}
@@ -264,11 +264,11 @@ export default function QuizResultPage() {
                         let badgeClass = "bg-muted text-muted-foreground";
 
                         if (isOptCorrect) {
-                          optClass = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-medium";
-                          badgeClass = "bg-emerald-500 text-[#020617] font-bold";
+                          optClass = "border-emerald-500/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-medium";
+                          badgeClass = "bg-emerald-500 text-white font-bold";
                         } else if (isSelected && !isOptCorrect) {
-                          optClass = "border-rose-500/50 bg-rose-500/10 text-rose-300 font-medium";
-                          badgeClass = "bg-rose-500 text-foreground font-bold";
+                          optClass = "border-rose-500/50 bg-rose-500/10 text-rose-800 dark:text-rose-300 font-medium";
+                          badgeClass = "bg-rose-500 text-white font-bold";
                         }
 
                         return (
@@ -286,8 +286,8 @@ export default function QuizResultPage() {
                               <span>{opt.option_text?.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim()}</span>
                             </div>
                             <div className="shrink-0 text-xs font-bold pl-2">
-                              {isOptCorrect && <span className="text-emerald-400">Đáp án đúng</span>}
-                              {isSelected && !isOptCorrect && <span className="text-rose-400">Bạn đã chọn</span>}
+                              {isOptCorrect && <span className="text-emerald-700 dark:text-emerald-400">Đáp án đúng</span>}
+                              {isSelected && !isOptCorrect && <span className="text-rose-700 dark:text-rose-400">Bạn đã chọn</span>}
                             </div>
                           </div>
                         );
@@ -296,7 +296,7 @@ export default function QuizResultPage() {
 
                     {/* Explanation if present */}
                     {q.explanation && (
-                      <div className="mt-4 p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-blue-300 leading-relaxed">
+                      <div className="mt-4 p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
                         <span className="font-bold text-[#4F7CFF]">Giải thích: </span>
                         {q.explanation}
                       </div>

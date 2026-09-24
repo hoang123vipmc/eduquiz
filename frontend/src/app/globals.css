@@ -41,29 +41,29 @@
 }
 
 :root {
-  /* LIGHT MODE */
+  /* LIGHT MODE - Modern, Friendly Educational */
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
   --primary: #4F7CFF;
   --primary-foreground: #ffffff;
-  --secondary: #e2e8f0;
-  --secondary-foreground: #0f172a;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #475569;
   --accent: #e2e8f0;
   --accent-foreground: #0f172a;
   --destructive: #EF4444;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
-  --input: #e2e8f0;
+  --input: #cbd5e1;
   --ring: #4F7CFF;
   --radius: 16px;
 }
 
 .dark {
-  /* DARK MODE */
+  /* DARK MODE - Sleek, Focus-oriented */
   --background: #020617;
   --foreground: #f8fafc;
   --card: #0f172a;
@@ -79,7 +79,7 @@
   --destructive: #EF4444;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
   --ring: #4F7CFF;
 }
 
@@ -88,7 +88,15 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased transition-colors duration-300;
+    @apply bg-background text-foreground font-sans antialiased transition-colors duration-250;
+  }
+  ::selection {
+    background-color: rgba(79, 124, 255, 0.25);
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 }
 
@@ -128,4 +136,14 @@
 
 .animate-spin-slow {
   animation: spin-slow 20s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-reverse,
+  .animate-pulse-slow,
+  .animate-spin-slow,
+  .animate-pulse {
+    animation: none !important;
+  }
 }
