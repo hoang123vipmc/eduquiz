@@ -14,6 +14,7 @@ export default function DashboardLayout({
   const { isAuthenticated, checkAuth } = useAuthStore();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -31,9 +32,9 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
+      <Sidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onOpenMobile={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
             {children}

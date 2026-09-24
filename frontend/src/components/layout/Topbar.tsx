@@ -1,27 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Bell, Search, Menu } from "lucide-react";
 
-export function Topbar() {
+interface TopbarProps {
+  onOpenMobile?: () => void;
+}
+
+export function Topbar({ onOpenMobile }: TopbarProps) {
   const { user } = useAuthStore();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/dashboard/quizzes?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      router.push('/dashboard/quizzes');
+    }
+  };
 
   return (
     <header className="h-[72px] bg-background/80 backdrop-blur-md sticky top-0 z-30 px-6 flex items-center justify-between border-b border-border">
       <div className="flex items-center gap-4 flex-1">
-        <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground hover:text-foreground">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onOpenMobile}
+          className="md:hidden text-muted-foreground hover:text-foreground"
+        >
           <Menu className="w-5 h-5" />
         </Button>
-        <div className="relative hidden sm:block max-w-md w-full">
+        <form onSubmit={handleSearch} className="relative hidden sm:block max-w-md w-full">
           <Search className="w-[18px] h-[18px] absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Tìm kiếm đề thi..." 
-            className="h-10 w-full rounded-full border border-transparent bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border transition-colors"
+            className="h-10 w-full rounded-full border border-border/50 bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
           />
-        </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-5">

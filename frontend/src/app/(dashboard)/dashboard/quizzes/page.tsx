@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
-import { Clock, HelpCircle, CheckCircle2, FileUp, Trash2, Users } from "lucide-react";
+import { Clock, HelpCircle, CheckCircle2, FileUp, Trash2, Users, Search } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
 import { ImportQuizModal } from "@/components/quiz/ImportQuizModal";
@@ -16,11 +16,30 @@ export default function QuizzesPage() {
 
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const fetchQuizzes = async () => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('search') || '';
+    if (q) {
+      setSearch(q);
+      setDebouncedSearch(q);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  const fetchQuizzes = async (query = debouncedSearch) => {
     setLoading(true);
     try {
-      const { data } = await api.get("/quizzes");
+      const url = query ? `/quizzes?search=${encodeURIComponent(query)}` : '/quizzes';
+      const { data } = await api.get(url);
       if (data.success) {
         const quizzesList = Array.isArray(data.data) ? data.data : data.data.data;
         setQuizzes(quizzesList || []);
@@ -33,8 +52,8 @@ export default function QuizzesPage() {
   };
 
   useEffect(() => {
-    fetchQuizzes();
-  }, []);
+    fetchQuizzes(debouncedSearch);
+  }, [debouncedSearch]);
 
   const handleStartQuiz = (config: any) => {
     if (!selectedQuiz) return;
@@ -78,10 +97,35 @@ export default function QuizzesPage() {
         </div>
         <button 
           onClick={() => setShowImportModal(true)}
-          className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+          className="flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground px-6 py-3 rounded-xl font-semibold shadow-[0_4px_12px_rgba(79,124,255,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 shrink-0"
         >
           <FileUp className="w-4 h-4" /> Import Đề thi
         </button>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card border border-border p-4 rounded-2xl shadow-xs">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input 
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Tìm kiếm theo tên đề thi..."
+            className="w-full bg-secondary border border-border rounded-xl pl-10 pr-8 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+          />
+          {search && (
+            <button 
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <div className="text-xs font-semibold text-muted-foreground self-start sm:self-auto">
+          {loading ? "Đang tìm kiếm..." : `Tìm thấy ${quizzes.length} đề thi`}
+        </div>
       </div>
 
       {loading ? (

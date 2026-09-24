@@ -27,7 +27,27 @@ export function parseQuizText(text: string): ParsedQuestion[] {
       continue;
     }
 
-    if (expectingNewQuestion) {
+    // Bỏ qua các đường kẻ phân cách dạng --- hoặc ===
+    if (/^[-=_*]{3,}$/.test(line)) {
+      continue;
+    }
+
+    // Nhận diện dòng chỉ định đáp án đúng (ví dụ: "=> Đáp án đúng: C", "Đáp án: A", "Answer: B")
+    const ansMatch = line.match(/^(?:=>\s*)?(?:Đáp án(?:\s*đúng)?|Đ\/a|Answer|Key)\s*[:：]\s*([A-Fa-f1-6])/i);
+    if (ansMatch && currentQuestion && currentQuestion.options.length > 0) {
+      const letter = ansMatch[1].toUpperCase();
+      const targetIdx = !isNaN(Number(letter)) ? (Number(letter) - 1) : (letter.charCodeAt(0) - 65);
+      if (currentQuestion.options[targetIdx]) {
+        currentQuestion.options.forEach(opt => { opt.isCorrect = false; });
+        currentQuestion.options[targetIdx].isCorrect = true;
+      }
+      continue;
+    }
+
+    // Bắt đầu câu hỏi mới khi có tiền tố "Câu X:" hoặc đang chờ câu mới
+    const isExplicitHeader = /^(?:Câu|Question)\s*\d+\s*[:：\.\)]/i.test(line);
+
+    if (expectingNewQuestion || (isExplicitHeader && currentQuestion && currentQuestion.options.length > 0)) {
       if (currentQuestion && currentQuestion.options.length > 0) {
         questionsData.push(currentQuestion);
       }
@@ -39,15 +59,19 @@ export function parseQuizText(text: string): ParsedQuestion[] {
       continue;
     }
 
-    const isCorrectOption = line.startsWith('*');
+    let isCorrectOption = line.startsWith('*');
     // Regex matches A. A) A- 1. 1) 1- (also handles " E .INT")
-    const optionRegex = /^[A-E1-4]\s*[\.\)\-]/i;
+    const optionRegex = /^[A-F1-6]\s*[\.\)\-]/i;
     const isOption = isCorrectOption || optionRegex.test(line);
 
     if (isOption && currentQuestion) {
       let optText = line;
       if (isCorrectOption) {
         optText = line.substring(1).trim();
+      }
+      if (/^[A-F1-6]\s*[\.\)\-]\s*\*/i.test(optText)) {
+        isCorrectOption = true;
+        optText = optText.replace(/^([A-F1-6]\s*[\.\)\-])\s*\*/i, '$1 ');
       }
       
       currentQuestion.options.push({

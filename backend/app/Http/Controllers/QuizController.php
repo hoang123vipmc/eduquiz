@@ -18,7 +18,15 @@ class QuizController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $quizzes = $query->paginate($request->get('per_page', 15));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $quizzes = $query->latest('id')->paginate($request->get('per_page', 15));
 
         return response()->json([
             'success' => true,

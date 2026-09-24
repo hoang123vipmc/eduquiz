@@ -216,14 +216,48 @@ class AttemptController extends Controller
 
     public function result(Request $request, $id)
     {
-        $result = Result::with('attempt')->where('id', $id)
-            ->whereHas('attempt', function ($query) use ($request) {
-                $query->where('user_id', $request->user()->id);
-            })->firstOrFail();
+        $result = Result::with([
+            'attempt.quiz.category',
+            'attempt.quiz.questions.options',
+            'attempt.answers'
+        ])->where(function ($query) use ($id) {
+            $query->where('id', $id)->orWhere('attempt_id', $id);
+        })->whereHas('attempt', function ($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })->latest('id')->firstOrFail();
+
+        $quiz = $result->attempt->quiz;
+        $userAnswers = $result->attempt->answers->keyBy('question_id');
+
+        $questionsDetail = [];
+        if ($quiz && $quiz->relationLoaded('questions')) {
+            foreach ($quiz->questions as $question) {
+                $ans = $userAnswers->get($question->id);
+                $questionsDetail[] = [
+                    'id' => $question->id,
+                    'question_text' => $question->question_text,
+                    'explanation' => $question->explanation,
+                    'points' => $question->points,
+                    'selected_option_id' => $ans ? $ans->option_id : null,
+                    'is_correct' => $ans ? (bool) $ans->is_correct : false,
+                    'is_answered' => $ans !== null,
+                    'options' => $question->options->map(function ($opt) {
+                        return [
+                            'id' => $opt->id,
+                            'option_text' => $opt->option_text,
+                            'is_correct' => (bool) $opt->is_correct,
+                        ];
+                    })
+                ];
+            }
+        }
+
+        $data = $result->toArray();
+        $data['questions_detail'] = $questionsDetail;
 
         return response()->json([
             'success' => true,
-            'data' => $result
+            'data' => $data
         ]);
     }
 

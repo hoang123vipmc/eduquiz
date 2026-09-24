@@ -75,8 +75,31 @@ class QuizImportController extends Controller
                 continue;
             }
 
-            if ($expectingNewQuestion) {
-                // Đây chắc chắn là câu hỏi
+            // Bỏ qua các đường kẻ phân cách dạng --- hoặc ===
+            if (preg_match('/^[-=_*]{3,}$/', $line)) {
+                continue;
+            }
+
+            // Nhận diện dòng chỉ định đáp án đúng (ví dụ: "=> Đáp án đúng: C", "Đáp án: A", "Answer: B")
+            if (preg_match('/^(?:=>\s*)?(?:Đáp án(?:\s*đúng)?|Đ\/a|Answer|Key)\s*[:：]\s*([A-Fa-f1-6])/iu', $line, $ansMatch)) {
+                if ($currentQuestion && !empty($currentQuestion['options'])) {
+                    $letter = strtoupper($ansMatch[1]);
+                    $targetIdx = is_numeric($letter) ? ((int)$letter - 1) : (ord($letter) - ord('A'));
+                    if (isset($currentQuestion['options'][$targetIdx])) {
+                        // Bỏ tick tất cả trước
+                        foreach ($currentQuestion['options'] as &$opt) {
+                            $opt['is_correct'] = false;
+                        }
+                        $currentQuestion['options'][$targetIdx]['is_correct'] = true;
+                    }
+                }
+                continue;
+            }
+
+            // Kiểm tra xem có phải bắt đầu câu hỏi mới không (Ví dụ: "Câu 1:", "Question 1:", hoặc đang chờ câu mới)
+            $isExplicitQuestionHeader = preg_match('/^(?:Câu|Question)\s*\d+\s*[:：\.\)]/iu', $line);
+
+            if ($expectingNewQuestion || ($isExplicitQuestionHeader && $currentQuestion && count($currentQuestion['options']) > 0)) {
                 if ($currentQuestion && count($currentQuestion['options']) > 0) {
                     $questionsData[] = $currentQuestion;
                 }
@@ -88,10 +111,9 @@ class QuizImportController extends Controller
                 continue;
             }
 
-            // Nếu không phải là dòng đầu tiên của câu hỏi mới, kiểm tra xem có phải option không
+            // Kiểm tra xem có phải option không
             $isCorrectOption = str_starts_with($line, '*');
-            // Regex mới: Hỗ trợ " E .INT" (khoảng trắng giữa chữ cái và dấu chấm)
-            $isOption = $isCorrectOption || preg_match('/^[A-E]\s*[\.\)\-]/i', $line) || preg_match('/^[1-4]\s*[\.\)\-]/', $line);
+            $isOption = $isCorrectOption || preg_match('/^[A-F]\s*[\.\)\-]/i', $line) || preg_match('/^[1-6]\s*[\.\)\-]/', $line);
 
             if ($isOption) {
                 $optText = $line;
@@ -99,8 +121,12 @@ class QuizImportController extends Controller
                     $optText = trim(substr($line, 1));
                 }
                 
-                // Đôi khi đáp án đúng có chữ (Đáp án đúng) ở cuối, ta có thể tự động xoá đi cho đẹp nếu muốn, 
-                // nhưng tạm thời cứ giữ nguyên text người dùng nhập.
+                // Nếu có dấu * nằm sau chữ cái: "A. *Đáp án"
+                if (preg_match('/^[A-F1-6]\s*[\.\)\-]\s*\*/i', $optText)) {
+                    $isCorrectOption = true;
+                    $optText = preg_replace('/^([A-F1-6]\s*[\.\)\-])\s*\*/i', '$1 ', $optText);
+                }
+
                 $currentQuestion['options'][] = [
                     'text' => $optText,
                     'is_correct' => $isCorrectOption
@@ -110,9 +136,7 @@ class QuizImportController extends Controller
                 if (count($currentQuestion['options']) === 0) {
                     $currentQuestion['q'] .= "\n" . $line;
                 } else {
-                    // Nếu đã có option mà gặp dòng không phải option (trong cùng 1 block chưa có dòng trống)
-                    // Đây có thể là đáp án dài bị xuống dòng hoặc lỗi đánh máy thiếu A. B. C.
-                    // => Nối nó vào đáp án cuối cùng thay vì tách thành câu hỏi mới!
+                    // Nối vào đáp án cuối cùng
                     $lastIdx = count($currentQuestion['options']) - 1;
                     $currentQuestion['options'][$lastIdx]['text'] .= "\n" . $line;
                 }

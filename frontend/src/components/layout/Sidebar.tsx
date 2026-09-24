@@ -16,7 +16,12 @@ import {
   User
 } from "lucide-react";
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -45,13 +50,12 @@ export function Sidebar() {
     router.push("/login");
   };
 
-  return (
-    <div className="w-[260px] bg-secondary border-r border-border hidden md:flex flex-col h-full text-foreground">
-      
+  const navContent = (
+    <div className="flex flex-col h-full text-foreground">
       {/* Brand & Slogan */}
       <div className="pt-8 pb-6 px-6">
         <div className="flex items-center gap-3 text-foreground font-bold text-2xl tracking-tight mb-1">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F7CFF] to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F7CFF] to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white">
             <span className="text-sm">EQ</span>
           </div>
           EduQuiz
@@ -65,14 +69,14 @@ export function Sidebar() {
       <div className="flex-1 py-4 overflow-y-auto px-3 space-y-1 scrollbar-hide">
         {links.map((link) => {
           const Icon = link.icon;
-          const isActive = pathname === link.href || pathname.startsWith(link.href + "/") && link.href !== '/dashboard';
-          // Fix exact match for dashboard
+          const isActive = pathname === link.href || (pathname.startsWith(link.href + "/") && link.href !== '/dashboard');
           const reallyActive = link.href === '/dashboard' ? pathname === '/dashboard' : isActive;
 
           return (
             <Link
               key={link.name}
               href={link.href}
+              onClick={() => onClose?.()}
               className={cn(
                 "group relative flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-all duration-250 ease-in-out",
                 reallyActive 
@@ -80,7 +84,6 @@ export function Sidebar() {
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               )}
             >
-              {/* Active Indicator Bar */}
               {reallyActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4F7CFF] rounded-r-full shadow-[0_0_8px_#4F7CFF]"></div>
               )}
@@ -98,8 +101,8 @@ export function Sidebar() {
       {/* Bottom User Card */}
       <div className="p-4 mt-auto border-t border-border">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors duration-250 group">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
-            <User className="w-5 h-5 text-foreground" />
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 text-white">
+            <User className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-foreground truncate">
@@ -111,14 +114,35 @@ export function Sidebar() {
           </div>
           <button 
             onClick={handleLogout}
-            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-            title="Logout"
+            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-80 hover:opacity-100"
+            title="Đăng xuất"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
-
     </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="w-[260px] bg-secondary border-r border-border hidden md:flex flex-col h-full shrink-0">
+        {navContent}
+      </aside>
+
+      {/* Mobile Drawer */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={onClose}
+          />
+          <aside className="relative w-[280px] max-w-[80vw] bg-card border-r border-border z-10 flex flex-col h-full shadow-2xl animate-in slide-in-from-left duration-300">
+            {navContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

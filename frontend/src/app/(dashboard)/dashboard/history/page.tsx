@@ -123,7 +123,7 @@ export default function HistoryPage() {
                             <XCircle className="w-4 h-4 text-[#EF4444]" />
                           )}
                           <span className="text-foreground font-medium">
-                            {h.correct_answers} <span className="text-muted-foreground text-xs">/ {h.quiz?.total_questions || '-'}</span>
+                            {h.correct_answers} <span className="text-muted-foreground text-xs">/ {h.total_questions || h.quiz?.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))}</span>
                           </span>
                         </div>
                       </td>
@@ -132,7 +132,7 @@ export default function HistoryPage() {
                       </td>
                       <td className="px-6 py-5 text-right">
                         <button 
-                          onClick={() => router.push(`/result/${h.attempt_id || h.id}`)}
+                          onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
                           className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-medium transition-colors"
                         >
                           Chi tiết <ChevronRight className="w-4 h-4" />

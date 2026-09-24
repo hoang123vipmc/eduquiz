@@ -9,7 +9,7 @@ import { formatQuizDuration } from "@/lib/utils/time";
 
 const cleanAnswerText = (text: string) => {
   if (!text) return '';
-  return text.replace(/^[A-Z][\.\)\-]\s*/i, '').trim();
+  return text.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim();
 };
 
 const QuizTimer = () => {
@@ -77,12 +77,34 @@ export default function QuizPlayerPage() {
   const questions = useQuizStore(s => s.questions);
   const answers = useQuizStore(s => s.answers);
   const isPractice = useQuizStore(s => s.isPractice);
+  const tick = useQuizStore(s => s.tick);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [autoNextDelay, setAutoNextDelay] = useState(0);
+
+  // Timer tick interval
+  useEffect(() => {
+    if (status !== 'doing') return;
+
+    const timer = setInterval(() => {
+      tick();
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [status, tick]);
+
+  // Auto-redirect if quiz times out and submits
+  useEffect(() => {
+    if (status === 'submitted') {
+      const attemptId = useQuizStore.getState().attemptId;
+      if (attemptId) {
+        router.push(`/result/${attemptId}`);
+      }
+    }
+  }, [status, router]);
 
   useEffect(() => {
     const initQuiz = async () => {

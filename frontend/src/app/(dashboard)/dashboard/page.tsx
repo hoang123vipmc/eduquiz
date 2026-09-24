@@ -77,7 +77,7 @@ export default function DashboardPage() {
         
         <div className="relative z-10">
           <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-            Chào mừng trở lại, {user?.name?.split(' ')[0] || 'Học viên'}! 👋
+            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}! 👋
           </h2>
           <p className="text-[#94a3b8] text-[15px]">
             Tiếp tục hành trình học tập của bạn hôm nay. Bạn đang làm rất tốt!
@@ -179,18 +179,21 @@ export default function DashboardPage() {
                       </div>
                       
                       {/* Content Card */}
-                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-secondary/50 hover:bg-muted/50 transition-colors">
+                      <div 
+                        onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
+                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-secondary/50 hover:bg-muted/50 hover:border-primary/40 transition-all cursor-pointer group/card"
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-semibold text-muted-foreground">{dateStr} • {timeStr}</span>
                           <span className={cn("text-xs font-bold px-2 py-1 rounded-md border", scoreColor)}>
                             {h.score} pts
                           </span>
                         </div>
-                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1">
+                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-[#4F7CFF] transition-colors">
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          Đúng {h.correct_answers} / {h.quiz?.total_questions || '-'} câu
+                          Đúng {h.correct_answers} / {h.total_questions || h.quiz?.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))} câu
                         </p>
                       </div>
                     </div>

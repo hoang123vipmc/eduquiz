@@ -68,7 +68,7 @@ class UserController extends Controller
     {
         $userId = $request->user()->id;
 
-        $history = Result::with('attempt.quiz:id,title,category_id', 'attempt.quiz.category:id,name,icon')
+        $history = Result::with('attempt.quiz:id,title,category_id,total_questions,duration_minutes,slug', 'attempt.quiz.category:id,name,icon')
             ->whereHas('attempt', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
@@ -79,6 +79,9 @@ class UserController extends Controller
                 // Đưa quiz ra cấp độ root của history item để Frontend dễ sử dụng
                 $item = $result->toArray();
                 $item['quiz'] = $result->attempt->quiz ?? null;
+                $quizTotal = $result->attempt?->quiz?->total_questions;
+                $calculatedTotal = $result->correct_answers + $result->wrong_answers + ($result->skipped_answers ?? 0);
+                $item['total_questions'] = $quizTotal ?: ($calculatedTotal > 0 ? $calculatedTotal : null);
                 return $item;
             });
 
