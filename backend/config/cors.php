@@ -19,7 +19,8 @@ return [
     'allowed_origins' => array_filter([
         'http://localhost:3000',
         'http://127.0.0.1:3000',
-        env('FRONTEND_URL'), // e.g. https://eduquiz-delta.vercel.app
+        'https://eduquiz-delta.vercel.app', // Explicitly allow production frontend
+        env('FRONTEND_URL'),
     ]),
 
     'allowed_origins_patterns' => [],

@@ -71,21 +71,18 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       
       {/* Hero Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-[20px] bg-gradient-to-r from-blue-50/70 via-card to-indigo-50/40 dark:from-[#0f172a] dark:to-[#071026] border border-border relative overflow-hidden shadow-xs">
-        {/* Ambient glow - Optimized for GPU */}
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none opacity-50 dark:opacity-100" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)' }}></div>
-        
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-xl bg-card border border-border shadow-sm">
         <div className="relative z-10">
           <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}! 👋
+            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}
           </h2>
           <p className="text-muted-foreground text-[15px]">
-            Tiếp tục hành trình học tập của bạn hôm nay. Bạn đang làm rất tốt!
+            Tiếp tục hành trình học tập của bạn hôm nay.
           </p>
         </div>
         <button 
           onClick={() => router.push('/dashboard/quizzes')}
-          className="relative z-10 shrink-0 flex items-center gap-2 bg-[#4F7CFF] hover:bg-[#6D91FF] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_4px_12px_rgba(79,124,255,0.3)] hover:shadow-[0_6px_16px_rgba(79,124,255,0.4)] hover:-translate-y-0.5 active:translate-y-0 focus-visible:ring-2 focus-visible:ring-primary"
+          className="relative z-10 shrink-0 flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Sparkles className="w-4 h-4" /> Bắt đầu học
         </button>
@@ -93,55 +90,51 @@ export default function DashboardPage() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
+        <div className="p-6 rounded-xl bg-card border border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#4F7CFF] group-hover:scale-110 transition-transform">
+            <div className="text-muted-foreground">
               <BookOpen className="w-5 h-5" />
             </div>
             <span className="text-sm font-medium text-muted-foreground">Tổng đề thi đã làm</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Hoàn thành</span>
           </div>
         </div>
         
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
+        <div className="p-6 rounded-xl bg-card border border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+            <div className="text-muted-foreground">
               <Target className="w-5 h-5" />
             </div>
             <span className="text-sm font-medium text-muted-foreground">Độ chính xác TB</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.accuracy}%</div>
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Mục tiêu 80%+</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
+        <div className="p-6 rounded-xl bg-card border border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-[#4F7CFF] group-hover:scale-110 transition-transform">
+            <div className="text-muted-foreground">
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-sm font-medium text-muted-foreground">Thời gian rèn luyện</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
-            <span className="text-xs font-medium text-muted-foreground">Tích lũy</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-[20px] bg-card border border-border hover:border-primary/30 hover:-translate-y-[2px] hover:shadow-sm transition-all duration-200 group">
+        <div className="p-6 rounded-xl bg-card border border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+            <div className="text-muted-foreground">
               <Flame className="w-5 h-5" />
             </div>
             <span className="text-sm font-medium text-muted-foreground">Chuỗi học tập</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.streak_days} ngày</div>
-            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">Liên tục!</span>
           </div>
         </div>
       </div>
@@ -149,13 +142,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Activity Timeline */}
-        <div className="col-span-1 lg:col-span-2 bg-card rounded-[20px] border border-border p-6 flex flex-col shadow-xs">
+        <div className="col-span-1 lg:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-bold text-foreground">Hoạt động gần đây</h3>
-              <p className="text-xs text-muted-foreground">Lịch sử các bài thi bạn đã nộp kết quả</p>
             </div>
-            <button className="text-sm font-medium text-[#4F7CFF] hover:text-[#6D91FF] transition-colors flex items-center gap-1" onClick={() => router.push('/dashboard/history')}>
+            <button className="text-sm font-medium text-primary hover:underline transition-colors flex items-center gap-1" onClick={() => router.push('/dashboard/history')}>
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -194,15 +186,15 @@ export default function DashboardPage() {
                         tabIndex={0}
                         onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/result/${h.id || h.attempt_id}`); } }}
-                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-lg border border-border bg-card hover:bg-accent hover:border-accent-foreground/20 transition-colors cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-muted-foreground">{dateStr} • {timeStr}</span>
-                          <span className={cn("text-xs font-bold px-2 py-0.5 rounded-md border", scoreColor)}>
+                          <span className="text-xs text-muted-foreground">{dateStr} • {timeStr}</span>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded border border-border">
                             {h.score} pts
                           </span>
                         </div>
-                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1 group-hover/card:text-primary transition-colors" title={h.quiz?.title}>
+                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1" title={h.quiz?.title}>
                           {h.quiz?.title || "Đề thi đã bị xóa"}
                         </h4>
                         <p className="text-xs text-muted-foreground">
@@ -218,40 +210,36 @@ export default function DashboardPage() {
         </div>
 
         {/* Recommended Quizzes */}
-        <div className="col-span-1 bg-card rounded-[20px] border border-border p-6 flex flex-col shadow-xs">
+        <div className="col-span-1 bg-card rounded-xl border border-border p-6 flex flex-col shadow-sm">
           <div className="mb-6">
             <h3 className="text-xl font-bold text-foreground">Gợi ý cho bạn</h3>
-            <p className="text-xs text-muted-foreground">Các đề thi nổi bật nên thử sức</p>
           </div>
           <div className="flex-1 flex flex-col gap-3">
             {quizzes.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10 text-center">
-                <BookOpen className="w-8 h-8 mb-2 opacity-30 text-primary" />
-                <p className="text-sm font-medium">Chưa có đề thi gợi ý</p>
+                <BookOpen className="w-8 h-8 mb-2 opacity-30" />
+                <p className="text-sm">Chưa có đề thi gợi ý</p>
               </div>
             ) : quizzes.map((q) => (
               <div 
                 key={q.id} 
                 role="button"
                 tabIndex={0}
-                className="group flex flex-col p-4 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+                className="group flex flex-col p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => setSelectedQuiz(q)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-                    {q.title.charAt(0)}
-                  </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-[15px] font-semibold text-foreground truncate group-hover:text-primary transition-colors" title={q.title}>
+                    <h4 className="text-sm font-medium text-foreground truncate" title={q.title}>
                       {q.title}
                     </h4>
-                    <p className="text-[13px] text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {q.category?.name || 'Tự do'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5">
                     <Target className="w-3.5 h-3.5" /> {q.total_questions} câu
                   </div>

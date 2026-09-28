@@ -48,7 +48,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 z-10">
+    <div className="w-full max-w-[420px] space-y-8 z-10">
       <div className="text-center md:text-left">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
         <p className="text-sm text-muted-foreground mt-2 font-normal">
@@ -58,7 +58,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5 mt-8">
         {error && (
-          <div className="p-3 text-sm text-red-400 bg-red-500/10 rounded-xl border border-red-500/20">
+          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
             {error}
           </div>
         )}
@@ -72,7 +72,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
+              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground rounded-md"
             />
           </div>
           <div className="space-y-2">
@@ -83,26 +83,26 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl transition-all"
+              className="h-12 bg-card border-border text-foreground placeholder:text-muted-foreground rounded-md"
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <input type="checkbox" id="remember" className="h-4 w-4 rounded bg-card border-border text-blue-600 focus:ring-blue-500 focus:ring-offset-[#020617]" />
+            <input type="checkbox" id="remember" className="h-4 w-4 rounded-sm bg-card border-border text-primary focus:ring-primary focus:ring-offset-background" />
             <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
               Remember me
             </label>
           </div>
           <div className="text-sm">
-            <a href="#" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+            <a href="#" className="font-medium text-primary hover:underline">
               Forgot password?
             </a>
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-semibold bg-[#4F7CFF] hover:bg-[#6D91FF] text-foreground rounded-xl shadow-[0_4px_12px_rgba(79,124,255,0.2)] transition-all" disabled={loading}>
+        <Button type="submit" className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-md" disabled={loading}>
           {loading ? "Signing in..." : "Sign in"}
         </Button>
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full h-12 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-slate-900 border-transparent rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full h-12 flex items-center justify-center gap-2 rounded-md"
           onClick={loginWithGoogle}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@ export default function LoginPage() {
 
       <p className="text-center text-sm text-muted-foreground mt-8">
         Don't have an account?{" "}
-        <Link href="/register" className="font-semibold text-blue-500 hover:text-blue-400 transition-colors">
+        <Link href="/register" className="font-medium text-primary hover:underline">
           Sign up
         </Link>
       </p>

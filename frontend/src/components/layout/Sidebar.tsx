@@ -62,7 +62,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {/* Brand & Slogan */}
       <div className="pt-8 pb-6 px-6">
         <div className="flex items-center gap-3 text-foreground font-bold text-2xl tracking-tight mb-1">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F7CFF] to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white">
+          <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
             <span className="text-sm">EQ</span>
           </div>
           EduQuiz
@@ -98,19 +98,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               href={link.href}
               onClick={() => onClose?.()}
               className={cn(
-                "group relative flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium transition-all duration-250 ease-in-out",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                 reallyActive 
-                  ? "bg-muted text-foreground" 
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               {reallyActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#4F7CFF] rounded-r-full shadow-[0_0_8px_#4F7CFF]"></div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-sm"></div>
               )}
               
               <Icon className={cn(
-                "w-5 h-5 transition-transform duration-250 ease-in-out group-hover:translate-x-[2px]", 
-                reallyActive ? "text-[#4F7CFF]" : "text-muted-foreground group-hover:text-foreground"
+                "w-5 h-5", 
+                reallyActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
               )} />
               {link.name}
             </Link>
@@ -120,8 +120,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       {/* Bottom User Card */}
       <div className="p-4 mt-auto border-t border-border">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors duration-250 group">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F7CFF] to-blue-600 flex items-center justify-center shrink-0 text-white shadow-sm shadow-blue-500/20">
+        <div className="flex items-center gap-3 p-3 rounded-md bg-card border border-border hover:bg-accent transition-colors group">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-primary-foreground">
             <User className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">

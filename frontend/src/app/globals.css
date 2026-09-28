@@ -41,46 +41,46 @@
 }
 
 :root {
-  /* LIGHT MODE - Modern, Friendly Educational */
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* LIGHT MODE - Clean & Neutral */
+  --background: #ffffff;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #4F7CFF;
+  --card-foreground: #111827;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --accent: #e2e8f0;
-  --accent-foreground: #0f172a;
-  --destructive: #EF4444;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1f2937;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #cbd5e1;
-  --ring: #4F7CFF;
-  --radius: 16px;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #2563eb;
+  --radius: 8px; /* CRISP radius, not slop */
 }
 
 .dark {
-  /* DARK MODE - Sleek, Focus-oriented */
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --primary: #4F7CFF;
+  /* DARK MODE - Pure neutral (no purple/blue tint slop) */
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #071026;
-  --secondary-foreground: #f8fafc;
-  --muted: #18233b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
-  --destructive: #EF4444;
+  --secondary: #171717;
+  --secondary-foreground: #fafafa;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --accent: #171717;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #4F7CFF;
+  --border: #262626;
+  --input: #262626;
+  --ring: #3b82f6;
 }
 
 @layer base {
