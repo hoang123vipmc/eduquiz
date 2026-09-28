@@ -16,7 +16,27 @@ class QuizImportController extends Controller
     public function extractDocx(Request $request)
     {
         $request->validate([
-            'file' => 'required|file',
+            'file' => [
+                'required',
+                'file',
+                'max:10240', // max 10MB
+                function ($attribute, $value, $fail) {
+                    // ── Security: Strict MIME type check, not trusting client Content-Type ──
+                    $realMime = mime_content_type($value->getRealPath());
+                    $allowed  = [
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/zip', // .docx is a zip
+                        'application/octet-stream',
+                    ];
+                    if (!in_array($realMime, $allowed)) {
+                        $fail('File phải là định dạng Word (.docx).');
+                    }
+                    // Also check extension
+                    if (strtolower($value->getClientOriginalExtension()) !== 'docx') {
+                        $fail('Chỉ chấp nhận file .docx.');
+                    }
+                },
+            ],
         ]);
 
         $file = $request->file('file');
@@ -52,8 +72,8 @@ class QuizImportController extends Controller
     public function importText(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'text' => 'required|string',
+            'title'       => 'required|string|max:255',
+            'text'        => 'required|string|max:200000', // max ~200KB text
             'category_id' => 'nullable|integer|exists:categories,id'
         ]);
 
@@ -203,8 +223,8 @@ class QuizImportController extends Controller
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
             }
-            Log::error("QuizImportController Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return response()->json(['success' => false, 'message' => 'Internal Server Error: ' . $e->getMessage()], 500);
+            Log::error('QuizImportController Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => 'Lỗi máy chủ. Vui lòng thử lại.'], 500);
         }
     }
 }

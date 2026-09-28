@@ -5,9 +5,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 Route::prefix('v1')->group(function () {
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
-
+    // ── Rate limit: 10 attempts per minute per IP on auth ──────────────────
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('/auth/register', [AuthController::class, 'register']);
+        Route::post('/auth/login',    [AuthController::class, 'login']);
+    });
 
     // OAuth
     Route::get('/auth/redirect/{provider}', [\App\Http\Controllers\SocialiteController::class, 'redirect']);

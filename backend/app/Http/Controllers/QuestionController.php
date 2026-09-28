@@ -14,19 +14,39 @@ class QuestionController extends Controller
     public function index(Request $request, $quizId)
     {
         $quiz = Quiz::findOrFail($quizId);
+
+        // ── Security: Private quiz questions only visible to owner ─────────────
+        if ($quiz->visibility === 'private') {
+            $authUser = $request->user();
+            if (!$authUser || $authUser->id !== $quiz->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền truy cập đề thi này.',
+                ], 403);
+            }
+        }
+
         $questions = $quiz->questions()->with('options')->orderBy('order')->get();
         $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
         return response()->json([
             'success' => true,
             'message' => 'Lấy danh sách câu hỏi thành công.',
-            'data' => QuestionResource::collection($questions)
+            'data'    => QuestionResource::collection($questions)
         ]);
     }
 
     public function store(StoreQuestionRequest $request, $quizId)
     {
         $quiz = Quiz::findOrFail($quizId);
+
+        // ── Security: Only quiz owner may add questions ─────────────────────
+        if ($quiz->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền thêm câu hỏi vào đề thi này.',
+            ], 403);
+        }
 
         DB::beginTransaction();
         try {
@@ -48,14 +68,13 @@ class QuestionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo câu hỏi thành công.',
-                'data' => new QuestionResource($question->load('options'))
+                'data'    => new QuestionResource($question->load('options'))
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi khi tạo câu hỏi.',
-                'error' => $e->getMessage()
             ], 500);
         }
     }

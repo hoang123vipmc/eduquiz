@@ -115,7 +115,7 @@ class AttemptController extends Controller
     {
         $request->validate([
             'question_id' => 'required|exists:questions,id',
-            'option_id' => 'required|exists:options,id'
+            'option_id'   => 'required|exists:options,id'
         ]);
 
         $attempt = QuizAttempt::where('user_id', $request->user()->id)->findOrFail($id);
@@ -124,9 +124,18 @@ class AttemptController extends Controller
             return response()->json(['success' => false, 'message' => 'Bài thi đã kết thúc.'], 400);
         }
 
+        // ── Security: Validate question belongs to THIS attempt's quiz ──────
+        $question = \App\Models\Question::where('id', $request->question_id)
+            ->where('quiz_id', $attempt->quiz_id)
+            ->firstOrFail();
+
+        // ── Security: Validate option belongs to THIS question ─────────────
+        $option = \App\Models\Option::where('id', $request->option_id)
+            ->where('question_id', $question->id)
+            ->firstOrFail();
+
         if ($attempt->remaining_time !== null) {
-            // Cập nhật remaining time
-            $elapsed = now()->diffInSeconds($attempt->started_at);
+            $elapsed   = now()->diffInSeconds($attempt->started_at);
             $remaining = max(0, ($attempt->quiz->duration_minutes * 60) - $elapsed);
 
             if ($remaining <= 0) {
@@ -136,13 +145,11 @@ class AttemptController extends Controller
             $attempt->update(['remaining_time' => $remaining]);
         }
 
-        $option = \App\Models\Option::findOrFail($request->option_id);
-
         UserAnswer::updateOrCreate(
-            ['attempt_id' => $attempt->id, 'question_id' => $request->question_id],
+            ['attempt_id' => $attempt->id, 'question_id' => $question->id],
             [
-                'option_id' => $option->id,
-                'is_correct' => $option->is_correct,
+                'option_id'   => $option->id,
+                'is_correct'  => $option->is_correct,
                 'answered_at' => now()
             ]
         );
@@ -210,7 +217,8 @@ class AttemptController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Lỗi nộp bài: ' . $e->getMessage() . ' at line ' . $e->getLine()], 500);
+            \Illuminate\Support\Facades\Log::error('submit error', ['exception' => $e]);
+            return response()->json(['success' => false, 'message' => 'Lỗi nộp bài. Vui lòng thử lại.'], 500);
         }
     }
 

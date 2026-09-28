@@ -26,17 +26,35 @@ class SocialiteController extends Controller
             $user = User::where('email', $socialUser->getEmail())->first();
 
             if (!$user) {
+                $adminEmail = env('ADMIN_EMAIL');
+                $role = ($adminEmail && strtolower($socialUser->getEmail()) === strtolower($adminEmail))
+                    ? 'admin' : 'student';
+
                 $user = User::create([
-                    'name' => $socialUser->getName() ?? $socialUser->getNickname(),
-                    'email' => $socialUser->getEmail(),
+                    'name'     => $socialUser->getName() ?? $socialUser->getNickname(),
+                    'email'    => $socialUser->getEmail(),
                     'password' => Hash::make(Str::random(24)),
-                    'avatar' => $socialUser->getAvatar(),
+                    'avatar'   => $socialUser->getAvatar(),
+                    'role'     => $role,
                 ]);
+            }
+
+            // ── Security: Reject banned users ──────────────────────────────────
+            if ($user->is_banned) {
+                $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+                return redirect()->to($frontendUrl . '/login?error=banned');
+            }
+
+            // ── Sync ADMIN_EMAIL on login ────────────────────────────────────
+            $adminEmail = env('ADMIN_EMAIL');
+            if ($adminEmail && strtolower($user->email) === strtolower($adminEmail) && $user->role !== 'admin') {
+                $user->role = 'admin';
+                $user->save();
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // Chuyển hướng về frontend kèm token (ví dụ: http://localhost:3000/auth/callback?token=xxx)
+            // Chuyển hướng về frontend kèm token
             $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
             return redirect()->to($frontendUrl . '/auth/callback?token=' . $token);
             
