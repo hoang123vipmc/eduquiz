@@ -15,6 +15,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   const [step, setStep] = useState<1 | 2>(1);
   const [title, setTitle] = useState('');
   const [coverImage, setCoverImage] = useState('/images/cover-exam.jpg');
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,40 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   }, [rawText, step]);
 
   if (!isOpen) return null;
+
+  const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedImage = e.target.files[0];
+      if (!selectedImage.type.startsWith('image/')) {
+        setError('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP).');
+        return;
+      }
+
+      // Đọc hiển thị xem trước tức thì
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCoverImage(reader.result as string);
+      };
+      reader.readAsDataURL(selectedImage);
+
+      // Tải lên server
+      setIsUploadingCover(true);
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+      try {
+        const { data } = await api.post('/upload/image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (data.success && data.url) {
+          setCoverImage(data.url);
+        }
+      } catch (err) {
+        console.warn('Upload ảnh bìa lên server thất bại, đang dùng dữ liệu ảnh trực tiếp', err);
+      } finally {
+        setIsUploadingCover(false);
+      }
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -187,39 +222,81 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
             </div>
 
             {/* Chọn ảnh bìa đề thi */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground flex items-center justify-between">
-                <span>Chọn ảnh bìa đề thi</span>
-                <span className="text-xs text-primary font-medium">Chuyên đề 3D</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { label: "Học phần & Thi cử", url: "/images/cover-exam.jpg" },
-                  { label: "Lập trình & CNTT", url: "/images/cover-code.jpg" },
-                  { label: "Mạng & Hệ thống", url: "/images/cover-network.jpg" },
-                ].map((preset) => (
-                  <button
-                    key={preset.url}
-                    type="button"
-                    onClick={() => setCoverImage(preset.url)}
-                    className={cn(
-                      "relative rounded-xl overflow-hidden border-2 aspect-video transition-all text-left group",
-                      coverImage === preset.url 
-                        ? "border-primary ring-2 ring-primary/25 scale-[1.02] shadow-sm" 
-                        : "border-border hover:border-primary/50 opacity-80 hover:opacity-100"
-                    )}
-                  >
-                    <img src={preset.url} alt={preset.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex items-end p-2 pointer-events-none">
-                      <span className="text-[11px] font-bold text-white line-clamp-1">{preset.label}</span>
+            <div className="space-y-3 p-3.5 rounded-2xl border border-border/80 bg-secondary/30">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-foreground">Ảnh bìa đề thi</label>
+                <span className="text-xs text-muted-foreground">Tải ảnh riêng hoặc dùng mẫu</span>
+              </div>
+
+              {/* Upload from Computer & URL */}
+              <div className="flex items-center gap-3">
+                <div className="w-24 h-16 rounded-xl overflow-hidden border border-border shrink-0 relative bg-muted">
+                  <img src={coverImage} alt="Cover Preview" className="w-full h-full object-cover" />
+                  {isUploadingCover && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white">
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     </div>
-                    {coverImage === preset.url && (
-                      <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-xs">
-                        ✓
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div>
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold cursor-pointer shadow-xs transition-all active:scale-95">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Tải ảnh từ máy tính</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleCoverFileChange} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
+
+                  <input 
+                    type="url" 
+                    value={coverImage.startsWith('data:') ? '' : coverImage} 
+                    onChange={(e) => setCoverImage(e.target.value)}
+                    placeholder="Hoặc dán URL ảnh từ internet..."
+                    className="w-full bg-background border border-border focus:border-primary text-foreground text-xs rounded-lg px-2.5 py-1.5 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Default Presets */}
+              <div className="pt-1">
+                <p className="text-[11px] font-medium text-muted-foreground mb-1.5">
+                  Hoặc chọn ảnh chủ đề có sẵn (Lựa chọn mặc định):
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "Học phần & Thi cử", url: "/images/cover-exam.jpg" },
+                    { label: "Lập trình & CNTT", url: "/images/cover-code.jpg" },
+                    { label: "Mạng & Hệ thống", url: "/images/cover-network.jpg" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.url}
+                      type="button"
+                      onClick={() => setCoverImage(preset.url)}
+                      className={cn(
+                        "relative rounded-lg overflow-hidden border-2 aspect-video transition-all text-left group",
+                        coverImage === preset.url 
+                          ? "border-primary ring-2 ring-primary/25 scale-[1.02] shadow-xs" 
+                          : "border-border hover:border-primary/50 opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      <img src={preset.url} alt={preset.label} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex items-end p-1.5 pointer-events-none">
+                        <span className="text-[10px] font-bold text-white line-clamp-1">{preset.label}</span>
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {coverImage === preset.url && (
+                        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-xs">
+                          ✓
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

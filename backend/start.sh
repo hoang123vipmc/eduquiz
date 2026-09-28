@@ -1,5 +1,6 @@
 #!/bin/bash
 php artisan migrate --force
+php artisan storage:link || true
 php artisan admin:sync-env
 php artisan config:cache
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle, Upload, Image as ImageIcon } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useTheme } from "next-themes";
 import api from "@/lib/axios";
@@ -17,7 +17,42 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name || "");
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith('image/')) {
+        setProfileMessage({ type: 'error', text: 'Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP).' });
+        return;
+      }
+      
+      // Đọc file thành data URL hiển thị xem trước tức thì
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Tải ảnh lên server
+      setIsUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      try {
+        const { data } = await api.post('/upload/image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (data.success && data.url) {
+          setAvatar(data.url);
+        }
+      } catch (err) {
+        console.warn('Upload ảnh lên server thất bại, đang dùng dữ liệu ảnh trực tiếp', err);
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    }
+  };
 
   // Security Form
   const [currentPassword, setCurrentPassword] = useState("");
@@ -135,53 +170,82 @@ export default function SettingsPage() {
               
               <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-lg">
                 {/* Avatar Section */}
-                <div className="pb-5 border-b border-border/60">
-                  <label className="block text-sm font-semibold text-foreground mb-3">Ảnh đại diện (Avatar)</label>
-                  <div className="flex items-center gap-4 mb-3.5">
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary shadow-sm bg-muted shrink-0 relative">
+                <div className="pb-6 border-b border-border/60 space-y-4">
+                  <label className="block text-sm font-semibold text-foreground">Ảnh đại diện (Avatar)</label>
+                  
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    {/* Current Preview */}
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary shadow-sm bg-muted shrink-0 relative">
                       <img 
                         src={avatar || "/images/avatar-student.jpg"} 
                         alt="Avatar Preview" 
                         className="w-full h-full object-cover" 
                       />
+                      {isUploadingAvatar && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white">
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Chọn nhanh một trong các mẫu avatar 3D hoặc nhập URL ảnh tùy chỉnh:
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {[
-                          { name: "3D Học viên", url: "/images/avatar-student.jpg" },
-                          { name: "Học viên Nữ", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Aria" },
-                          { name: "Coder", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Felix" },
-                          { name: "Học giả", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Oliver" },
-                          { name: "Sáng tạo", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Maya" },
-                        ].map((preset) => (
-                          <button
-                            key={preset.name}
-                            type="button"
-                            onClick={() => setAvatar(preset.url)}
-                            className={cn(
-                              "w-10 h-10 rounded-full overflow-hidden border-2 transition-all p-0.5 hover:scale-110",
-                              (avatar === preset.url || (!avatar && preset.url === "/images/avatar-student.jpg"))
-                                ? "border-primary ring-2 ring-primary/20 scale-105"
-                                : "border-border hover:border-primary/50 opacity-80 hover:opacity-100"
-                            )}
-                            title={preset.name}
-                          >
-                            <img src={preset.url} alt={preset.name} className="w-full h-full object-cover rounded-full" />
-                          </button>
-                        ))}
+
+                    {/* Primary Actions: Upload File & URL */}
+                    <div className="flex-1 space-y-3 w-full">
+                      <div>
+                        <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold cursor-pointer shadow-xs transition-all active:scale-95">
+                          <Upload className="w-4 h-4" />
+                          <span>Tải ảnh từ máy tính</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleAvatarFileChange} 
+                            className="hidden" 
+                          />
+                        </label>
+                        <span className="text-xs text-muted-foreground ml-3 block sm:inline mt-1 sm:mt-0">Hỗ trợ JPG, PNG, WEBP (tối đa 5MB)</span>
+                      </div>
+
+                      <div>
+                        <input 
+                          type="url" 
+                          value={avatar} 
+                          onChange={(e) => setAvatar(e.target.value)}
+                          placeholder="Hoặc dán URL ảnh từ internet (https://...)"
+                          className="w-full bg-background border border-border focus:border-primary text-foreground text-xs rounded-xl px-3.5 py-2.5 outline-none transition-colors"
+                        />
                       </div>
                     </div>
                   </div>
-                  <input 
-                    type="url" 
-                    value={avatar} 
-                    onChange={(e) => setAvatar(e.target.value)}
-                    placeholder="Hoặc dán URL ảnh trực tuyến (https://...)"
-                    className="w-full bg-background border border-border focus:border-primary text-foreground text-xs rounded-xl px-3.5 py-2.5 outline-none transition-colors"
-                  />
+
+                  {/* Preset Defaults */}
+                  <div className="pt-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                      Hoặc chọn ảnh mẫu có sẵn (Lựa chọn mặc định):
+                    </p>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      {[
+                        { name: "3D Học viên", url: "/images/avatar-student.jpg" },
+                        { name: "Học viên Nữ", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Aria" },
+                        { name: "Coder", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Felix" },
+                        { name: "Học giả", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Oliver" },
+                        { name: "Sáng tạo", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Maya" },
+                      ].map((preset) => (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => setAvatar(preset.url)}
+                          className={cn(
+                            "w-11 h-11 rounded-full overflow-hidden border-2 transition-all p-0.5 hover:scale-110",
+                            (avatar === preset.url || (!avatar && preset.url === "/images/avatar-student.jpg"))
+                              ? "border-primary ring-2 ring-primary/20 scale-105"
+                              : "border-border hover:border-primary/50 opacity-70 hover:opacity-100"
+                          )}
+                          title={preset.name}
+                        >
+                          <img src={preset.url} alt={preset.name} className="w-full h-full object-cover rounded-full" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div>

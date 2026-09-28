@@ -95,7 +95,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'avatar' => 'nullable|string|max:2048',
+            'avatar' => 'nullable|string',
         ]);
 
         $user = $request->user();

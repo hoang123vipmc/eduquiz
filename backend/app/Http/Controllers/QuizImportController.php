@@ -75,7 +75,7 @@ class QuizImportController extends Controller
             'title'       => 'required|string|max:255',
             'text'        => 'required|string|max:200000', // max ~200KB text
             'category_id' => 'nullable|integer|exists:categories,id',
-            'cover_image' => 'nullable|string|max:2048',
+            'cover_image' => 'nullable|string',
             'description' => 'nullable|string|max:1000',
         ]);
 

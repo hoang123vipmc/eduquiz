@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/user/history', [\App\Http\Controllers\UserController::class, 'history']);
         Route::put('/user/profile', [\App\Http\Controllers\UserController::class, 'updateProfile']);
         Route::put('/user/password', [\App\Http\Controllers\UserController::class, 'changePassword']);
+        Route::post('/upload/image', [\App\Http\Controllers\UploadController::class, 'uploadImage']);
         
         Route::get('/bank/questions', [\App\Http\Controllers\QuestionController::class, 'bank']);
         Route::get('/leaderboard', [\App\Http\Controllers\LeaderboardController::class, 'index']);
