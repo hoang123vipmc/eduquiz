@@ -24,10 +24,14 @@ class AuthController extends Controller
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ]);
 
+        $adminEmail = env('ADMIN_EMAIL');
+        $role = ($adminEmail && strtolower($request->email) === strtolower($adminEmail)) ? 'admin' : 'student';
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password, // Laravel 11 tự động hash vì có cast 'hashed' trong User model
+            'role' => $role,
         ]);
 
         return response()->json([
@@ -65,6 +69,12 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Tự động đồng bộ quyền Admin nếu email trùng khớp với cấu hình ADMIN_EMAIL trên server
+        $adminEmail = env('ADMIN_EMAIL');
+        if ($adminEmail && strtolower($user->email) === strtolower($adminEmail) && $user->role !== 'admin') {
+            $user->role = 'admin';
+        }
+
         $user->last_login_at = now();
         $user->save();
 
@@ -88,43 +98,6 @@ class AuthController extends Controller
             'data' => null
         ]);
     }
-
-    public function bootstrapAdmin(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'key' => 'required|string',
-        ]);
-
-        $validKey = env('ADMIN_BOOTSTRAP_KEY', 'eduquiz-admin-2026');
-
-        if ($request->key !== $validKey) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mã bí mật thiết lập quản trị (secret key) không chính xác.',
-            ], 403);
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => "Không tìm thấy tài khoản với email '{$request->email}'. Vui lòng đăng ký tài khoản trước.",
-            ], 404);
-        }
-
-        $user->role = 'admin';
-        $user->is_banned = false;
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => "Cấp quyền Quản trị viên (Admin) cho '{$user->name}' ({$user->email}) thành công!",
-            'data' => [
-                'user' => $user
-            ]
-        ]);
-    }
 }
+
 

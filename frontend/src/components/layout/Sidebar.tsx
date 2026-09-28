@@ -33,9 +33,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
     { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },
     { name: "Lịch sử", href: "/dashboard/history", icon: History },
-    { name: "Quản trị hệ thống", href: "/dashboard/admin", icon: Users },
     { name: "Cài đặt", href: "/dashboard/settings", icon: Settings },
   ];
+
 
 
   const adminLinks = [
