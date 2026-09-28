@@ -15,10 +15,10 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quizId);
 
-        // ── Security: Private quiz questions only visible to owner ─────────────
+        // ── Security: Private quiz questions only visible to owner or admin ─────────────
         if ($quiz->visibility === 'private') {
             $authUser = $request->user();
-            if (!$authUser || $authUser->id !== $quiz->user_id) {
+            if (!$authUser || ($authUser->id !== $quiz->user_id && $authUser->role !== 'admin')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không có quyền truy cập đề thi này.',
@@ -40,8 +40,8 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quizId);
 
-        // ── Security: Only quiz owner may add questions ─────────────────────
-        if ($quiz->user_id !== $request->user()->id) {
+        // ── Security: Only quiz owner or admin may add questions ─────────────────────
+        if ($quiz->user_id !== $request->user()->id && $request->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền thêm câu hỏi vào đề thi này.',

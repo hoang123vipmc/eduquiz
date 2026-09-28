@@ -65,7 +65,7 @@ class QuizController extends Controller
         $quiz = Quiz::findOrFail($id);
         
         // Kiểm tra quyền (chỉ người tạo hoặc admin mới được xoá)
-        if ($quiz->user_id !== $request->user()->id) {
+        if ($quiz->user_id !== $request->user()->id && $request->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không có quyền xoá đề thi này.'
