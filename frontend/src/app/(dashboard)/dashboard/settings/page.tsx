@@ -15,6 +15,7 @@ export default function SettingsPage() {
   
   // Account Form
   const [name, setName] = useState(user?.name || "");
+  const [avatar, setAvatar] = useState(user?.avatar || "");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
@@ -30,10 +31,10 @@ export default function SettingsPage() {
     setIsUpdatingProfile(true);
     setProfileMessage({ type: "", text: "" });
     try {
-      const { data } = await api.put("/user/profile", { name });
+      const { data } = await api.put("/user/profile", { name, avatar });
       if (data.success) {
-        updateUser({ name });
-        setProfileMessage({ type: "success", text: "Cập nhật thông tin thành công." });
+        updateUser({ name, avatar });
+        setProfileMessage({ type: "success", text: "Cập nhật thông tin và ảnh đại diện thành công." });
       }
     } catch (error: any) {
       setProfileMessage({ type: "error", text: error.response?.data?.message || "Lỗi cập nhật thông tin." });
@@ -132,7 +133,57 @@ export default function SettingsPage() {
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <h3 className="text-xl font-bold text-foreground mb-6 pb-4 border-b border-border">Thông tin cá nhân</h3>
               
-              <form onSubmit={handleUpdateProfile} className="space-y-5 max-w-md">
+              <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-lg">
+                {/* Avatar Section */}
+                <div className="pb-5 border-b border-border/60">
+                  <label className="block text-sm font-semibold text-foreground mb-3">Ảnh đại diện (Avatar)</label>
+                  <div className="flex items-center gap-4 mb-3.5">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary shadow-sm bg-muted shrink-0 relative">
+                      <img 
+                        src={avatar || "/images/avatar-student.jpg"} 
+                        alt="Avatar Preview" 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Chọn nhanh một trong các mẫu avatar 3D hoặc nhập URL ảnh tùy chỉnh:
+                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {[
+                          { name: "3D Học viên", url: "/images/avatar-student.jpg" },
+                          { name: "Học viên Nữ", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Aria" },
+                          { name: "Coder", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Felix" },
+                          { name: "Học giả", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Oliver" },
+                          { name: "Sáng tạo", url: "https://api.dicebear.com/7.x/notionists/svg?seed=Maya" },
+                        ].map((preset) => (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => setAvatar(preset.url)}
+                            className={cn(
+                              "w-10 h-10 rounded-full overflow-hidden border-2 transition-all p-0.5 hover:scale-110",
+                              (avatar === preset.url || (!avatar && preset.url === "/images/avatar-student.jpg"))
+                                ? "border-primary ring-2 ring-primary/20 scale-105"
+                                : "border-border hover:border-primary/50 opacity-80 hover:opacity-100"
+                            )}
+                            title={preset.name}
+                          >
+                            <img src={preset.url} alt={preset.name} className="w-full h-full object-cover rounded-full" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <input 
+                    type="url" 
+                    value={avatar} 
+                    onChange={(e) => setAvatar(e.target.value)}
+                    placeholder="Hoặc dán URL ảnh trực tuyến (https://...)"
+                    className="w-full bg-background border border-border focus:border-primary text-foreground text-xs rounded-xl px-3.5 py-2.5 outline-none transition-colors"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">Địa chỉ Email (Không thể đổi)</label>
                   <input 

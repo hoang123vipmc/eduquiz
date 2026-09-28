@@ -14,6 +14,7 @@ interface ImportQuizModalProps {
 export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [title, setTitle] = useState('');
+  const [coverImage, setCoverImage] = useState('/images/cover-exam.jpg');
   const [file, setFile] = useState<File | null>(null);
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,7 +109,8 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
     try {
       const { data } = await api.post('/quizzes/import-text', {
         title: title,
-        text: rawText
+        text: rawText,
+        cover_image: coverImage
       });
       
       if (data.success) {
@@ -176,12 +178,49 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               <label className="text-sm font-medium text-foreground">Quiz Title</label>
               <input 
                 type="text" 
-                placeholder="Enter quiz name..."
+                placeholder="Ví dụ: Đề thi Mạng máy tính, Lập trình Java..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-muted border border-border focus:border-[#4F7CFF] text-foreground rounded-xl px-4 py-3 outline-none transition-all placeholder:text-muted-foreground"
+                className="w-full bg-muted border border-border focus:border-primary text-foreground rounded-xl px-4 py-3 outline-none transition-all placeholder:text-muted-foreground text-sm"
                 disabled={loading}
               />
+            </div>
+
+            {/* Chọn ảnh bìa đề thi */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center justify-between">
+                <span>Chọn ảnh bìa đề thi</span>
+                <span className="text-xs text-primary font-medium">Chuyên đề 3D</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { label: "Học phần & Thi cử", url: "/images/cover-exam.jpg" },
+                  { label: "Lập trình & CNTT", url: "/images/cover-code.jpg" },
+                  { label: "Mạng & Hệ thống", url: "/images/cover-network.jpg" },
+                ].map((preset) => (
+                  <button
+                    key={preset.url}
+                    type="button"
+                    onClick={() => setCoverImage(preset.url)}
+                    className={cn(
+                      "relative rounded-xl overflow-hidden border-2 aspect-video transition-all text-left group",
+                      coverImage === preset.url 
+                        ? "border-primary ring-2 ring-primary/25 scale-[1.02] shadow-sm" 
+                        : "border-border hover:border-primary/50 opacity-80 hover:opacity-100"
+                    )}
+                  >
+                    <img src={preset.url} alt={preset.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex items-end p-2 pointer-events-none">
+                      <span className="text-[11px] font-bold text-white line-clamp-1">{preset.label}</span>
+                    </div>
+                    {coverImage === preset.url && (
+                      <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-xs">
+                        ✓
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

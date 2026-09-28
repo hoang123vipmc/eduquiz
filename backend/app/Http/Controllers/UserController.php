@@ -95,10 +95,14 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'avatar' => 'nullable|string|max:2048',
         ]);
 
         $user = $request->user();
         $user->name = $request->name;
+        if ($request->has('avatar')) {
+            $user->avatar = $request->avatar;
+        }
         $user->save();
 
         return response()->json([

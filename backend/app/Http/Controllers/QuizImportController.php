@@ -74,7 +74,9 @@ class QuizImportController extends Controller
         $request->validate([
             'title'       => 'required|string|max:255',
             'text'        => 'required|string|max:200000', // max ~200KB text
-            'category_id' => 'nullable|integer|exists:categories,id'
+            'category_id' => 'nullable|integer|exists:categories,id',
+            'cover_image' => 'nullable|string|max:2048',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         $text = $request->text;
@@ -178,7 +180,8 @@ class QuizImportController extends Controller
                 'category_id' => $request->category_id,
                 'title' => $request->title,
                 'slug' => Str::slug($request->title) . '-' . time(),
-                'description' => 'Được tạo từ văn bản nhập nhanh.',
+                'description' => $request->description ?: 'Được tạo từ văn bản nhập nhanh.',
+                'cover_image' => $request->cover_image,
                 'duration_minutes' => 60,
                 'total_questions' => count($questionsData),
                 'passing_score' => 50,
