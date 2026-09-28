@@ -60,15 +60,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const navContent = (
     <div className="flex flex-col h-full text-foreground">
       {/* Brand & Slogan */}
-      <div className="pt-8 pb-6 px-6">
-        <div className="flex items-center gap-3 text-foreground font-bold text-2xl tracking-tight mb-1">
-          <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
-            <span className="text-sm">EQ</span>
+      <div className="pt-7 pb-6 px-6 border-b border-border/40">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-base shadow-sm shadow-primary/25">
+            <span>EQ</span>
           </div>
-          EduQuiz
-        </div>
-        <div className="text-[13px] text-muted-foreground font-medium pl-13">
-          Học tập thông minh.
+          <div>
+            <div className="text-foreground font-bold text-xl tracking-tight leading-tight">
+              EduQuiz
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">
+              Học tập thông minh
+            </div>
+          </div>
         </div>
       </div>
 
@@ -98,18 +102,18 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               href={link.href}
               onClick={() => onClose?.()}
               className={cn(
-                "group relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                 reallyActive 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-primary/10 text-primary font-semibold" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               {reallyActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-sm"></div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-md"></div>
               )}
               
               <Icon className={cn(
-                "w-5 h-5", 
+                "w-5 h-5 transition-colors", 
                 reallyActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
               )} />
               {link.name}
@@ -119,23 +123,23 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       </div>
 
       {/* Bottom User Card */}
-      <div className="p-4 mt-auto border-t border-border">
-        <div className="flex items-center gap-3 p-3 rounded-md bg-card border border-border hover:bg-accent transition-colors group">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-primary-foreground">
-            <User className="w-5 h-5" />
+      <div className="p-4 mt-auto border-t border-border/50">
+        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card border border-border/70 hover:border-border hover:bg-muted/40 transition-all group">
+          <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary font-bold text-sm">
+            {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-foreground truncate">
-              {user?.name || "Student User"}
+              {user?.name || "Học viên"}
             </div>
-            <div className="text-[13px] text-muted-foreground truncate">
-              {user?.role === 'admin' ? 'Administrator' : 'Student Pro'}
+            <div className="text-[11px] text-muted-foreground truncate">
+              {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
             </div>
           </div>
           <button 
             onClick={handleLogout}
             aria-label="Đăng xuất tài khoản"
-            className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-80 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-red-400"
+            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors opacity-70 hover:opacity-100"
             title="Đăng xuất"
           >
             <LogOut className="w-4 h-4" />
