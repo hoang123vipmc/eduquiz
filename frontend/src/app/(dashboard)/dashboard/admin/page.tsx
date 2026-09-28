@@ -101,17 +101,37 @@ function ConfirmModal({
   );
 }
 
-// ─────────────────────────────── Main Page ───────────────────────────────
 export default function AdminPage() {
   const router = useRouter();
-  const { user: authUser } = useAuthStore();
+  const { user: authUser, updateUser } = useAuthStore();
 
-  // Guard: only admin
-  useEffect(() => {
-    if (authUser && authUser.role !== "admin") {
-      router.replace("/dashboard");
+  // Bootstrap Admin state (when user is not yet an admin)
+  const [bootstrapKey, setBootstrapKey] = useState("eduquiz-admin-2026");
+  const [bootstrapLoading, setBootstrapLoading] = useState(false);
+  const [bootstrapError, setBootstrapError] = useState("");
+  const [bootstrapSuccess, setBootstrapSuccess] = useState("");
+
+  const handleBootstrap = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authUser?.email) return;
+    setBootstrapLoading(true);
+    setBootstrapError("");
+    setBootstrapSuccess("");
+    try {
+      const res = await api.post("/auth/bootstrap-admin", {
+        email: authUser.email,
+        key: bootstrapKey
+      });
+      if (res.data?.success) {
+        setBootstrapSuccess(res.data.message || "Kích hoạt quyền Quản trị viên thành công!");
+        updateUser({ role: "admin" });
+      }
+    } catch (err: any) {
+      setBootstrapError(err.response?.data?.message || "Không thể kích hoạt quyền Admin. Kiểm tra lại mã bí mật.");
+    } finally {
+      setBootstrapLoading(false);
     }
-  }, [authUser, router]);
+  };
 
   const [overview, setOverview] = useState<Overview | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -149,10 +169,13 @@ export default function AdminPage() {
 
   // ── Fetch overview ──
   useEffect(() => {
-    api.get("/admin/overview").then(({ data }) => {
-      if (data.success) setOverview(data.data);
-    }).catch(() => {});
-  }, []);
+    if (authUser?.role === "admin") {
+      api.get("/admin/overview").then(({ data }) => {
+        if (data.success) setOverview(data.data);
+      }).catch(() => {});
+    }
+  }, [authUser?.role]);
+
 
   // ── Fetch users ──
   const fetchUsers = useCallback(async () => {
@@ -176,7 +199,11 @@ export default function AdminPage() {
     }
   }, [search, roleFilter, statusFilter, page]);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => {
+    if (authUser?.role === "admin") {
+      fetchUsers();
+    }
+  }, [fetchUsers, authUser?.role]);
 
   // ── View user detail ──
   const openDetail = async (u: UserRow) => {
@@ -293,7 +320,112 @@ export default function AdminPage() {
     }
   };
 
-  if (authUser?.role !== "admin") return null;
+  if (authUser && authUser.role !== "admin") {
+    return (
+      <div className="max-w-xl mx-auto py-12 px-4 animate-in fade-in duration-300">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex items-center gap-4 mb-6 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm shrink-0">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Kích hoạt quyền Quản trị viên</h1>
+              <p className="text-sm text-muted-foreground">Cấp quyền Quản trị viên (Admin) cho tài khoản</p>
+            </div>
+          </div>
+
+          <div className="bg-muted/50 border border-border/60 rounded-2xl p-4 mb-6 space-y-2 text-sm relative z-10">
+            <div className="flex justify-between items-center text-muted-foreground">
+              <span>Tài khoản hiện tại:</span>
+              <span className="font-semibold text-foreground">{authUser.email}</span>
+            </div>
+            <div className="flex justify-between items-center text-muted-foreground">
+              <span>Họ tên:</span>
+              <span className="font-medium text-foreground">{authUser.name}</span>
+            </div>
+            <div className="flex justify-between items-center text-muted-foreground">
+              <span>Vai trò hiện tại:</span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20 capitalize">
+                {authUser.role}
+              </span>
+            </div>
+          </div>
+
+          {bootstrapError && (
+            <div className="mb-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm flex items-center gap-2 relative z-10">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{bootstrapError}</span>
+            </div>
+          )}
+
+          {bootstrapSuccess && (
+            <div className="mb-4 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm flex items-center gap-2 relative z-10">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{bootstrapSuccess}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleBootstrap} className="space-y-4 relative z-10">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Mã bí mật thiết lập Quản trị (Admin Secret Key)
+              </label>
+              <input
+                type="text"
+                value={bootstrapKey}
+                onChange={(e) => setBootstrapKey(e.target.value)}
+                placeholder="eduquiz-admin-2026"
+                required
+                className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all font-mono"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                Mã mặc định đã được điền sẵn. Bạn chỉ cần bấm nút bên dưới là tài khoản sẽ được nâng lên Quản trị viên ngay tức thì!
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={bootstrapLoading}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/95 hover:to-indigo-600/95 text-white font-semibold text-sm shadow-md shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+            >
+              {bootstrapLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Đang kích hoạt quyền Admin...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  Kích hoạt quyền Quản trị viên ngay
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-border/50 text-center relative z-10">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard")}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Quay lại Bảng điều khiển
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 space-y-8">

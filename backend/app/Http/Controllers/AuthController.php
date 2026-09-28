@@ -88,4 +88,43 @@ class AuthController extends Controller
             'data' => null
         ]);
     }
+
+    public function bootstrapAdmin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'key' => 'required|string',
+        ]);
+
+        $validKey = env('ADMIN_BOOTSTRAP_KEY', 'eduquiz-admin-2026');
+
+        if ($request->key !== $validKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã bí mật thiết lập quản trị (secret key) không chính xác.',
+            ], 403);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => "Không tìm thấy tài khoản với email '{$request->email}'. Vui lòng đăng ký tài khoản trước.",
+            ], 404);
+        }
+
+        $user->role = 'admin';
+        $user->is_banned = false;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Cấp quyền Quản trị viên (Admin) cho '{$user->name}' ({$user->email}) thành công!",
+            'data' => [
+                'user' => $user
+            ]
+        ]);
+    }
 }
+
