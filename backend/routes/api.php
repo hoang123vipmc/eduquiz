@@ -49,6 +49,17 @@ Route::prefix('v1')->group(function () {
         Route::post('/attempts/{id}/retry-wrong', [\App\Http\Controllers\AttemptController::class, 'retryWrong']);
         Route::post('/attempts/{id}/clear-wrong', [\App\Http\Controllers\AttemptController::class, 'clearWrong']);
         Route::get('/results/{id}', [\App\Http\Controllers\AttemptController::class, 'result']);
+
+        // ── Admin routes ──────────────────────────────────────────────
+        Route::prefix('admin')->middleware('role:admin')->group(function () {
+            Route::get('/overview',                       [\App\Http\Controllers\AdminController::class, 'overview']);
+            Route::get('/users',                          [\App\Http\Controllers\AdminController::class, 'users']);
+            Route::get('/users/{id}',                     [\App\Http\Controllers\AdminController::class, 'userDetail']);
+            Route::patch('/users/{id}/toggle-ban',        [\App\Http\Controllers\AdminController::class, 'toggleBan']);
+            Route::patch('/users/{id}/role',              [\App\Http\Controllers\AdminController::class, 'changeRole']);
+            Route::post('/users/{id}/reset-password',     [\App\Http\Controllers\AdminController::class, 'resetPassword']);
+            Route::delete('/users/{id}',                  [\App\Http\Controllers\AdminController::class, 'deleteUser']);
+        });
     });
     
     // API Public (Không cần đăng nhập)

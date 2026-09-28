@@ -37,10 +37,15 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   ];
 
   const adminLinks = [
-    { name: "Tổng quan", href: "/admin", icon: LayoutDashboard },
-    { name: "Quản lý Đề thi", href: "/admin/quizzes", icon: FileQuestion },
-    { name: "Quản lý Người dùng", href: "/admin/users", icon: Users },
-    { name: "Cài đặt Hệ thống", href: "/admin/settings", icon: Settings },
+    { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Đề thi của tôi", href: "/dashboard/quizzes", icon: Library },
+    { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
+    { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
+    { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },
+    { name: "Lịch sử", href: "/dashboard/history", icon: History },
+    { name: "───────────", href: "#", icon: Settings, isDivider: true },
+    { name: "Quản lý người dùng", href: "/dashboard/admin", icon: Users },
+    { name: "Cài đặt", href: "/dashboard/settings", icon: Settings },
   ];
 
   const links = user?.role === "admin" ? adminLinks : studentLinks;
@@ -69,6 +74,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <div className="flex-1 py-4 overflow-y-auto px-3 space-y-1 scrollbar-hide">
         {links.map((link) => {
           const Icon = link.icon;
+          
+          // Render visual divider for admin section
+          if ((link as any).isDivider) {
+            return (
+              <div key={link.name} className="my-2 px-3">
+                <div className="h-px bg-border" />
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mt-3 mb-1 px-0.5">
+                  Quản trị
+                </p>
+              </div>
+            );
+          }
+
           const isActive = pathname === link.href || (pathname.startsWith(link.href + "/") && link.href !== '/dashboard');
           const reallyActive = link.href === '/dashboard' ? pathname === '/dashboard' : isActive;
 

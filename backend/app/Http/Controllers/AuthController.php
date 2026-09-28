@@ -58,6 +58,16 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->is_banned) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+            ], 403);
+        }
+
+        $user->last_login_at = now();
+        $user->save();
+
         return response()->json([
             'success' => true,
             'message' => 'Đăng nhập thành công.',
