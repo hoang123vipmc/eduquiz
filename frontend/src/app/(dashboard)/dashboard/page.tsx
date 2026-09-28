@@ -12,10 +12,26 @@ import {
   Clock, 
   Flame,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  HelpCircle,
+  FileQuestion,
+  TrendingUp,
+  CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
+
+function getQuizThumbnail(title: string, categoryName?: string, coverImage?: string | null) {
+  if (coverImage) return coverImage;
+  const text = (title + " " + (categoryName || "")).toLowerCase();
+  if (text.includes("java") || text.includes("code") || text.includes("mã nguồn") || text.includes("lập trình") || text.includes("python") || text.includes("web")) {
+    return "/images/cover-code.jpg";
+  }
+  if (text.includes("mạng") || text.includes("qtm") || text.includes("đtdm") || text.includes("cloud") || text.includes("hệ thống")) {
+    return "/images/cover-network.jpg";
+  }
+  return "/images/cover-exam.jpg";
+}
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -68,73 +84,105 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       
-      {/* Hero Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 rounded-xl bg-card border border-border shadow-sm">
-        <div className="relative z-10">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">
-            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}
+      {/* Hero Section with 3D Illustration */}
+      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 p-7 sm:p-8 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border shadow-sm">
+        <div className="relative z-10 max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Nền tảng ôn thi trắc nghiệm EduQuiz</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
           </h2>
-          <p className="text-muted-foreground text-[15px]">
-            Tiếp tục hành trình học tập của bạn hôm nay.
+          <p className="text-muted-foreground text-sm sm:text-[15px] leading-relaxed mb-6">
+            Tiếp tục hành trình học tập, rèn luyện kỹ năng và chuẩn bị cho các kỳ thi học phần với ngân hàng đề thi thông minh.
           </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <button 
+              onClick={() => router.push('/dashboard/quizzes')}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md active:scale-95"
+            >
+              <Play className="w-4 h-4 fill-current" /> Bắt đầu luyện thi
+            </button>
+            <button 
+              onClick={() => router.push('/dashboard/bank')}
+              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 rounded-xl font-medium text-sm transition-colors border border-border/60"
+            >
+              <BookOpen className="w-4 h-4" /> Ngân hàng câu hỏi
+            </button>
+          </div>
         </div>
-        <button 
-          onClick={() => router.push('/dashboard/quizzes')}
-          className="relative z-10 shrink-0 flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-md font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Sparkles className="w-4 h-4" /> Bắt đầu học
-        </button>
+
+        {/* 3D Learning Graphic Banner */}
+        <div className="relative w-full md:w-72 lg:w-96 h-48 md:h-52 rounded-2xl overflow-hidden shrink-0 border border-border/80 shadow-md group">
+          <img 
+            src="/images/hero-learning.jpg" 
+            alt="Học tập thông minh EduQuiz" 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
+          <div className="absolute bottom-3 left-3 text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Luyện tập thông minh mỗi ngày
+          </div>
+        </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-6 rounded-xl bg-card border border-border">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-muted-foreground">
+        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Tổng đề thi đã làm</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tổng đề đã làm</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
+            <span className="text-xs text-muted-foreground">bộ đề</span>
           </div>
         </div>
         
-        <div className="p-6 rounded-xl bg-card border border-border">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-muted-foreground">
+        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Target className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Độ chính xác TB</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Độ chính xác TB</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.accuracy}%</div>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+              <TrendingUp className="w-3.5 h-3.5" /> Chuẩn hóa
+            </span>
           </div>
         </div>
 
-        <div className="p-6 rounded-xl bg-card border border-border">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-muted-foreground">
+        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Thời gian rèn luyện</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Thời gian rèn luyện</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
+            <span className="text-xs text-muted-foreground">tổng cộng</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-xl bg-card border border-border">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-muted-foreground">
+        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
               <Flame className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">Chuỗi học tập</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Chuỗi học tập</span>
           </div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-bold text-foreground">{stats.streak_days} ngày</div>
+            <span className="text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
           </div>
         </div>
       </div>
@@ -142,13 +190,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Activity Timeline */}
-        <div className="col-span-1 lg:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-foreground">Hoạt động gần đây</h3>
+        <div className="col-span-1 lg:col-span-2 bg-card rounded-2xl border border-border/80 p-6 flex flex-col shadow-xs">
+          <div className="flex items-center justify-between mb-6 pb-3 border-b border-border/40">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">Hoạt động gần đây</h3>
             </div>
-            <button className="text-sm font-medium text-primary hover:underline transition-colors flex items-center gap-1" onClick={() => router.push('/dashboard/history')}>
-              Xem tất cả <ChevronRight className="w-4 h-4" />
+            <button 
+              className="text-xs font-semibold text-primary hover:underline transition-colors flex items-center gap-1" 
+              onClick={() => router.push('/dashboard/history')}
+            >
+              Xem tất cả <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
           
@@ -166,7 +220,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+              <div className="space-y-4">
                 {history.map((h) => {
                   const scoreColor = getScoreColor(h.score);
                   const dateObj = new Date(h.created_at);
@@ -174,32 +228,36 @@ export default function DashboardPage() {
                   const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
                   
                   return (
-                    <div key={h.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                      {/* Timeline dot */}
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-muted text-muted-foreground group-hover:text-white group-hover:bg-[#4F7CFF] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xs transition-colors z-10">
-                        <CheckCircleIcon />
-                      </div>
-                      
-                      {/* Content Card */}
-                      <div 
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/result/${h.id || h.attempt_id}`); } }}
-                        className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-lg border border-border bg-card hover:bg-accent hover:border-accent-foreground/20 transition-colors cursor-pointer group/card focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-muted-foreground">{dateStr} • {timeStr}</span>
-                          <span className="text-xs font-medium px-2 py-0.5 rounded border border-border">
-                            {h.score} pts
-                          </span>
+                    <div 
+                      key={h.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push(`/result/${h.id || h.attempt_id}`); } }}
+                      className="group flex items-center justify-between p-3.5 rounded-xl border border-border/70 bg-card hover:border-primary/40 hover:bg-accent/40 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {/* Thumbnail / Indicator */}
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 font-bold">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                         </div>
-                        <h4 className="text-[15px] font-semibold text-foreground line-clamp-1 mb-1" title={h.quiz?.title}>
-                          {h.quiz?.title || "Đề thi đã bị xóa"}
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          Đúng {h.correct_answers} / {h.total_questions || h.quiz?.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))} câu
-                        </p>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors" title={h.quiz?.title}>
+                            {h.quiz?.title || "Đề thi đã bị xóa"}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                            <span>{dateStr} lúc {timeStr}</span>
+                            <span>•</span>
+                            <span>Đúng {h.correct_answers} / {h.total_questions || h.quiz?.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))} câu</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 ml-3">
+                        <span className={cn("text-xs font-bold px-2.5 py-1 rounded-lg border", scoreColor)}>
+                          {h.score} pts
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
                       </div>
                     </div>
                   );
@@ -209,46 +267,69 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recommended Quizzes */}
-        <div className="col-span-1 bg-card rounded-xl border border-border p-6 flex flex-col shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-foreground">Gợi ý cho bạn</h3>
+        {/* Recommended Quizzes with Cover Thumbnails */}
+        <div className="col-span-1 bg-card rounded-2xl border border-border/80 p-6 flex flex-col shadow-xs">
+          <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/40">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="text-lg font-bold text-foreground">Gợi ý cho bạn</h3>
+            </div>
+            <button 
+              onClick={() => router.push('/dashboard/quizzes')}
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              Xem kho đề
+            </button>
           </div>
-          <div className="flex-1 flex flex-col gap-3">
+
+          <div className="flex-1 flex flex-col gap-3.5">
             {quizzes.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10 text-center">
                 <BookOpen className="w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">Chưa có đề thi gợi ý</p>
               </div>
-            ) : quizzes.map((q) => (
-              <div 
-                key={q.id} 
-                role="button"
-                tabIndex={0}
-                className="group flex flex-col p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
-                onClick={() => setSelectedQuiz(q)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
-              >
-                <div className="flex items-center gap-3 mb-3">
+            ) : quizzes.map((q) => {
+              const coverImg = getQuizThumbnail(q.title, q.category?.name, q.cover_image);
+
+              return (
+                <div 
+                  key={q.id} 
+                  role="button"
+                  tabIndex={0}
+                  className="group flex items-center gap-3.5 p-3 rounded-xl border border-border/70 bg-card hover:border-primary/40 hover:bg-accent/40 transition-all cursor-pointer overflow-hidden"
+                  onClick={() => setSelectedQuiz(q)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
+                >
+                  {/* Thumbnail Cover Image */}
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden shrink-0 border border-border/60 relative bg-muted">
+                    <img 
+                      src={coverImg} 
+                      alt={q.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-foreground truncate" title={q.title}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                        {q.category?.name || 'Tự do'}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors" title={q.title}>
                       {q.title}
                     </h4>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {q.category?.name || 'Tự do'}
-                    </p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
+                      <span className="flex items-center gap-1">
+                        <FileQuestion className="w-3.5 h-3.5 text-primary" /> {q.total_questions || 0} câu
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-amber-500" /> {q.duration_minutes || 60}m
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5" /> {q.total_questions} câu
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" /> {q.duration_minutes} phút
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -271,13 +352,5 @@ export default function DashboardPage() {
         }}
       />
     </div>
-  );
-}
-
-function CheckCircleIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
   );
 }

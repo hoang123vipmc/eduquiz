@@ -110,13 +110,11 @@ export default function LeaderboardPage() {
                 </div>
                 
                 <div className="col-span-5 md:col-span-4 flex items-center gap-3 pl-2 truncate">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover shrink-0 border border-border" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border text-muted-foreground">
-                      <UserIcon className="w-5 h-5" />
-                    </div>
-                  )}
+                  <img 
+                    src={user.avatar || (user.id === currentUser?.id ? "/images/avatar-student.jpg" : `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(user.name || 'user')}`)} 
+                    alt={user.name} 
+                    className="w-10 h-10 rounded-full object-cover shrink-0 border border-border/80 shadow-xs bg-muted" 
+                  />
                   <span className={cn("font-medium truncate", user.rank === 1 ? "text-amber-700 dark:text-amber-400 font-bold" : "text-foreground")}>
                     {user.name}
                   </span>
@@ -157,13 +155,11 @@ export default function LeaderboardPage() {
               </div>
               
               <div className="col-span-5 md:col-span-4 flex items-center gap-3 pl-2 truncate">
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover shrink-0 border border-primary/30" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/30 text-primary">
-                    <UserIcon className="w-5 h-5" />
-                  </div>
-                )}
+                <img 
+                  src={currentUser.avatar || "/images/avatar-student.jpg"} 
+                  alt={currentUser.name} 
+                  className="w-10 h-10 rounded-full object-cover shrink-0 border border-primary/40 shadow-xs" 
+                />
                 <span className="font-bold text-foreground truncate">{currentUser.name} (Bạn)</span>
               </div>
 

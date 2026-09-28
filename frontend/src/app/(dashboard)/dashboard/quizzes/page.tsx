@@ -336,84 +336,96 @@ export default function QuizzesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {processedQuizzes.map((quiz) => {
             const theme = getQuizTheme(quiz.title, quiz.category?.name);
-            const ThemeIcon = theme.icon;
+            const coverImg = quiz.cover_image || (
+              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("java") ||
+              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("code") ||
+              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("mã nguồn")
+                ? "/images/cover-code.jpg"
+                : (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("mạng") ||
+                  (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("qtm") ||
+                  (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("đtdm")
+                ? "/images/cover-network.jpg"
+                : "/images/cover-exam.jpg"
+            );
 
             return (
               <div 
                 key={quiz.id} 
                 onClick={() => setSelectedQuiz(quiz)}
-                className="group relative flex flex-col bg-card rounded-2xl border border-border/70 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer"
+                className="group relative flex flex-col bg-card rounded-2xl border border-border/80 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer"
               >
-                {/* Decorative Top Accent Bar */}
-                <div className={cn("h-1.5 w-full bg-gradient-to-r", theme.gradient)} />
+                {/* TOP: Cover Image with overlay & badges */}
+                <div className="h-40 w-full relative overflow-hidden bg-slate-900">
+                  <img 
+                    src={coverImg} 
+                    alt={quiz.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
 
-                <div className="p-5 flex-1 flex flex-col">
-                  {/* Top Header: Subject Icon + Badges + Actions */}
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-105 shadow-xs", theme.accentBg)}>
-                        <ThemeIcon className="w-5 h-5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className={cn("px-2.5 py-0.5 rounded-md text-[11px] font-semibold border", theme.badgeColor)}>
-                            {quiz.category?.name || theme.defaultTag}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-secondary text-secondary-foreground border border-border/60">
-                            Cơ bản
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
-                      className="p-1.5 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                      aria-label={`Xóa đề thi ${quiz.title}`}
-                      title="Xóa đề thi"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  {/* Badges on Cover */}
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white bg-black/50 backdrop-blur-md rounded-lg border border-white/10 shadow-xs">
+                      {quiz.category?.name || theme.defaultTag}
+                    </span>
+                    <span className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/60 backdrop-blur-md rounded-lg border border-emerald-500/30">
+                      Cơ bản
+                    </span>
                   </div>
-                  
-                  {/* Quiz Title */}
-                  <h3 
-                    className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight" 
-                    title={quiz.title}
+
+                  {/* Delete button (Top Right) */}
+                  <button 
+                    onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
+                    className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 shadow-sm"
+                    aria-label={`Xóa đề thi ${quiz.title}`}
+                    title="Xóa đề thi"
                   >
-                    {quiz.title}
-                  </h3>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
 
-                  {/* Description */}
-                  <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mb-4 flex-1">
-                    {quiz.description || "Bộ đề thi trắc nghiệm phục vụ luyện tập và củng cố kiến thức."}
-                  </p>
-
-                  {/* Meta Chips */}
-                  <div className="flex items-center gap-2 flex-wrap mb-4">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/80 text-xs font-medium text-foreground">
-                      <FileQuestion className="w-3.5 h-3.5 text-primary" />
-                      <span>{quiz.total_questions || 0} câu</span>
+                  {/* Bottom of Cover: Quick Stats */}
+                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white/90 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[11px] font-medium border border-white/10">
+                        <FileQuestion className="w-3 h-3 text-blue-400" /> {quiz.total_questions || 0} câu
+                      </span>
+                      <span className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[11px] font-medium border border-white/10">
+                        <Clock className="w-3 h-3 text-amber-400" /> {quiz.duration_minutes || 60}m
+                      </span>
                     </div>
+                    <span className="text-[11px] font-medium text-emerald-300 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
+                      Đạt {quiz.passing_score ? `${quiz.passing_score}%` : '80%'}
+                    </span>
+                  </div>
+                </div>
 
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/80 text-xs font-medium text-foreground">
-                      <Clock className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{quiz.duration_minutes || 60}m</span>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/80 text-xs font-medium text-foreground">
-                      <Target className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Đạt {quiz.passing_score ? `${quiz.passing_score}%` : '80%'}</span>
-                    </div>
+                {/* Card Body */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 
+                      className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight" 
+                      title={quiz.title}
+                    >
+                      {quiz.title}
+                    </h3>
+                    <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mb-4">
+                      {quiz.description || "Bộ đề thi trắc nghiệm phục vụ luyện tập và củng cố kiến thức học phần."}
+                    </p>
                   </div>
 
-                  {/* Card Footer: Ready Status & CTA */}
-                  <div className="flex items-center justify-between pt-3.5 border-t border-border/50 mt-auto">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span>Sẵn sàng luyện thi</span>
+                  {/* Card Footer: Author with Avatar & CTA */}
+                  <div className="flex items-center justify-between pt-3 border-t border-border/50 mt-auto">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <img 
+                        src={quiz.author?.avatar || "/images/avatar-student.jpg"} 
+                        alt="Avatar" 
+                        className="w-6 h-6 rounded-full object-cover border border-border shrink-0" 
+                      />
+                      <span className="text-xs text-muted-foreground truncate max-w-[110px]">
+                        {quiz.author?.name || "EduQuiz"}
+                      </span>
                     </div>
-                    
+
                     <button 
                       className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:shadow-md transition-all active:scale-95 group/btn"
                       onClick={(e) => {
@@ -421,7 +433,7 @@ export default function QuizzesPage() {
                         setSelectedQuiz(quiz);
                       }}
                     >
-                      <span>Làm bài</span>
+                      <span>Luyện tập</span>
                       <Play className="w-3 h-3 fill-current transition-transform group-hover/btn:translate-x-0.5" />
                     </button>
                   </div>

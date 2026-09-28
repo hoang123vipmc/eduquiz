@@ -125,8 +125,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {/* Bottom User Card */}
       <div className="p-4 mt-auto border-t border-border/50">
         <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card border border-border/70 hover:border-border hover:bg-muted/40 transition-all group">
-          <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary font-bold text-sm">
-            {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-border shrink-0 shadow-xs">
+            <img 
+              src={user?.avatar || "/images/avatar-student.jpg"} 
+              alt={user?.name || "Avatar"} 
+              className="w-full h-full object-cover" 
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-foreground truncate">

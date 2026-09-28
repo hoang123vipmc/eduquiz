@@ -65,12 +65,12 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
             <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{user?.name || "Học viên"}</span>
             <span className="text-[11px] text-muted-foreground capitalize">{user?.role === 'admin' ? 'Quản trị viên' : 'Tài khoản miễn phí'}</span>
           </div>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F7CFF] to-blue-600 border-2 border-border flex items-center justify-center overflow-hidden shadow-sm shadow-blue-500/20 text-white">
-            {user?.avatar ? (
-              <img src={user.avatar} alt={user?.name || "Avatar"} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-sm font-bold">{user?.name?.charAt(0) || "S"}</span>
-            )}
+          <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center overflow-hidden shadow-xs shrink-0">
+            <img 
+              src={user?.avatar || "/images/avatar-student.jpg"} 
+              alt={user?.name || "Avatar"} 
+              className="w-full h-full object-cover" 
+            />
           </div>
         </div>
       </div>
