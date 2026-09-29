@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\Result;
 use App\Models\QuizAttempt;
 
@@ -13,21 +14,21 @@ class UserController extends Controller
     {
         $userId = $request->user()->id;
 
-        $stats = Result::whereHas('attempt', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-        ->selectRaw('COUNT(*) as total_quizzes, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds')
-        ->first();
+        $stats = DB::table('results')
+            ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
+            ->where('quiz_attempts.user_id', $userId)
+            ->selectRaw('COUNT(*) as total_quizzes, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds')
+            ->first();
 
-        $totalQuizzes = $stats->total_quizzes ?? 0;
-        $avgAccuracy = $stats->avg_accuracy ?? 0;
-        $totalTimeSeconds = $stats->total_time_seconds ?? 0;
+        $totalQuizzes = (int) ($stats->total_quizzes ?? 0);
+        $avgAccuracy = (float) ($stats->avg_accuracy ?? 0);
+        $totalTimeSeconds = (int) ($stats->total_time_seconds ?? 0);
 
-        // Tính chuỗi ngày học liên tiếp (Streak) - Đơn giản hóa: Trả về số ngày phân biệt đã làm bài
-        $streak = Result::whereHas('attempt', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->selectRaw('DATE(created_at) as date')
+        // Tính chuỗi ngày học liên tiếp (Streak) - Trả về số ngày phân biệt đã làm bài
+        $streak = DB::table('results')
+            ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
+            ->where('quiz_attempts.user_id', $userId)
+            ->selectRaw('DATE(results.created_at) as date')
             ->groupBy('date')
             ->get()
             ->count();
@@ -35,20 +36,20 @@ class UserController extends Controller
         // Lấy dữ liệu trend 7 ngày gần nhất
         $sevenDaysAgo = now()->subDays(6)->startOfDay();
         
-        $trend = Result::whereHas('attempt', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->where('created_at', '>=', $sevenDaysAgo)
-            ->selectRaw('DATE(created_at) as date, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds, COUNT(*) as quizzes_count')
+        $trend = DB::table('results')
+            ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
+            ->where('quiz_attempts.user_id', $userId)
+            ->where('results.created_at', '>=', $sevenDaysAgo)
+            ->selectRaw('DATE(results.created_at) as date, AVG(accuracy) as avg_accuracy, SUM(time_taken_seconds) as total_time_seconds, COUNT(*) as quizzes_count')
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get()
             ->map(function ($item) {
                 return [
                     'date' => \Carbon\Carbon::parse($item->date)->format('d/m'),
-                    'accuracy' => round($item->avg_accuracy, 1),
-                    'time_minutes' => round($item->total_time_seconds / 60, 1),
-                    'quizzes' => $item->quizzes_count
+                    'accuracy' => round((float) $item->avg_accuracy, 1),
+                    'time_minutes' => round(((int) $item->total_time_seconds) / 60, 1),
+                    'quizzes' => (int) $item->quizzes_count
                 ];
             });
 
@@ -94,8 +95,13 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'avatar' => 'nullable|string',
+            'name'   => 'required|string|max:255',
+            'avatar' => ['nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
+                // Chỉ cho phép URL http/https hoặc data URI ảnh - ngăn JavaScript URI (XSS)
+                if ($value && !preg_match('#^(https?://|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
+                    $fail('Avatar phải là URL ảnh hợp lệ (http/https).');
+                }
+            }],
         ]);
 
         $user = $request->user();

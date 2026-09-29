@@ -111,4 +111,75 @@ class QuestionController extends Controller
             ]
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $question = Question::with('quiz')->findOrFail($id);
+
+        if ($question->quiz->user_id !== $request->user()->id && $request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền chỉnh sửa câu hỏi này.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'question_text' => 'sometimes|required|string',
+            'question_type' => 'sometimes|required|in:single_choice,multiple_choice,true_false',
+            'explanation'   => 'nullable|string',
+            'points'        => 'sometimes|integer|min:1',
+            'options'       => 'sometimes|array|min:2',
+            'options.*.text' => 'required_with:options|string',
+            'options.*.is_correct' => 'required_with:options|boolean',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $question->update(collect($validated)->except('options')->toArray());
+
+            if (isset($validated['options'])) {
+                $question->options()->delete();
+                foreach ($validated['options'] as $optionData) {
+                    $question->options()->create($optionData);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật câu hỏi thành công.',
+                'data'    => new QuestionResource($question->fresh('options'))
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi cập nhật câu hỏi.',
+            ], 500);
+        }
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $question = Question::with('quiz')->findOrFail($id);
+
+        if ($question->quiz->user_id !== $request->user()->id && $request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền xóa câu hỏi này.',
+            ], 403);
+        }
+
+        $quiz = $question->quiz;
+        $question->delete();
+        if ($quiz->total_questions > 0) {
+            $quiz->decrement('total_questions');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa câu hỏi thành công.'
+        ]);
+    }
 }

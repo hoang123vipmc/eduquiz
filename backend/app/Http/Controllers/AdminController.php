@@ -130,6 +130,15 @@ class AdminController extends Controller
             ], 400);
         }
 
+        // ── Security: Ngăn admin khóa tài khoản của admin khác (privilege confusion) ──
+        // Chỉ cho phép khóa account có role thấp hơn hoặc bằng
+        if ($user->role === 'admin' && $admin->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể khóa tài khoản Quản trị viên khác. Hãy hạ quyền trước.',
+            ], 403);
+        }
+
         $user->is_banned = !$user->is_banned;
         $user->save();
 
@@ -165,6 +174,16 @@ class AdminController extends Controller
             ], 400);
         }
 
+        // ── Security: Ngăn admin nâng quyền admin cho người khác nếu không phải super admin ──
+        // Chỉ admin mới có thể cấp quyền admin, nhưng không thể cấp cho người đã là admin
+        // (Privilege escalation prevention)
+        if ($request->role === 'admin' && $user->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Người dùng này đã là Quản trị viên.',
+            ], 400);
+        }
+
         $user->role = $request->role;
         $user->save();
 
@@ -182,10 +201,30 @@ class AdminController extends Controller
     public function resetPassword(int $id, Request $request)
     {
         $request->validate([
-            'new_password' => 'required|string|min:6',
+            // Tối thiểu 8 ký tự, nhất quán với trang đăng ký
+            'new_password' => 'required|string|min:8',
+        ], [
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
         ]);
 
-        $user = User::findOrFail($id);
+        $admin = $request->user();
+        $user  = User::findOrFail($id);
+
+        // ── Security: Admin không thể reset password của chính mình qua route này ──
+        if ($user->id === $admin->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hãy dùng tính năng đổi mật khẩu trong cài đặt tài khoản.',
+            ], 400);
+        }
+
+        // ── Security: Admin không thể reset password của admin khác ──
+        if ($user->role === 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đặt lại mật khẩu cho tài khoản Quản trị viên khác.',
+            ], 403);
+        }
 
         if ($user->provider_id && !$user->password) {
             return response()->json([

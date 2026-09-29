@@ -11,9 +11,14 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        // Chuẩn hóa email về chữ thường và xóa khoảng trắng thừa
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email', ''))),
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ], [
             'name.required' => 'Vui lòng nhập họ tên.',
@@ -27,12 +32,24 @@ class AuthController extends Controller
         $adminEmail = env('ADMIN_EMAIL');
         $role = ($adminEmail && strtolower($request->email) === strtolower($adminEmail)) ? 'admin' : 'student';
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password, // Laravel 11 tự động hash vì có cast 'hashed' trong User model
-            'role' => $role,
-        ]);
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => $request->password, // Laravel 11 tự động hash vì có cast 'hashed' trong User model
+                'role' => $role,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Bắt lỗi Race Condition: Nếu 100 người cùng gửi đăng ký với cùng 1 email ở cùng 1 mili-giây,
+            // cả 100 request đều vượt qua validation SELECT count(*), nhưng Database chỉ cho phép 1 người insert thành công.
+            // 99 người còn lại sẽ bị chặn bởi Unique Constraint. Chúng ta chuyển lỗi SQL 23000 thành lỗi Validation 422 thân thiện.
+            if ($e->getCode() == 23000 || str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'UNIQUE')) {
+                throw ValidationException::withMessages([
+                    'email' => ['Email này đã được sử dụng.'],
+                ]);
+            }
+            throw $e;
+        }
 
         return response()->json([
             'success' => true,

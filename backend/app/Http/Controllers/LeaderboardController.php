@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class LeaderboardController extends Controller
 {
@@ -12,74 +13,79 @@ class LeaderboardController extends Controller
     {
         $currentUserId = $request->user()->id;
 
-        // Xếp hạng dựa trên tổng số câu đúng, sau đó đến độ chính xác trung bình
-        $leaderboard = User::select('users.id', 'users.name', 'users.avatar')
-            ->join('quiz_attempts', 'users.id', '=', 'quiz_attempts.user_id')
-            ->join('results', 'quiz_attempts.id', '=', 'results.attempt_id')
-            ->selectRaw('SUM(results.correct_answers) as total_correct')
-            ->selectRaw('COUNT(results.id) as total_quizzes')
-            ->selectRaw('AVG(results.accuracy) as avg_accuracy')
-            ->groupBy('users.id', 'users.name', 'users.avatar')
-            ->havingRaw('COUNT(results.id) > 0') // Chỉ lấy user đã làm bài
-            ->orderBy('total_correct', 'desc')
-            ->orderBy('avg_accuracy', 'desc')
-            ->take(50) // Lấy top 50
-            ->get();
+        // Cache top 50 leaderboard trong 30 giây để chịu tải 100+ concurrent requests mà không làm sập DB
+        $cachedLeaderboard = Cache::remember('global_leaderboard_top_50', 30, function () {
+            return User::select('users.id', 'users.name', 'users.avatar')
+                ->join('quiz_attempts', 'users.id', '=', 'quiz_attempts.user_id')
+                ->join('results', 'quiz_attempts.id', '=', 'results.attempt_id')
+                ->selectRaw('SUM(results.correct_answers) as total_correct')
+                ->selectRaw('COUNT(results.id) as total_quizzes')
+                ->selectRaw('AVG(results.accuracy) as avg_accuracy')
+                ->groupBy('users.id', 'users.name', 'users.avatar')
+                ->havingRaw('COUNT(results.id) > 0')
+                ->orderBy('total_correct', 'desc')
+                ->orderBy('avg_accuracy', 'desc')
+                ->take(50)
+                ->get()
+                ->toArray();
+        });
 
-        // Gắn rank cho từng user
+        // Tái tạo collection và rank
         $rank = 1;
         $currentUserRank = null;
         $currentUserData = null;
 
-        $leaderboard->transform(function ($user) use (&$rank, $currentUserId, &$currentUserRank, &$currentUserData) {
-            $user->rank = $rank++;
-            $user->avg_accuracy = round($user->avg_accuracy, 1);
-            
-            if ($user->id === $currentUserId) {
-                $currentUserRank = $user->rank;
-                $currentUserData = $user;
+        $leaderboard = array_map(function ($u) use (&$rank, $currentUserId, &$currentUserRank, &$currentUserData) {
+            $u['rank'] = $rank++;
+            $u['avg_accuracy'] = round((float) ($u['avg_accuracy'] ?? 0), 1);
+            $u['total_correct'] = (int) ($u['total_correct'] ?? 0);
+            $u['total_quizzes'] = (int) ($u['total_quizzes'] ?? 0);
+
+            if ($u['id'] === $currentUserId) {
+                $currentUserRank = $u['rank'];
+                $currentUserData = $u;
             }
-            
-            return $user;
-        });
+
+            return $u;
+        }, $cachedLeaderboard);
 
         // Nếu user hiện tại không nằm trong top 50, cần query riêng để lấy rank của họ
         if (!$currentUserRank) {
-            // Đếm số người có điểm cao hơn user hiện tại
-            $currentUserStats = DB::table('results')
-                ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
-                ->where('quiz_attempts.user_id', $currentUserId)
-                ->selectRaw('SUM(correct_answers) as total_correct, AVG(accuracy) as avg_accuracy, COUNT(results.id) as total_quizzes')
-                ->first();
-
-            if ($currentUserStats && $currentUserStats->total_quizzes > 0) {
-                // Đếm những người có total_correct lớn hơn, hoặc bằng nhưng avg_accuracy lớn hơn
-                $betterUsersCount = DB::table('results')
+            $userCacheKey = "user_rank_stats_{$currentUserId}";
+            $currentUserData = Cache::remember($userCacheKey, 30, function () use ($request, $currentUserId) {
+                $currentUserStats = DB::table('results')
                     ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
-                    ->selectRaw('quiz_attempts.user_id, SUM(correct_answers) as total_correct, AVG(accuracy) as avg_accuracy')
-                    ->groupBy('quiz_attempts.user_id')
-                    ->havingRaw('SUM(correct_answers) > ? OR (SUM(correct_answers) = ? AND AVG(accuracy) > ?)', [
-                        $currentUserStats->total_correct,
-                        $currentUserStats->total_correct,
-                        $currentUserStats->avg_accuracy
-                    ])
-                    ->count();
+                    ->where('quiz_attempts.user_id', $currentUserId)
+                    ->selectRaw('SUM(correct_answers) as total_correct, AVG(accuracy) as avg_accuracy, COUNT(results.id) as total_quizzes')
+                    ->first();
 
-                $currentUserRank = $betterUsersCount + 1;
+                if ($currentUserStats && $currentUserStats->total_quizzes > 0) {
+                    $betterUsersCount = DB::table('results')
+                        ->join('quiz_attempts', 'results.attempt_id', '=', 'quiz_attempts.id')
+                        ->selectRaw('quiz_attempts.user_id, SUM(correct_answers) as total_correct, AVG(accuracy) as avg_accuracy')
+                        ->groupBy('quiz_attempts.user_id')
+                        ->havingRaw('SUM(correct_answers) > ? OR (SUM(correct_answers) = ? AND AVG(accuracy) > ?)', [
+                            $currentUserStats->total_correct,
+                            $currentUserStats->total_correct,
+                            $currentUserStats->avg_accuracy
+                        ])
+                        ->count();
+
+                    $rank = $betterUsersCount + 1;
+                    $user = $request->user();
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'avatar' => $user->avatar,
+                        'total_correct' => (int) $currentUserStats->total_correct,
+                        'total_quizzes' => (int) $currentUserStats->total_quizzes,
+                        'avg_accuracy' => round((float) $currentUserStats->avg_accuracy, 1),
+                        'rank' => $rank
+                    ];
+                }
+
                 $user = $request->user();
-                $currentUserData = [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'avatar' => $user->avatar,
-                    'total_correct' => $currentUserStats->total_correct,
-                    'total_quizzes' => $currentUserStats->total_quizzes,
-                    'avg_accuracy' => round($currentUserStats->avg_accuracy, 1),
-                    'rank' => $currentUserRank
-                ];
-            } else {
-                // Chưa làm bài nào
-                $user = $request->user();
-                $currentUserData = [
+                return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'avatar' => $user->avatar,
@@ -88,7 +94,7 @@ class LeaderboardController extends Controller
                     'avg_accuracy' => 0,
                     'rank' => '-'
                 ];
-            }
+            });
         }
 
         return response()->json([

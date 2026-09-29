@@ -16,11 +16,11 @@ class StoreQuizRequest extends FormRequest
         return [
             'category_id' => 'nullable|exists:categories,id',
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:quizzes,slug',
+            'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'cover_image' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:1',
-            'total_questions' => 'required|integer|min:1',
+            'total_questions' => 'nullable|integer|min:0',
             'visibility' => 'nullable|in:public,private',
             'status' => 'nullable|in:draft,published',
             'shuffle_questions' => 'boolean',

@@ -22,46 +22,49 @@ class AttemptController extends Controller
 
         $quiz = Quiz::findOrFail($request->quiz_id);
 
-        // Kiểm tra xem có bài đang làm dở với cùng chế độ không
-        $existingAttempt = QuizAttempt::where('user_id', $request->user()->id)
-            ->where('quiz_id', $quiz->id)
-            ->where('mode', $request->mode)
-            ->where('status', 'doing')
-            ->first();
+        return DB::transaction(function () use ($request, $quiz) {
+            // Kiểm tra xem có bài đang làm dở với cùng chế độ không (lock để tránh duplicate race condition)
+            $existingAttempt = QuizAttempt::where('user_id', $request->user()->id)
+                ->where('quiz_id', $quiz->id)
+                ->where('mode', $request->mode)
+                ->where('status', 'doing')
+                ->lockForUpdate()
+                ->first();
 
-        if ($existingAttempt) {
-            return $this->resume($request, $existingAttempt->id);
-        }
+            if ($existingAttempt) {
+                return $this->resume($request, $existingAttempt->id);
+            }
 
-        $isUnlimited = $request->input('unlimited', false);
-        $remainingTime = $isUnlimited ? null : $quiz->duration_minutes * 60;
+            $isUnlimited = $request->input('unlimited', false);
+            $remainingTime = $isUnlimited ? null : $quiz->duration_minutes * 60;
 
-        $attempt = QuizAttempt::create([
-            'user_id' => $request->user()->id,
-            'quiz_id' => $quiz->id,
-            'mode' => $request->mode,
-            'started_at' => now(),
-            'remaining_time' => $remainingTime,
-            'status' => 'doing'
-        ]);
+            $attempt = QuizAttempt::create([
+                'user_id' => $request->user()->id,
+                'quiz_id' => $quiz->id,
+                'mode' => $request->mode,
+                'started_at' => now(),
+                'remaining_time' => $remainingTime,
+                'status' => 'doing'
+            ]);
 
-        if ($attempt->mode === 'practice') {
-            $request->attributes->set('is_practice_mode', true);
-        }
-        $request->attributes->set('quiz_owner_id', $quiz->user_id);
+            if ($attempt->mode === 'practice') {
+                $request->attributes->set('is_practice_mode', true);
+            }
+            $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
-        // Trả về trạng thái bắt đầu và danh sách câu hỏi
-        return response()->json([
-            'success' => true,
-            'message' => 'Bắt đầu làm bài.',
-            'data' => [
-                'attempt_id' => $attempt->id,
-                'mode' => $attempt->mode,
-                'remaining_time' => $attempt->remaining_time,
-                'elapsed_time' => 0,
-                'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
-            ]
-        ]);
+            // Trả về trạng thái bắt đầu và danh sách câu hỏi
+            return response()->json([
+                'success' => true,
+                'message' => 'Bắt đầu làm bài.',
+                'data' => [
+                    'attempt_id' => $attempt->id,
+                    'mode' => $attempt->mode,
+                    'remaining_time' => $attempt->remaining_time,
+                    'elapsed_time' => 0,
+                    'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
+                ]
+            ]);
+        });
     }
 
     public function resume(Request $request, $id)
@@ -159,14 +162,27 @@ class AttemptController extends Controller
 
     public function submit(Request $request, $id)
     {
-        $attempt = QuizAttempt::where('user_id', $request->user()->id)->findOrFail($id);
+        return DB::transaction(function () use ($request, $id) {
+            // Pessimistic lock row để ngăn chặn race condition khi nộp bài đồng thời (double-click hoặc 2 request cùng lúc)
+            $attempt = QuizAttempt::where('user_id', $request->user()->id)
+                ->where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if ($attempt->status !== 'doing') {
-            return response()->json(['success' => false, 'message' => 'Bài thi đã được nộp trước đó.']);
-        }
+            // Nếu bài thi đã nộp trước đó (ví dụ do click đúp hoặc đã tự động nộp do hết giờ)
+            // Trả về kết quả đã tạo thay vì báo lỗi 400/500 -> Đảm bảo Idempotency (tính lũy thừa)
+            if ($attempt->status !== 'doing') {
+                $existingResult = Result::where('attempt_id', $attempt->id)->first();
+                if ($existingResult) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Bài thi đã được nộp thành công.',
+                        'data' => $existingResult
+                    ]);
+                }
+                return response()->json(['success' => false, 'message' => 'Bài thi đã được nộp trước đó.'], 400);
+            }
 
-        DB::beginTransaction();
-        try {
             $attempt->update([
                 'status' => 'submitted',
                 'ended_at' => now()
@@ -193,33 +209,32 @@ class AttemptController extends Controller
                 }
             }
 
-            $skippedCount = $questions->count() - $answers->count();
+            $skippedCount = max(0, $questions->count() - $answers->count());
             $score = $totalPoints > 0 ? ($correctPoints / $totalPoints) * 100 : 0;
             $accuracy = $questions->count() > 0 ? ($correctCount / $questions->count()) * 100 : 0;
             $timeTaken = (int) abs(now()->diffInSeconds($attempt->started_at));
 
-            $result = Result::create([
-                'attempt_id' => $attempt->id,
-                'score' => round($score, 2),
-                'correct_answers' => $correctCount,
-                'wrong_answers' => $wrongCount,
-                'skipped_answers' => $skippedCount,
-                'accuracy' => round($accuracy, 2),
-                'time_taken_seconds' => $timeTaken
-            ]);
+            $result = Result::updateOrCreate(
+                ['attempt_id' => $attempt->id],
+                [
+                    'score' => round($score, 2),
+                    'correct_answers' => $correctCount,
+                    'wrong_answers' => $wrongCount,
+                    'skipped_answers' => $skippedCount,
+                    'accuracy' => round($accuracy, 2),
+                    'time_taken_seconds' => $timeTaken
+                ]
+            );
 
-            DB::commit();
+            // Cập nhật lượt làm bài của đề thi một cách Atomic (chống lost update khi 100 người nộp cùng lúc)
+            $attempt->quiz()->increment('total_attempts');
 
             return response()->json([
                 'success' => true,
                 'message' => 'Nộp bài thành công.',
                 'data' => $result
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Illuminate\Support\Facades\Log::error('submit error', ['exception' => $e]);
-            return response()->json(['success' => false, 'message' => 'Lỗi nộp bài. Vui lòng thử lại.'], 500);
-        }
+        });
     }
 
     public function result(Request $request, $id)
@@ -288,17 +303,24 @@ class AttemptController extends Controller
                 'status' => 'doing'
             ]);
 
-            // Copy lại các đáp án đúng từ attempt cũ
+            // Copy lại các đáp án đúng từ attempt cũ (Bulk insert tối ưu DB query)
+            $answersToInsert = [];
             foreach ($oldAttempt->answers as $ans) {
                 if ($ans->is_correct) {
-                    UserAnswer::create([
+                    $answersToInsert[] = [
                         'attempt_id' => $newAttempt->id,
                         'question_id' => $ans->question_id,
                         'option_id' => $ans->option_id,
                         'is_correct' => true,
-                        'answered_at' => now()
-                    ]);
+                        'answered_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
                 }
+            }
+
+            if (!empty($answersToInsert)) {
+                UserAnswer::insert($answersToInsert);
             }
 
             DB::commit();

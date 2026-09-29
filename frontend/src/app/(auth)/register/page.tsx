@@ -22,6 +22,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     if (password !== passwordConfirmation) {
       setError("Mật khẩu xác nhận không khớp.");
       return;

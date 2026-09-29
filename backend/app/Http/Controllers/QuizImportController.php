@@ -173,13 +173,22 @@ class QuizImportController extends Controller
             return response()->json(['success' => false, 'message' => 'Không tìm thấy câu hỏi nào hợp lệ.'], 400);
         }
 
+        $baseSlug = Str::slug($request->title);
+        if (empty($baseSlug)) {
+            $baseSlug = 'quiz';
+        }
+        $slug = $baseSlug . '-' . Str::lower(Str::random(6)) . '-' . substr(uniqid(), -5);
+        while (Quiz::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . Str::lower(Str::random(8)) . '-' . (int)(microtime(true) * 1000);
+        }
+
         DB::beginTransaction();
         try {
             $quiz = Quiz::create([
                 'user_id' => $request->user()->id,
                 'category_id' => $request->category_id,
                 'title' => $request->title,
-                'slug' => Str::slug($request->title) . '-' . time(),
+                'slug' => $slug,
                 'description' => $request->description ?: 'Được tạo từ văn bản nhập nhanh.',
                 'cover_image' => $request->cover_image,
                 'duration_minutes' => 60,

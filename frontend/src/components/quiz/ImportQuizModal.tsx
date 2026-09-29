@@ -129,6 +129,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   };
 
   const handleImportText = async () => {
+    if (loading) return;
     if (!title.trim()) {
       setError('Vui lòng nhập tên đề thi');
       return;

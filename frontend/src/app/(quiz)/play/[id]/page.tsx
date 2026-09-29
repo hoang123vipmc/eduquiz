@@ -182,6 +182,8 @@ export default function QuizPlayerPage() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
     const unansweredCount = questions.length - Object.keys(answers).length;
     const confirmMsg = unansweredCount > 0 
       ? `Bạn còn ${unansweredCount} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài thi ngay không?`

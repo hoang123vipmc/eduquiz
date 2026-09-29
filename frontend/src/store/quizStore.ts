@@ -155,13 +155,17 @@ export const useQuizStore = create<QuizState>()(
                 const { attemptId, status } = get();
                 if (status !== 'doing' || !attemptId) return null;
 
+                // Chuyển sang trạng thái submitted ngay lập tức để chặn double click và timer tick đồng thời
+                set({ status: 'submitted' });
+
                 try {
                     const { data } = await api.post(`/attempts/${attemptId}/submit`);
                     if (data.success) {
-                        set({ status: 'submitted' });
                         return data.data; // Trả về object result
                     }
                 } catch (e: any) {
+                    // Nếu lỗi, khôi phục trạng thái 'doing' để người dùng có thể bấm thử lại
+                    set({ status: 'doing' });
                     console.error("Lỗi nộp bài", e);
                     throw new Error(e.response?.data?.message || e.message || "Lỗi nộp bài");
                 }
