@@ -43,7 +43,17 @@ export default function LoginPage() {
     }
   };
 
-  const loginWithGoogle = () => {
+  const loginWithGoogle = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/auth/redirect/google');
+      if (data && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+    } catch (e) {
+      console.warn("Direct redirect fallback", e);
+    }
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/auth/redirect/google`;
   };
 

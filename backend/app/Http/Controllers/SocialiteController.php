@@ -11,11 +11,18 @@ use Illuminate\Support\Facades\Hash;
 
 class SocialiteController extends Controller
 {
-    public function redirect($provider)
+    public function redirect(Request $request, $provider)
     {
-        return response()->json([
-            'url' => Socialite::driver($provider)->stateless()->redirect()->getTargetUrl()
-        ]);
+        $targetUrl = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'url' => $targetUrl
+            ]);
+        }
+
+        return redirect()->away($targetUrl);
     }
 
     public function callback($provider)
