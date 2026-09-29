@@ -96,6 +96,9 @@ Quản lý tại file `backend/.env` (khi dev) và **Render Settings** (khi ch�
 | `DATABASE_URL` | *(None)* | *(Render tự sinh khi attach DB)* | Chuỗi kết nối PostgreSQL bảo mật |
 | `SESSION_DRIVER` | `database` hoặc `file` | `database` hoặc `cookie` | Lưu session |
 | `SESSION_SECURE_COOKIE` | `false` | `true` | Chỉ gửi cookie qua HTTPS khi trên Production |
+| `GOOGLE_CLIENT_ID` | *(Client ID từ Google)* | *(Client ID từ Google)* | ID ứng dụng Google OAuth 2.0 |
+| `GOOGLE_CLIENT_SECRET` | *(Client Secret)* | *(Client Secret)* | Khóa bí mật Google OAuth 2.0 |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8000/api/v1/auth/callback/google` | `https://<tên-service>.onrender.com/api/v1/auth/callback/google` | URL nhận kết quả xác thực từ Google |
 
 ---
 
