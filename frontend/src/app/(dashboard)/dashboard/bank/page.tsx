@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/authStore";
 
 interface Option {
   id: number;
@@ -42,6 +43,7 @@ interface Question {
 }
 
 export default function QuestionBankPage() {
+  const { user } = useAuthStore();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -278,19 +280,21 @@ export default function QuestionBankPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={(e) => handleDeleteQuestion(q.id, e)}
-                          disabled={deletingId === q.id}
-                          aria-label="Xóa câu hỏi"
-                          title="Xóa câu hỏi này"
-                          className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {deletingId === q.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </button>
+                        {(user?.role === 'admin' || (user?.id && (!q.quiz || (q.quiz as any).user_id === user.id))) && (
+                          <button
+                            onClick={(e) => handleDeleteQuestion(q.id, e)}
+                            disabled={deletingId === q.id}
+                            aria-label="Xóa câu hỏi"
+                            title="Xóa câu hỏi này"
+                            className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            {deletingId === q.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

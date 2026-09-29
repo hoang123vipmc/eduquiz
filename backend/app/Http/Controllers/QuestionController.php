@@ -87,10 +87,13 @@ class QuestionController extends Controller
         
         $quizId = $request->query('quiz_id');
         
-        $query = Question::with('quiz:id,title', 'options')
-            ->whereHas('quiz', function ($q) use ($userId) {
+        $query = Question::with('quiz:id,title,user_id', 'options');
+
+        if (!($request->user()->role === 'admin' && $request->boolean('all_users'))) {
+            $query->whereHas('quiz', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             });
+        }
 
         if ($search) {
             $query->where('question_text', 'like', "%{$search}%");
@@ -107,10 +110,9 @@ class QuestionController extends Controller
         $questions = $query->orderBy('created_at', 'desc')->paginate(15);
         $request->attributes->set('quiz_owner_id', $userId);
 
-        $userQuizzes = Quiz::where('user_id', $userId)
-            ->select('id', 'title')
-            ->orderBy('title')
-            ->get();
+        $userQuizzes = ($request->user()->role === 'admin' && $request->boolean('all_users'))
+            ? Quiz::select('id', 'title')->orderBy('title')->get()
+            : Quiz::where('user_id', $userId)->select('id', 'title')->orderBy('title')->get();
 
         return response()->json([
             'success' => true,

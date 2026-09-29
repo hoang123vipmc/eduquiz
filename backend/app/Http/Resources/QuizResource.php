@@ -25,6 +25,7 @@ class QuizResource extends JsonResource
             'shuffle_answers' => $this->shuffle_answers,
             'allow_review' => $this->allow_review,
             'passing_score' => $this->passing_score,
+            'user_id' => $this->user_id,
             'author' => [
                 'id' => $this->user->id ?? null,
                 'name' => $this->user->name ?? null,

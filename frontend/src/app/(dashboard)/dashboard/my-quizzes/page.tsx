@@ -10,20 +10,23 @@ import {
   FileUp, 
   Trash2, 
   Users, 
-  Search,
-  Play,
-  Library,
-  BookOpen,
-  GraduationCap,
-  Code2,
-  Cpu,
-  BrainCircuit,
-  Sparkles,
-  ArrowUpDown,
-  Filter,
-  FileQuestion,
-  Target,
-  Printer
+  Search, 
+  Play, 
+  Library, 
+  BookOpen, 
+  GraduationCap, 
+  Code2, 
+  Cpu, 
+  BrainCircuit, 
+  Sparkles, 
+  ArrowUpDown, 
+  Filter, 
+  FileQuestion, 
+  Printer, 
+  ShieldCheck, 
+  Layers, 
+  FolderPlus,
+  UserCheck
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
@@ -32,7 +35,7 @@ import { PrintQuizModal } from "@/components/quiz/PrintQuizModal";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
-// Helper to determine subject theme and icons based on title/category
+// Helper theme styling
 function getQuizTheme(title: string, categoryName?: string) {
   const text = (title + " " + (categoryName || "")).toLowerCase();
   
@@ -72,11 +75,13 @@ function getQuizTheme(title: string, categoryName?: string) {
   };
 }
 
-export default function QuizzesPage() {
+export default function MyQuizzesPage() {
   const { user } = useAuthStore();
+  const router = useRouter();
+
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [adminViewAll, setAdminViewAll] = useState(false);
 
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [printingQuiz, setPrintingQuiz] = useState<any>(null);
@@ -87,56 +92,59 @@ export default function QuizzesPage() {
   const [sortBy, setSortBy] = useState<"newest" | "questions" | "duration">("newest");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('search') || '';
-    if (q) {
-      setSearch(q);
-      setDebouncedSearch(q);
-    }
-  }, []);
-
-  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
     }, 350);
     return () => clearTimeout(handler);
   }, [search]);
 
-  const fetchQuizzes = async (query = debouncedSearch) => {
+  const fetchQuizzes = async (query = debouncedSearch, isViewAll = adminViewAll) => {
     setLoading(true);
     try {
-      const url = query ? `/quizzes?search=${encodeURIComponent(query)}` : '/quizzes';
-      const { data } = await api.get(url);
+      const params = new URLSearchParams();
+      if (query) params.append("search", query);
+
+      // Nếu là admin và đang chọn xem toàn bộ hệ thống
+      if (user?.role === "admin" && isViewAll) {
+        params.append("admin_all", "1");
+      } else {
+        // Mặc định: chỉ lấy đề của chính tài khoản đăng nhập
+        params.append("mine", "1");
+      }
+
+      const { data } = await api.get(`/quizzes?${params.toString()}`);
       if (data.success) {
         const quizzesList = Array.isArray(data.data) ? data.data : data.data.data;
         setQuizzes(quizzesList || []);
       }
     } catch (error) {
-      console.error("Lỗi tải danh sách đề thi", error);
+      console.error("Lỗi tải đề thi của tôi", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchQuizzes(debouncedSearch);
-  }, [debouncedSearch]);
+    if (user) {
+      fetchQuizzes(debouncedSearch, adminViewAll);
+    }
+  }, [debouncedSearch, adminViewAll, user]);
 
-  // Extract available categories
+  // Danh sách thể loại
   const categories = useMemo(() => {
     const set = new Set<string>();
-    quizzes.forEach(q => {
+    quizzes.forEach((q) => {
       if (q.category?.name) set.add(q.category.name);
     });
     return Array.from(set);
   }, [quizzes]);
 
-  // Filter and sort quizzes on frontend
+  // Lọc và sắp xếp
   const processedQuizzes = useMemo(() => {
     let result = [...quizzes];
 
     if (selectedCategory !== "all") {
-      result = result.filter(q => q.category?.name === selectedCategory);
+      result = result.filter((q) => q.category?.name === selectedCategory);
     }
 
     if (sortBy === "questions") {
@@ -144,7 +152,6 @@ export default function QuizzesPage() {
     } else if (sortBy === "duration") {
       result.sort((a, b) => (b.duration_minutes || 0) - (a.duration_minutes || 0));
     } else {
-      // Default newest by id
       result.sort((a, b) => b.id - a.id);
     }
 
@@ -155,23 +162,23 @@ export default function QuizzesPage() {
     if (!selectedQuiz) return;
     const query = new URLSearchParams({
       mode: config.examMode,
-      shuffleQ: config.shuffleQuestions ? '1' : '0',
-      shuffleO: config.shuffleOptions ? '1' : '0',
+      shuffleQ: config.shuffleQuestions ? "1" : "0",
+      shuffleO: config.shuffleOptions ? "1" : "0",
       delay: config.autoNextDelay,
-      unlimited: config.unlimitedTime ? '1' : '0'
+      unlimited: config.unlimitedTime ? "1" : "0",
     }).toString();
-    
+
     router.push(`/play/${selectedQuiz.id}?${query}`);
     setSelectedQuiz(null);
   };
 
   const handleDeleteQuiz = async (e: React.MouseEvent, id: number, title: string) => {
     e.stopPropagation();
-    if (window.confirm(`Bạn có chắc chắn muốn xóa đề thi "${title}"?`)) {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bộ đề thi "${title}"?`)) {
       try {
         const { data } = await api.delete(`/quizzes/${id}`);
         if (data.success) {
-          fetchQuizzes();
+          fetchQuizzes(debouncedSearch, adminViewAll);
         }
       } catch (error) {
         console.error("Lỗi khi xoá đề thi", error);
@@ -182,35 +189,67 @@ export default function QuizzesPage() {
 
   return (
     <div className="space-y-7 animate-in fade-in duration-500 pb-12">
-      
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2 border-b border-border/40">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
-            <BookOpen className="w-6 h-6" />
+            <Library className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Danh sách đề thi
+                Đề thi của tôi
               </h1>
               <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                 {quizzes.length} bộ đề
               </span>
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Khám phá, tra cứu và luyện tập với toàn bộ kho đề thi trắc nghiệm công khai.
+              {user?.role === "admin" && adminViewAll
+                ? "Chế độ Quản trị: Toàn quyền kiểm soát và quản lý tất cả các đề thi trong hệ thống."
+                : "Quản lý và luyện tập với những bộ đề thi trắc nghiệm do chính bạn tạo hoặc tải lên."}
             </p>
           </div>
         </div>
 
-        <button 
-          onClick={() => setShowImportModal(true)}
-          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md active:scale-[0.98] shrink-0"
-        >
-          <FileUp className="w-4 h-4" /> 
-          <span>Import Đề thi</span>
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Admin Control Switch */}
+          {user?.role === "admin" && (
+            <div className="flex items-center bg-card border border-border rounded-xl p-1 shadow-xs">
+              <button
+                onClick={() => setAdminViewAll(false)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                  !adminViewAll
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Đề của tôi ({user.name})
+              </button>
+              <button
+                onClick={() => setAdminViewAll(true)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all",
+                  adminViewAll
+                    ? "bg-rose-500 text-white shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Kiểm soát toàn hệ thống
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md active:scale-[0.98] shrink-0"
+          >
+            <FileUp className="w-4 h-4" />
+            <span>Tạo / Import Đề thi</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Controls Toolbar */}
@@ -218,122 +257,109 @@ export default function QuizzesPage() {
         {/* Search Box */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <input 
+          <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Tìm kiếm theo tên đề thi"
+            aria-label="Tìm kiếm trong đề thi của tôi"
             placeholder="Tìm kiếm theo tên đề thi, từ khóa..."
             className="w-full bg-card border border-border/80 rounded-xl pl-10 pr-9 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-xs"
           />
           {search && (
-            <button 
+            <button
               onClick={() => setSearch("")}
               aria-label="Xóa từ khóa tìm kiếm"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs p-1 rounded-full hover:bg-muted"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
             >
               ✕
             </button>
           )}
         </div>
 
-        {/* Filter Pills & Sort Selector */}
-        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+        {/* Filter and Sort Dropdowns */}
+        <div className="flex items-center gap-2.5 self-end sm:self-auto w-full sm:w-auto">
           {categories.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
-                  selectedCategory === "all"
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
-                )}
+            <div className="relative flex-1 sm:flex-initial">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Lọc theo thể loại"
+                className="w-full sm:w-auto appearance-none bg-card border border-border/80 rounded-xl px-3.5 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-xs"
               >
-                Tất cả
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
-                    selectedCategory === cat
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {cat}
-                </button>
-              ))}
+                <option value="all">Tất cả môn học</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <Filter className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
           )}
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-1.5 bg-card border border-border/80 rounded-xl px-2.5 py-1.5 text-xs text-muted-foreground shrink-0 shadow-xs">
-            <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="relative flex-1 sm:flex-initial">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-foreground font-medium focus:outline-none cursor-pointer pr-1"
-              aria-label="Sắp xếp danh sách đề thi"
+              aria-label="Sắp xếp theo thứ tự"
+              className="w-full sm:w-auto appearance-none bg-card border border-border/80 rounded-xl px-3.5 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-xs"
             >
               <option value="newest">Mới nhất</option>
-              <option value="questions">Nhiều câu nhất</option>
-              <option value="duration">Thời lượng dài</option>
+              <option value="questions">Số câu hỏi</option>
+              <option value="duration">Thời gian thi</option>
             </select>
+            <ArrowUpDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           </div>
         </div>
       </div>
 
-      {/* Quizzes Grid / Loading / Empty States */}
+      {/* Grid of Quizzes */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="animate-pulse flex flex-col bg-card rounded-2xl overflow-hidden border border-border h-[220px]">
-              <div className="h-1.5 bg-muted w-full" />
-              <div className="p-6 flex-1 flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-muted" />
-                  <div className="h-5 bg-muted rounded-md flex-1" />
-                </div>
-                <div className="h-4 bg-muted rounded-md w-full" />
-                <div className="h-4 bg-muted rounded-md w-2/3" />
-                <div className="mt-auto flex justify-between items-center">
-                  <div className="h-6 bg-muted rounded-md w-24" />
-                  <div className="h-8 bg-muted rounded-xl w-24" />
-                </div>
-              </div>
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="bg-card rounded-2xl border border-border p-4 space-y-4 animate-pulse"
+            >
+              <div className="h-40 bg-muted rounded-xl" />
+              <div className="h-5 bg-muted rounded w-3/4" />
+              <div className="h-4 bg-muted rounded w-1/2" />
             </div>
           ))}
         </div>
       ) : processedQuizzes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card/50 rounded-2xl border border-dashed border-border/80">
-          <div className="w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-5 text-primary">
-            <BookOpen className="w-8 h-8" />
+        <div className="text-center py-16 px-4 bg-card rounded-2xl border border-dashed border-border/80 flex flex-col items-center justify-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            <FileQuestion className="w-8 h-8" />
           </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">
-            {search ? "Không tìm thấy đề thi phù hợp" : "Chưa có đề thi nào"}
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-sm mb-6">
-            {search 
-              ? `Không có kết quả nào cho "${search}". Hãy thử tìm kiếm từ khóa khác.`
-              : "Bạn chưa có bộ đề thi nào. Hãy tải lên file Word (.docx) hoặc dán văn bản để bắt đầu ôn thi."}
-          </p>
+          <div className="space-y-1 max-w-md">
+            <h3 className="text-lg font-bold text-foreground">
+              {search
+                ? "Không tìm thấy bộ đề phù hợp"
+                : user?.role === "admin" && adminViewAll
+                ? "Chưa có đề thi nào trong hệ thống"
+                : "Bạn chưa tải lên đề thi nào"}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {search
+                ? `Không có bộ đề nào khớp với từ khóa "${search}". Vui lòng thử từ khóa khác.`
+                : "Tải lên tài liệu Word (.docx) hoặc dán văn bản trắc nghiệm để hệ thống tự động nhận diện và tạo bộ đề cho riêng bạn."}
+            </p>
+          </div>
           {search ? (
-            <button 
+            <button
               onClick={() => setSearch("")}
               className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl text-sm font-medium transition-colors"
             >
               Xóa bộ lọc tìm kiếm
             </button>
           ) : (
-            <button 
+            <button
               onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md"
             >
               <FileUp className="w-4 h-4" />
-              <span>Tạo đề thi đầu tiên</span>
+              <span>Tải lên bộ đề đầu tiên</span>
             </button>
           )}
         </div>
@@ -341,32 +367,46 @@ export default function QuizzesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {processedQuizzes.map((quiz) => {
             const theme = getQuizTheme(quiz.title, quiz.category?.name);
-            const coverImg = quiz.cover_image || (
-              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("java") ||
-              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("code") ||
-              (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("mã nguồn")
+            const coverImg =
+              quiz.cover_image ||
+              ((quiz.title + " " + (quiz.category?.name || ""))
+                .toLowerCase()
+                .includes("java") ||
+              (quiz.title + " " + (quiz.category?.name || ""))
+                .toLowerCase()
+                .includes("code") ||
+              (quiz.title + " " + (quiz.category?.name || ""))
+                .toLowerCase()
+                .includes("mã nguồn")
                 ? "/images/cover-code.jpg"
-                : (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("mạng") ||
-                  (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("qtm") ||
-                  (quiz.title + " " + (quiz.category?.name || "")).toLowerCase().includes("đtdm")
+                : (quiz.title + " " + (quiz.category?.name || ""))
+                    .toLowerCase()
+                    .includes("mạng") ||
+                  (quiz.title + " " + (quiz.category?.name || ""))
+                    .toLowerCase()
+                    .includes("qtm") ||
+                  (quiz.title + " " + (quiz.category?.name || ""))
+                    .toLowerCase()
+                    .includes("đtdm")
                 ? "/images/cover-network.jpg"
-                : "/images/cover-exam.jpg"
-            );
+                : "/images/cover-exam.jpg");
 
-            const isOwner = Boolean(user?.id && (quiz.user_id === user.id || quiz.author?.id === user.id));
-            const canManage = user?.role === 'admin' || isOwner;
+            const isOwner = Boolean(
+              user?.id && (quiz.user_id === user.id || quiz.author?.id === user.id)
+            );
+            const canManage = user?.role === "admin" || isOwner;
 
             return (
-              <div 
-                key={quiz.id} 
+              <div
+                key={quiz.id}
                 onClick={() => setSelectedQuiz(quiz)}
                 className="group relative flex flex-col bg-card rounded-2xl border border-border/80 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden hover:-translate-y-1 cursor-pointer"
               >
                 {/* TOP: Cover Image with overlay & badges */}
                 <div className="h-40 w-full relative overflow-hidden bg-slate-900">
-                  <img 
-                    src={coverImg} 
-                    alt={quiz.title} 
+                  <img
+                    src={coverImg}
+                    alt={quiz.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
@@ -381,19 +421,23 @@ export default function QuizzesPage() {
                         Của bạn
                       </span>
                     ) : (
-                      <span className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-950/60 backdrop-blur-md rounded-lg border border-emerald-500/30">
-                        Cơ bản
+                      <span className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-300 bg-amber-950/70 backdrop-blur-md rounded-lg border border-amber-500/40">
+                        {quiz.author?.name || "Người dùng"}
                       </span>
                     )}
                   </div>
 
-                  {/* Delete button (Top Right) - Only admin or owner can delete */}
+                  {/* Delete button (Top Right) */}
                   {canManage && (
-                    <button 
+                    <button
                       onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
                       className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 shadow-sm"
                       aria-label={`Xóa đề thi ${quiz.title}`}
-                      title={user?.role === 'admin' ? "Quản trị viên xóa đề thi" : "Xóa đề thi của bạn"}
+                      title={
+                        user?.role === "admin" && !isOwner
+                          ? "Quản trị viên xóa đề thi này"
+                          : "Xóa đề thi của bạn"
+                      }
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -403,14 +447,16 @@ export default function QuizzesPage() {
                   <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white/90 text-xs">
                     <div className="flex items-center gap-2">
                       <span className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[11px] font-medium border border-white/10">
-                        <FileQuestion className="w-3 h-3 text-blue-400" /> {quiz.total_questions || 0} câu
+                        <FileQuestion className="w-3 h-3 text-blue-400" />{" "}
+                        {quiz.total_questions || 0} câu
                       </span>
                       <span className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md text-[11px] font-medium border border-white/10">
-                        <Clock className="w-3 h-3 text-amber-400" /> {quiz.duration_minutes || 60}m
+                        <Clock className="w-3 h-3 text-amber-400" />{" "}
+                        {quiz.duration_minutes || 60}m
                       </span>
                     </div>
                     <span className="text-[11px] font-medium text-emerald-300 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                      Đạt {quiz.passing_score ? `${quiz.passing_score}%` : '80%'}
+                      Đạt {quiz.passing_score ? `${quiz.passing_score}%` : "80%"}
                     </span>
                   </div>
                 </div>
@@ -418,24 +464,25 @@ export default function QuizzesPage() {
                 {/* Card Body */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 
-                      className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight" 
+                    <h3
+                      className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight"
                       title={quiz.title}
                     >
                       {quiz.title}
                     </h3>
                     <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mb-4">
-                      {quiz.description || "Bộ đề thi trắc nghiệm phục vụ luyện tập và củng cố kiến thức học phần."}
+                      {quiz.description ||
+                        "Bộ đề thi trắc nghiệm phục vụ luyện tập và củng cố kiến thức học phần."}
                     </p>
                   </div>
 
                   {/* Card Footer: Author with Avatar & CTA */}
                   <div className="flex items-center justify-between pt-3 border-t border-border/50 mt-auto">
                     <div className="flex items-center gap-2 min-w-0">
-                      <img 
-                        src={quiz.author?.avatar || "/images/avatar-student.jpg"} 
-                        alt="Avatar" 
-                        className="w-6 h-6 rounded-full object-cover border border-border shrink-0" 
+                      <img
+                        src={quiz.author?.avatar || "/images/avatar-student.jpg"}
+                        alt="Avatar"
+                        className="w-6 h-6 rounded-full object-cover border border-border shrink-0"
                       />
                       <span className="text-xs text-muted-foreground truncate max-w-[110px]">
                         {quiz.author?.name || "EduQuiz"}
@@ -443,7 +490,7 @@ export default function QuizzesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <button 
+                      <button
                         title="Xem & In đề thi ra giấy"
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                         onClick={(e) => {
@@ -451,18 +498,18 @@ export default function QuizzesPage() {
                           setPrintingQuiz(quiz);
                         }}
                       >
-                        <Printer className="w-3.5 h-3.5" />
+                        <Printer className="w-4 h-4" />
                       </button>
 
-                      <button 
-                        className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:shadow-md transition-all active:scale-95 group/btn"
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedQuiz(quiz);
                         }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs transition-all shadow-xs hover:shadow active:scale-[0.98]"
                       >
                         <span>Luyện tập</span>
-                        <Play className="w-3 h-3 fill-current transition-transform group-hover/btn:translate-x-0.5" />
+                        <Play className="w-3 h-3 fill-current" />
                       </button>
                     </div>
                   </div>
@@ -473,28 +520,32 @@ export default function QuizzesPage() {
         </div>
       )}
 
-      {/* Render Modals */}
-      <QuizSettingsModal 
-        isOpen={!!selectedQuiz}
-        onClose={() => setSelectedQuiz(null)}
-        quizTitle={selectedQuiz?.title}
-        onConfirm={handleStartQuiz}
-      />
+      {/* Start Quiz Settings Modal */}
+      {selectedQuiz && (
+        <QuizSettingsModal
+          quiz={selectedQuiz}
+          onClose={() => setSelectedQuiz(null)}
+          onStart={handleStartQuiz}
+        />
+      )}
 
+      {/* Import / Upload Modal */}
       <ImportQuizModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onSuccess={() => {
           setShowImportModal(false);
-          fetchQuizzes();
+          fetchQuizzes(debouncedSearch, adminViewAll);
         }}
       />
 
-      <PrintQuizModal
-        isOpen={!!printingQuiz}
-        onClose={() => setPrintingQuiz(null)}
-        quiz={printingQuiz}
-      />
+      {/* Print Exam Sheet Modal */}
+      {printingQuiz && (
+        <PrintQuizModal
+          quiz={printingQuiz}
+          onClose={() => setPrintingQuiz(null)}
+        />
+      )}
     </div>
   );
 }

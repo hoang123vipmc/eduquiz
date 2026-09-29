@@ -28,7 +28,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   
   const studentLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Đề thi của tôi", href: "/dashboard/quizzes", icon: Library },
+    { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
+    { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
     { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
     { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },
@@ -36,11 +37,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     { name: "Cài đặt", href: "/dashboard/settings", icon: Settings },
   ];
 
-
-
   const adminLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Đề thi của tôi", href: "/dashboard/quizzes", icon: Library },
+    { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
+    { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
     { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
     { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },

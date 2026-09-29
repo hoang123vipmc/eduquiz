@@ -14,9 +14,20 @@ class QuizController extends Controller
     public function index(Request $request)
     {
         $user = $request->user('sanctum');
-        if ($user && $request->boolean('mine')) {
+
+        if ($request->boolean('mine')) {
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng đăng nhập để xem danh sách đề thi của bạn.',
+                ], 401);
+            }
             $query = Quiz::with(['user', 'category'])->where('user_id', $user->id);
+        } elseif ($user && $user->role === 'admin' && $request->boolean('admin_all')) {
+            // Admin có quyền kiểm soát toàn bộ đề thi trong hệ thống
+            $query = Quiz::with(['user', 'category']);
         } else {
+            // Danh sách đề thi công khai chung cho mọi học viên
             $query = Quiz::with(['user', 'category'])->where('status', 'published')->where('visibility', 'public');
         }
         
@@ -32,7 +43,7 @@ class QuizController extends Controller
             });
         }
 
-        $quizzes = $query->latest('id')->paginate($request->get('per_page', 15));
+        $quizzes = $query->latest('id')->paginate($request->get('per_page', 50));
 
         return response()->json([
             'success' => true,
