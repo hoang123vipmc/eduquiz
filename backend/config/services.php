@@ -36,9 +36,9 @@ return [
     ],
 
     'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID', 'mock-client-id'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET', 'mock-client-secret'),
-        'redirect' => env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/v1/auth/callback/google'),
+        'client_id' => trim((string) env('GOOGLE_CLIENT_ID', 'mock-client-id'), " \t\n\r\0\x0B\"'"),
+        'client_secret' => trim((string) env('GOOGLE_CLIENT_SECRET', 'mock-client-secret'), " \t\n\r\0\x0B\"'"),
+        'redirect' => trim((string) env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/v1/auth/callback/google'), " \t\n\r\0\x0B\"'"),
     ],
 
 ];
