@@ -85,6 +85,8 @@ class QuestionController extends Controller
         $search = $request->query('search', '');
         $difficulty = $request->query('difficulty', '');
         
+        $quizId = $request->query('quiz_id');
+        
         $query = Question::with('quiz:id,title', 'options')
             ->whereHas('quiz', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
@@ -98,8 +100,17 @@ class QuestionController extends Controller
             $query->where('difficulty', $difficulty);
         }
 
+        if ($quizId) {
+            $query->where('quiz_id', $quizId);
+        }
+
         $questions = $query->orderBy('created_at', 'desc')->paginate(15);
         $request->attributes->set('quiz_owner_id', $userId);
+
+        $userQuizzes = Quiz::where('user_id', $userId)
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -107,7 +118,8 @@ class QuestionController extends Controller
                 'data' => QuestionResource::collection($questions->items()),
                 'current_page' => $questions->currentPage(),
                 'last_page' => $questions->lastPage(),
-                'total' => $questions->total()
+                'total' => $questions->total(),
+                'user_quizzes' => $userQuizzes
             ]
         ]);
     }

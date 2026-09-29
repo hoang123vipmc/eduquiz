@@ -13,9 +13,14 @@ class QuizController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Quiz::with(['user', 'category'])->where('status', 'published')->where('visibility', 'public');
+        $user = $request->user('sanctum');
+        if ($user && $request->boolean('mine')) {
+            $query = Quiz::with(['user', 'category'])->where('user_id', $user->id);
+        } else {
+            $query = Quiz::with(['user', 'category'])->where('status', 'published')->where('visibility', 'public');
+        }
         
-        if ($request->has('category_id')) {
+        if ($request->has('category_id') && $request->category_id !== 'all') {
             $query->where('category_id', $request->category_id);
         }
 

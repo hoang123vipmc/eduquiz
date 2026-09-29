@@ -16,7 +16,10 @@ import {
   ChevronUp, 
   HelpCircle,
   Eye,
-  Filter
+  Filter,
+  Printer,
+  Share2,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +31,34 @@ export default function QuizResultPage() {
   const [error, setError] = useState<string | null>(null);
   const [showReview, setShowReview] = useState(true);
   const [filterMode, setFilterMode] = useState<"all" | "wrong" | "correct">("all");
+  const [copied, setCopied] = useState(false);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = result?.attempt?.quiz?.title || "Kết quả thi";
+    const text = `Tôi vừa hoàn thành bài thi "${title}" với điểm số ${result?.score}/100 trên EduQuiz!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch (err) {
+        // Fallback to clipboard if share was cancelled or failed
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      alert("Liên kết: " + url);
+    }
+  };
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -176,8 +207,14 @@ export default function QuizResultPage() {
           </div>
         </div>
 
+        {/* Printable Official Header (only visible when printing) */}
+        <div className="hidden print:block text-center border-b border-gray-300 pb-4 mb-6">
+          <h1 className="text-2xl font-bold uppercase tracking-wider text-black">EduQuiz — Báo Cáo Kết Quả Bài Thi</h1>
+          <p className="text-sm text-gray-600 mt-1">Hệ thống khảo sát & Đánh giá năng lực học tập trực tuyến</p>
+        </div>
+
         {/* Buttons Action Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 print:hidden">
           <button 
             onClick={() => router.push('/dashboard')}
             className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
@@ -198,6 +235,30 @@ export default function QuizResultPage() {
               <AlertCircle className="w-4 h-4" /> Làm lại {result.wrong_answers} câu sai
             </button>
           )}
+          <button
+            onClick={handlePrint}
+            title="In hoặc lưu kết quả bài thi dưới dạng tệp PDF"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+          >
+            <Printer className="w-4 h-4 text-primary" /> In / Lưu PDF
+          </button>
+          <button
+            onClick={handleShare}
+            title="Chia sẻ kết quả bài thi"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-500" />
+                <span className="text-emerald-500">Đã copy link!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4 text-blue-500" />
+                <span>Chia sẻ</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Review Breakdown Section */}
@@ -215,7 +276,7 @@ export default function QuizResultPage() {
               </div>
 
               {/* Filters */}
-              <div className="flex items-center gap-1.5 bg-muted p-1 rounded-xl self-start sm:self-auto text-xs font-semibold">
+              <div className="flex items-center gap-1.5 bg-muted p-1 rounded-xl self-start sm:self-auto text-xs font-semibold print:hidden">
                 <button
                   onClick={() => setFilterMode("all")}
                   className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}

@@ -22,11 +22,13 @@ import {
   ArrowUpDown,
   Filter,
   FileQuestion,
-  Target
+  Target,
+  Printer
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
 import { ImportQuizModal } from "@/components/quiz/ImportQuizModal";
+import { PrintQuizModal } from "@/components/quiz/PrintQuizModal";
 import { cn } from "@/lib/utils";
 
 // Helper to determine subject theme and icons based on title/category
@@ -75,6 +77,7 @@ export default function QuizzesPage() {
   const router = useRouter();
 
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
+  const [printingQuiz, setPrintingQuiz] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -426,16 +429,29 @@ export default function QuizzesPage() {
                       </span>
                     </div>
 
-                    <button 
-                      className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:shadow-md transition-all active:scale-95 group/btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedQuiz(quiz);
-                      }}
-                    >
-                      <span>Luyện tập</span>
-                      <Play className="w-3 h-3 fill-current transition-transform group-hover/btn:translate-x-0.5" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button 
+                        title="Xem & In đề thi ra giấy"
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPrintingQuiz(quiz);
+                        }}
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button 
+                        className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:shadow-md transition-all active:scale-95 group/btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedQuiz(quiz);
+                        }}
+                      >
+                        <span>Luyện tập</span>
+                        <Play className="w-3 h-3 fill-current transition-transform group-hover/btn:translate-x-0.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -459,6 +475,12 @@ export default function QuizzesPage() {
           setShowImportModal(false);
           fetchQuizzes();
         }}
+      />
+
+      <PrintQuizModal
+        isOpen={!!printingQuiz}
+        onClose={() => setPrintingQuiz(null)}
+        quiz={printingQuiz}
       />
     </div>
   );

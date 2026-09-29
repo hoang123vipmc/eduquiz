@@ -68,27 +68,47 @@ class UserController extends Controller
     public function history(Request $request)
     {
         $userId = $request->user()->id;
+        $search = trim($request->query('search', ''));
+        $status = $request->query('status', ''); // 'passed', 'failed', 'all'
+        $perPage = (int) $request->query('per_page', 15);
 
-        $history = Result::with('attempt.quiz:id,title,category_id,total_questions,duration_minutes,slug', 'attempt.quiz.category:id,name,icon')
-            ->whereHas('attempt', function ($query) use ($userId) {
+        $query = Result::with('attempt.quiz:id,title,category_id,total_questions,duration_minutes,slug,passing_score', 'attempt.quiz.category:id,name,icon')
+            ->whereHas('attempt', function ($query) use ($userId, $search) {
                 $query->where('user_id', $userId);
-            })
-            ->orderBy('created_at', 'desc')
-            ->take(15)
-            ->get()
-            ->map(function ($result) {
-                // Đưa quiz ra cấp độ root của history item để Frontend dễ sử dụng
-                $item = $result->toArray();
-                $item['quiz'] = $result->attempt->quiz ?? null;
-                $quizTotal = $result->attempt?->quiz?->total_questions;
-                $calculatedTotal = $result->correct_answers + $result->wrong_answers + ($result->skipped_answers ?? 0);
-                $item['total_questions'] = $quizTotal ?: ($calculatedTotal > 0 ? $calculatedTotal : null);
-                return $item;
+                if ($search !== '') {
+                    $query->whereHas('quiz', function ($quizQuery) use ($search) {
+                        $quizQuery->where('title', 'like', "%{$search}%");
+                    });
+                }
             });
+
+        if ($status === 'passed') {
+            $query->where('score', '>=', 50);
+        } elseif ($status === 'failed') {
+            $query->where('score', '<', 50);
+        }
+
+        $paginator = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        $history = collect($paginator->items())->map(function ($result) {
+            // Đưa quiz ra cấp độ root của history item để Frontend dễ sử dụng
+            $item = $result->toArray();
+            $item['quiz'] = $result->attempt->quiz ?? null;
+            $quizTotal = $result->attempt?->quiz?->total_questions;
+            $calculatedTotal = $result->correct_answers + $result->wrong_answers + ($result->skipped_answers ?? 0);
+            $item['total_questions'] = $quizTotal ?: ($calculatedTotal > 0 ? $calculatedTotal : null);
+            return $item;
+        });
 
         return response()->json([
             'success' => true,
-            'data' => $history
+            'data' => $history,
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+            ]
         ]);
     }
 

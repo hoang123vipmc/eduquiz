@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuizStore } from "@/store/quizStore";
-import { Clock, ChevronLeft, ChevronRight, CheckCircle2, X, Loader2, AlertCircle } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, CheckCircle2, X, Loader2, AlertCircle, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
 
@@ -41,6 +41,7 @@ const QuestionGridButton = React.memo(({
   isAnswered, 
   isCorrect, 
   isWrong, 
+  isFlagged,
   onSelect 
 }: any) => {
   let gridClass = "bg-muted text-muted-foreground hover:bg-muted/80 border-transparent";
@@ -59,11 +60,19 @@ const QuestionGridButton = React.memo(({
       onClick={() => onSelect(idx)}
       aria-label={`Câu hỏi ${idx + 1}`}
       className={cn(
-        "min-h-[44px] rounded-xl font-semibold text-[13px] flex items-center justify-center transition-all duration-150 hover:scale-105 border-2 focus-visible:ring-2 focus-visible:ring-primary",
+        "relative min-h-[44px] rounded-xl font-semibold text-[13px] flex items-center justify-center transition-all duration-150 hover:scale-105 border-2 focus-visible:ring-2 focus-visible:ring-primary",
         isCurrent ? "border-primary bg-card text-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-background shadow-md" : gridClass
       )}
     >
       {idx + 1}
+      {isFlagged && (
+        <span 
+          title="Câu hỏi đã đánh dấu xem lại" 
+          className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center shadow-xs text-[9px] font-black"
+        >
+          ⚑
+        </span>
+      )}
     </button>
   );
 });
@@ -89,6 +98,16 @@ export default function QuizPlayerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [autoNextDelay, setAutoNextDelay] = useState(0);
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
+
+  const toggleFlagCurrent = () => {
+    const q = questions[currentQuestionIndex];
+    if (!q) return;
+    setFlaggedQuestions(prev => ({
+      ...prev,
+      [q.id]: !prev[q.id]
+    }));
+  };
 
   // Timer tick interval
   useEffect(() => {
@@ -316,7 +335,23 @@ export default function QuizPlayerPage() {
             className="max-w-4xl mx-auto flex flex-col h-full animate-in fade-in slide-in-from-right-3 duration-200 ease-out motion-reduce:animate-none"
           >
             <div className="flex items-center justify-between text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-6">
-              <span>Câu hỏi {currentQuestionIndex + 1} / {questions.length}</span>
+              <div className="flex items-center gap-3">
+                <span>Câu hỏi {currentQuestionIndex + 1} / {questions.length}</span>
+                <button
+                  type="button"
+                  onClick={toggleFlagCurrent}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                    flaggedQuestions[currentQuestion.id]
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-amber-500/10"
+                      : "bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80"
+                  )}
+                  title="Đánh dấu câu hỏi này để xem lại trước khi nộp bài"
+                >
+                  <Flag className={cn("w-3.5 h-3.5", flaggedQuestions[currentQuestion.id] && "fill-amber-500 text-amber-500")} />
+                  <span>{flaggedQuestions[currentQuestion.id] ? "Đã đánh dấu" : "Đánh dấu xem lại"}</span>
+                </button>
+              </div>
               <span className="bg-muted px-3 py-1 rounded-full border border-border text-primary font-bold">1 Điểm</span>
             </div>
             
@@ -457,6 +492,7 @@ export default function QuizPlayerPage() {
                     isAnswered={isAnswered}
                     isCorrect={isCorrect}
                     isWrong={isWrong}
+                    isFlagged={!!flaggedQuestions[q.id]}
                     onSelect={setCurrentQuestionIndex}
                   />
                 );
@@ -465,10 +501,16 @@ export default function QuizPlayerPage() {
           </div>
           
           {/* Navigator Footer Stats */}
-          <div className="p-4 md:p-6 border-t border-border bg-card/80 grid grid-cols-2 gap-4 text-sm font-medium shrink-0">
+          <div className="p-4 md:p-6 border-t border-border bg-card/80 grid grid-cols-3 gap-2 text-sm font-medium shrink-0">
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Đã làm</span>
               <span className="text-foreground text-lg">{Object.keys(answers).length}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Đánh dấu</span>
+              <span className="text-amber-600 dark:text-amber-400 font-bold text-lg">
+                {Object.values(flaggedQuestions).filter(Boolean).length}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground text-[11px] uppercase tracking-wider">Còn lại</span>
