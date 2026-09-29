@@ -51,14 +51,14 @@ class SocialiteController extends Controller
                     'password'    => Hash::make(Str::random(32)),
                     'avatar'      => $socialUser->getAvatar(),
                     'role'        => $role,
-                    'provider_id' => $socialUser->getId(),
+                    'provider_id' => (string) $socialUser->getId(),
                 ]);
             } else {
                 if ($socialUser->getAvatar() && !$user->avatar) {
                     $user->avatar = $socialUser->getAvatar();
                 }
                 if ($socialUser->getId() && !$user->provider_id) {
-                    $user->provider_id = $socialUser->getId();
+                    $user->provider_id = (string) $socialUser->getId();
                 }
                 $user->last_login_at = now();
                 $user->save();
