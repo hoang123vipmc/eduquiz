@@ -521,13 +521,12 @@ export default function MyQuizzesPage() {
       )}
 
       {/* Start Quiz Settings Modal */}
-      {selectedQuiz && (
-        <QuizSettingsModal
-          quiz={selectedQuiz}
-          onClose={() => setSelectedQuiz(null)}
-          onStart={handleStartQuiz}
-        />
-      )}
+      <QuizSettingsModal
+        isOpen={!!selectedQuiz}
+        onClose={() => setSelectedQuiz(null)}
+        quizTitle={selectedQuiz?.title}
+        onConfirm={handleStartQuiz}
+      />
 
       {/* Import / Upload Modal */}
       <ImportQuizModal
@@ -542,6 +541,7 @@ export default function MyQuizzesPage() {
       {/* Print Exam Sheet Modal */}
       {printingQuiz && (
         <PrintQuizModal
+          isOpen={!!printingQuiz}
           quiz={printingQuiz}
           onClose={() => setPrintingQuiz(null)}
         />

@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { 
   LayoutDashboard, 
   Library, 
+  BookOpen,
   History, 
   Settings, 
   Users, 
