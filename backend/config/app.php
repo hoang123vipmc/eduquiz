@@ -41,6 +41,10 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'frontend_url' => env('FRONTEND_URL', 'https://eduquiz-delta.vercel.app'),
+
+    'admin_email' => env('ADMIN_EMAIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

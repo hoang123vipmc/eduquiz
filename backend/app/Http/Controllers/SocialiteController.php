@@ -25,35 +25,52 @@ class SocialiteController extends Controller
         return redirect()->away($targetUrl);
     }
 
-    public function callback($provider)
+    public function callback(Request $request, $provider)
     {
+        $frontendUrl = rtrim(config('app.frontend_url') ?: env('FRONTEND_URL') ?: 'https://eduquiz-delta.vercel.app', '/');
+
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
             
             $user = User::where('email', $socialUser->getEmail())->first();
 
             if (!$user) {
-                $adminEmail = env('ADMIN_EMAIL');
+                $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
                 $role = ($adminEmail && strtolower($socialUser->getEmail()) === strtolower($adminEmail))
                     ? 'admin' : 'student';
 
+                $userName = $socialUser->getName() ?: $socialUser->getNickname();
+                if (!$userName) {
+                    $parts = explode('@', $socialUser->getEmail() ?? 'user');
+                    $userName = $parts[0] ?: 'User';
+                }
+
                 $user = User::create([
-                    'name'     => $socialUser->getName() ?? $socialUser->getNickname(),
-                    'email'    => $socialUser->getEmail(),
-                    'password' => Hash::make(Str::random(24)),
-                    'avatar'   => $socialUser->getAvatar(),
-                    'role'     => $role,
+                    'name'        => $userName,
+                    'email'       => $socialUser->getEmail(),
+                    'password'    => Hash::make(Str::random(32)),
+                    'avatar'      => $socialUser->getAvatar(),
+                    'role'        => $role,
+                    'provider_id' => $socialUser->getId(),
                 ]);
+            } else {
+                if ($socialUser->getAvatar() && !$user->avatar) {
+                    $user->avatar = $socialUser->getAvatar();
+                }
+                if ($socialUser->getId() && !$user->provider_id) {
+                    $user->provider_id = $socialUser->getId();
+                }
+                $user->last_login_at = now();
+                $user->save();
             }
 
             // ── Security: Reject banned users ──────────────────────────────────
             if ($user->is_banned) {
-                $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-                return redirect()->to($frontendUrl . '/login?error=banned');
+                return redirect()->away($frontendUrl . '/login?error=banned');
             }
 
             // ── Sync ADMIN_EMAIL on login ────────────────────────────────────
-            $adminEmail = env('ADMIN_EMAIL');
+            $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
             if ($adminEmail && strtolower($user->email) === strtolower($adminEmail) && $user->role !== 'admin') {
                 $user->role = 'admin';
                 $user->save();
@@ -62,11 +79,19 @@ class SocialiteController extends Controller
             $token = $user->createToken('auth_token')->plainTextToken;
 
             // Chuyển hướng về frontend kèm token
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
-            return redirect()->to($frontendUrl . '/auth/callback?token=' . $token);
+            return redirect()->away($frontendUrl . '/auth/callback?token=' . $token);
             
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Đăng nhập thất bại.'], 400);
+        } catch (\Throwable $e) {
+            \Log::error('OAuth login failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đăng nhập thất bại: ' . $e->getMessage()
+                ], 400);
+            }
+
+            return redirect()->away($frontendUrl . '/login?error=' . urlencode($e->getMessage()));
         }
     }
 }
