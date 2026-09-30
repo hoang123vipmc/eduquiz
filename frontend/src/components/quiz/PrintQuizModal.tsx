@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { X, Printer, Loader2, BookOpen, Clock, FileText, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 
 interface PrintQuizModalProps {
   isOpen: boolean;
@@ -148,9 +149,10 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
               <div className="space-y-6 pt-2">
                 {questions.map((q, qIdx) => (
                   <div key={q.id || qIdx} className="space-y-2.5 break-inside-avoid">
-                    <p className="font-bold text-sm md:text-base text-foreground leading-relaxed">
-                      <span className="text-primary font-black">Câu {qIdx + 1}:</span> {q.question_text}
-                    </p>
+                    <div className="font-bold text-sm md:text-base text-foreground leading-relaxed">
+                      <span className="text-primary font-black">Câu {qIdx + 1}:</span>{" "}
+                      <FormattedText text={q.question_text} />
+                    </div>
 
                     {/* Options Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-2">
@@ -167,7 +169,9 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
                             )}
                           >
                             <span className="font-bold shrink-0">{letters[optIdx] || optIdx + 1}.</span>
-                            <span className="flex-1">{opt.option_text}</span>
+                            <span className="flex-1">
+                              <FormattedText text={cleanOptionPrefix(opt.option_text)} />
+                            </span>
                             {isCorrect && (
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                             )}
@@ -179,7 +183,8 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
                     {/* Explanation */}
                     {showAnswers && q.explanation && (
                       <div className="pl-3 py-1 text-xs text-muted-foreground italic border-l-2 border-primary/40">
-                        <strong>Giải thích:</strong> {q.explanation}
+                        <strong>Giải thích:</strong>{" "}
+                        <FormattedText text={q.explanation} />
                       </div>
                     )}
                   </div>

@@ -20,6 +20,7 @@ import {
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
+import { FormattedText, cleanInlineText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 
 interface Option {
   id: number;
@@ -248,8 +249,8 @@ export default function QuestionBankPage() {
                     className="border-b border-border last:border-0 hover:bg-muted/40 transition-colors cursor-pointer group"
                   >
                     <td className="p-4">
-                      <p className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors" title={q.question_text}>
-                        {q.question_text}
+                      <p className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors" title={cleanInlineText(q.question_text)}>
+                        <FormattedText text={q.question_text} />
                       </p>
                     </td>
                     <td className="p-4">
@@ -366,7 +367,7 @@ export default function QuestionBankPage() {
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Câu hỏi:</p>
                 <div className="p-4 rounded-xl bg-muted/50 border border-border text-foreground font-semibold text-base leading-relaxed">
-                  {activeQuestion.question_text}
+                  <FormattedText text={activeQuestion.question_text} />
                 </div>
               </div>
 
@@ -398,7 +399,7 @@ export default function QuestionBankPage() {
                             {letters[idx] || idx + 1}
                           </div>
                           <div className="flex-1 text-sm leading-relaxed pt-0.5">
-                            {opt.option_text}
+                            <FormattedText text={cleanOptionPrefix(opt.option_text)} />
                           </div>
                           {isCorrect && (
                             <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-md shrink-0">
@@ -418,9 +419,9 @@ export default function QuestionBankPage() {
                   <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
                     <Sparkles className="w-4 h-4" /> Lời giải / Giải thích:
                   </div>
-                  <p className="text-sm text-foreground/90 leading-relaxed pt-1">
-                    {activeQuestion.explanation}
-                  </p>
+                  <div className="text-sm text-foreground/90 leading-relaxed pt-1">
+                    <FormattedText text={activeQuestion.explanation} />
+                  </div>
                 </div>
               )}
             </div>

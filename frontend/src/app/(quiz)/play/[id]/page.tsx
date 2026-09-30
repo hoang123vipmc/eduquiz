@@ -7,10 +7,7 @@ import { Clock, ChevronLeft, ChevronRight, CheckCircle2, X, Loader2, AlertCircle
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
 
-const cleanAnswerText = (text: string) => {
-  if (!text) return '';
-  return text.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim();
-};
+import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 
 const QuizTimer = () => {
   const remainingTime = useQuizStore(s => s.remainingTime);
@@ -339,7 +336,7 @@ export default function QuizPlayerPage() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 relative z-10 scrollbar-hide">
           <div 
             key={currentQuestion.id}
-            className="max-w-4xl mx-auto flex flex-col h-full animate-in fade-in slide-in-from-right-3 duration-200 ease-out motion-reduce:animate-none"
+            className="max-w-4xl mx-auto flex flex-col min-h-full animate-in fade-in slide-in-from-right-3 duration-200 ease-out motion-reduce:animate-none"
           >
             <div className="flex items-center justify-between text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-6">
               <div className="flex items-center gap-3">
@@ -364,7 +361,7 @@ export default function QuizPlayerPage() {
             
             <div className="bg-card rounded-[20px] border border-border p-6 md:p-10 shadow-xs mb-6 shrink-0">
               <h2 className="text-[20px] md:text-[24px] font-semibold leading-[1.6] text-foreground break-words">
-                {currentQuestion.question_text}
+                <FormattedText text={currentQuestion.question_text} />
               </h2>
             </div>
             
@@ -418,7 +415,7 @@ export default function QuizPlayerPage() {
                       {letters[idx]}
                     </div>
                     <span className={cn("text-[15px] md:text-[16px] leading-relaxed break-words flex-1", textClass)}>
-                      {cleanAnswerText(option.option_text)}
+                      <FormattedText text={cleanOptionPrefix(option.option_text)} />
                     </span>
                   </div>
                 );

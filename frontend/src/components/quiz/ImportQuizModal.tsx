@@ -3,6 +3,7 @@ import { X, Upload, FileText, Loader2, Edit3, ArrowLeft, HelpCircle, AlertCircle
 import { cn } from '@/lib/utils';
 import api from '@/lib/axios';
 import { FormatGuideModal } from './FormatGuideModal';
+import { FormattedText, cleanOptionPrefix } from './FormattedText';
 import { parseQuizText } from '@/lib/utils/quizParser';
 
 interface ImportQuizModalProps {
@@ -408,10 +409,10 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                     const hasCorrect = q.options.some(o => o.isCorrect);
                     return (
                       <div key={idx} className={cn("p-4 bg-muted border rounded-xl transition-all", hasCorrect ? "border-border" : "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.1)]")}>
-                        <p className="text-sm font-semibold text-foreground mb-3 break-words whitespace-pre-wrap">
+                        <div className="text-sm font-semibold text-foreground mb-3 break-words">
                           <span className="text-[#4F7CFF] mr-2">Câu {idx + 1}:</span>
-                          {q.questionText}
-                        </p>
+                          <FormattedText text={q.questionText} />
+                        </div>
                         <div className="space-y-2">
                           {q.options.map((opt, oIdx) => (
                             <div 
@@ -423,7 +424,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                                   : "bg-secondary border-border text-muted-foreground"
                               )}
                             >
-                              {opt.text}
+                              <FormattedText text={cleanOptionPrefix(opt.text)} />
                             </div>
                           ))}
                         </div>

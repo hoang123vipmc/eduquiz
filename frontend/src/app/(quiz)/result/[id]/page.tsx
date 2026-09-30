@@ -22,6 +22,7 @@ import {
   Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 
 export default function QuizResultPage() {
   const { id } = useParams();
@@ -354,9 +355,9 @@ export default function QuizResultPage() {
                     </div>
 
                     {/* Question text */}
-                    <p className="text-[16px] font-semibold text-foreground mb-5 leading-relaxed break-words">
-                      {q.question_text}
-                    </p>
+                    <div className="text-[16px] font-semibold text-foreground mb-5 leading-relaxed break-words">
+                      <FormattedText text={q.question_text} />
+                    </div>
 
                     {/* Options */}
                     <div className="space-y-2.5">
@@ -387,7 +388,9 @@ export default function QuizResultPage() {
                               <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0", badgeClass)}>
                                 {letters[optIdx] || optIdx + 1}
                               </span>
-                              <span className="break-words min-w-0 flex-1">{opt.option_text?.replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, '').trim()}</span>
+                              <span className="break-words min-w-0 flex-1">
+                                <FormattedText text={cleanOptionPrefix(opt.option_text)} />
+                              </span>
                             </div>
                             <div className="shrink-0 text-xs font-bold pl-2">
                               {isOptCorrect && <span className="text-emerald-700 dark:text-emerald-400">Đáp án đúng</span>}
@@ -401,8 +404,8 @@ export default function QuizResultPage() {
                     {/* Explanation if present */}
                     {q.explanation && (
                       <div className="mt-4 p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                        <span className="font-bold text-[#4F7CFF]">Giải thích: </span>
-                        {q.explanation}
+                        <span className="font-bold text-[#4F7CFF] block mb-1">Giải thích:</span>
+                        <FormattedText text={q.explanation} />
                       </div>
                     )}
                   </div>
