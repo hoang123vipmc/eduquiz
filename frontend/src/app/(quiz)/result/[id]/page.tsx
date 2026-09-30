@@ -229,7 +229,15 @@ export default function QuizResultPage() {
           </button>
           {result.wrong_answers > 0 && (
             <button 
-              onClick={() => router.push(`/play/${result.attempt?.quiz_id}?retry_attempt=${result.attempt_id}`)}
+              onClick={() => {
+                const quizId = result.attempt?.quiz_id || result.quiz_id || (result.attempt && result.attempt.quiz ? result.attempt.quiz.id : null);
+                const attemptId = result.attempt_id || result.attempt?.id || id;
+                if (quizId) {
+                  router.push(`/play/${quizId}?retry_attempt=${attemptId}`);
+                } else {
+                  router.push(`/play/${id}?retry_attempt=${attemptId}`);
+                }
+              }}
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
             >
               <AlertCircle className="w-4 h-4" /> Làm lại {result.wrong_answers} câu sai

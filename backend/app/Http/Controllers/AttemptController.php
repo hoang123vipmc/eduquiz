@@ -286,7 +286,24 @@ class AttemptController extends Controller
 
     public function retryWrong(Request $request, $id)
     {
-        $oldAttempt = QuizAttempt::with('answers')->where('user_id', $request->user()->id)->findOrFail($id);
+        // Cho phép tìm theo cả attempt_id hoặc result_id để tránh 404
+        $oldAttempt = QuizAttempt::with('answers')
+            ->where('user_id', $request->user()->id)
+            ->where(function ($q) use ($id) {
+                $q->where('id', $id)
+                  ->orWhereHas('result', function ($rq) use ($id) {
+                      $rq->where('id', $id);
+                  });
+            })
+            ->first();
+
+        if (!$oldAttempt) {
+            $oldAttempt = QuizAttempt::with('answers')->where('user_id', $request->user()->id)->find($id);
+        }
+
+        if (!$oldAttempt) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy lượt làm bài thi trước đó.'], 404);
+        }
 
         if ($oldAttempt->status !== 'submitted') {
             return response()->json(['success' => false, 'message' => 'Bài thi trước đó chưa hoàn thành.'], 400);
@@ -305,8 +322,10 @@ class AttemptController extends Controller
 
             // Copy lại các đáp án đúng từ attempt cũ (Bulk insert tối ưu DB query)
             $answersToInsert = [];
+            $correctQuestionIds = [];
             foreach ($oldAttempt->answers as $ans) {
                 if ($ans->is_correct) {
+                    $correctQuestionIds[] = $ans->question_id;
                     $answersToInsert[] = [
                         'attempt_id' => $newAttempt->id,
                         'question_id' => $ans->question_id,
@@ -330,20 +349,29 @@ class AttemptController extends Controller
 
             $quiz = $newAttempt->quiz;
             $request->attributes->set('quiz_owner_id', $quiz->user_id);
+
+            $allQuestionIds = $quiz->questions()->pluck('id')->toArray();
+            $wrongQuestionIds = array_values(array_diff($allQuestionIds, $correctQuestionIds));
+
+            $answersMap = (object) $newAttempt->answers()->pluck('option_id', 'question_id')->toArray();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Bắt đầu làm lại các câu sai.',
                 'data' => [
                     'attempt_id' => $newAttempt->id,
+                    'quiz_id' => $quiz->id,
                     'mode' => $newAttempt->mode,
                     'remaining_time' => null,
-                    'answers' => $newAttempt->answers()->pluck('option_id', 'question_id'),
+                    'answers' => $answersMap,
+                    'wrong_question_ids' => $wrongQuestionIds,
                     'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
                 ]
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Lỗi tạo bài thi mới.'], 500);
+            \Log::error('retryWrong error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => 'Lỗi tạo bài thi mới: ' . $e->getMessage()], 500);
         }
     }
 
@@ -355,14 +383,15 @@ class AttemptController extends Controller
             return response()->json(['success' => false, 'message' => 'Chỉ có thể xóa đáp án sai khi bài thi đang diễn ra.'], 400);
         }
 
-        // Xóa tất cả các câu trả lời sai của attempt này
+        // Xóa tất cả các câu trả lời sai của attempt này (Dùng boolean false tương thích chuẩn PostgreSQL)
         UserAnswer::where('attempt_id', $attempt->id)
-            ->where('is_correct', '!=', 1)
+            ->where('is_correct', false)
             ->delete();
 
         // Load lại answers bằng fresh query để đảm bảo đồng bộ
-        $answers = UserAnswer::where('attempt_id', $attempt->id)
-            ->pluck('option_id', 'question_id');
+        $answers = (object) UserAnswer::where('attempt_id', $attempt->id)
+            ->pluck('option_id', 'question_id')
+            ->toArray();
 
         return response()->json([
             'success' => true,

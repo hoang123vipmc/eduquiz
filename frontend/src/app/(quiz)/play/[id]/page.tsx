@@ -138,7 +138,14 @@ export default function QuizPlayerPage() {
 
     try {
       if (retryAttemptId) {
-        await retryWrong(Number(retryAttemptId));
+        const retryData = await retryWrong(Number(retryAttemptId));
+        if (retryData && retryData.questions) {
+          const answersMap = retryData.answers || {};
+          const firstWrongIdx = retryData.questions.findIndex((q: any) => !answersMap[q.id]);
+          if (firstWrongIdx !== -1) {
+            setCurrentQuestionIndex(firstWrongIdx);
+          }
+        }
       } else {
         const config = {
           mode: params.get('mode') || 'exam',
@@ -447,16 +454,32 @@ export default function QuizPlayerPage() {
                 onClick={async () => {
                   setClearing(true);
                   try {
-                    await clearWrongAnswers();
-                    const firstWrong = questions.findIndex(q => {
+                    // Tìm các vị trí câu sai trước khi xóa khỏi state
+                    const wrongIndices: number[] = [];
+                    questions.forEach((q, idx) => {
                       const ansId = answers[q.id];
-                      if (!ansId) return false;
-                      const opt = q.options.find(o => o.id === ansId);
-                      return opt && !(opt.is_correct === 1 || opt.is_correct === true || String(opt.is_correct) === '1' || String(opt.is_correct) === 'true');
+                      if (ansId) {
+                        const opt = q.options.find(o => o.id === ansId);
+                        const isOptCorrect = opt && (opt.is_correct === 1 || opt.is_correct === true || String(opt.is_correct) === '1' || String(opt.is_correct) === 'true');
+                        if (!isOptCorrect) {
+                          wrongIndices.push(idx);
+                        }
+                      }
                     });
-                    if (firstWrong !== -1) setCurrentQuestionIndex(firstWrong);
+
+                    if (wrongIndices.length === 0) {
+                      alert("Tất cả câu trả lời hiện tại đều đúng, không có câu sai cần làm lại!");
+                      return;
+                    }
+
+                    await clearWrongAnswers();
+
+                    if (wrongIndices.length > 0) {
+                      setCurrentQuestionIndex(wrongIndices[0]);
+                    }
                   } catch (e) {
-                    console.error(e);
+                    console.error("Lỗi xóa câu sai:", e);
+                    alert("Có lỗi khi làm mới các câu sai. Vui lòng thử lại.");
                   } finally {
                     setClearing(false);
                   }
