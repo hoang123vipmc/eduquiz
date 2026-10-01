@@ -14,6 +14,7 @@ import {
   Loader2, 
   AlertCircle, 
   Flag, 
+  Bookmark,
   Monitor, 
   Sparkles, 
   LayoutGrid,
@@ -126,6 +127,22 @@ export default function QuizPlayerPage() {
       ...prev,
       [q.id]: !prev[q.id]
     }));
+  };
+
+  const jumpToNextSaved = () => {
+    const savedIndices = questions
+      .map((q, idx) => flaggedQuestions[q.id] ? idx : -1)
+      .filter(idx => idx !== -1);
+    
+    if (savedIndices.length === 0) return;
+
+    const nextIdx = savedIndices.find(idx => idx > currentQuestionIndex);
+    if (nextIdx !== undefined) {
+      setCurrentQuestionIndex(nextIdx);
+    } else {
+      // Quay vòng lại câu đã lưu đầu tiên
+      setCurrentQuestionIndex(savedIndices[0]);
+    }
   };
 
   // Timer tick interval
@@ -374,9 +391,11 @@ export default function QuizPlayerPage() {
   if (theme === 'itest') {
     const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
     const currentAnsId = answers[currentQuestion.id];
+    const isSavedCurrent = !!flaggedQuestions[currentQuestion.id];
+    const savedCount = Object.values(flaggedQuestions).filter(Boolean).length;
 
     return (
-      <div className="fixed inset-0 flex flex-col bg-[#bfc7d0] text-[#000000] z-50 overflow-hidden font-sans select-none">
+      <div className="fixed inset-0 flex flex-col bg-[#cfc6b4] text-[#000000] z-50 overflow-hidden font-sans select-none">
         
         {/* 1. Thanh tiêu đề cửa sổ Windows classic */}
         <div className="h-6 bg-gradient-to-r from-[#0a246a] via-[#104f96] to-[#a6caf0] text-white flex items-center justify-between px-2 text-[11px] font-sans shrink-0 border-b border-[#001040]">
@@ -424,15 +443,15 @@ export default function QuizPlayerPage() {
           </div>
         </div>
 
-        {/* 3. Thân ứng dụng: Cột Thí sinh bên trái & Trang giấy thi bên phải */}
-        <div className="flex-1 flex overflow-hidden p-1.5 md:p-2.5 gap-2 bg-[#cfd5dd]">
+        {/* 3. Thân ứng dụng: Cột Thí sinh bên trái & Trang giấy thi bên phải (Màu hơi ám vàng đậm đà) */}
+        <div className="flex-1 flex overflow-hidden p-2 md:p-3 gap-2.5 bg-[#cfc6b4]">
           
-          {/* CỘT TRÁI: Thẻ Sinh Viên Chuẩn Phòng Thi (Flat grey, font Arial/Tahoma, không icon thừa) */}
-          <aside className="w-48 sm:w-52 md:w-56 bg-[#dbe0e6] border border-[#9aa5b1] flex flex-col p-2.5 text-[#000000] text-[13px] shrink-0 select-text rounded-xs shadow-xs">
+          {/* CỘT TRÁI: Thẻ Sinh Viên Chuẩn Phòng Thi (Được mở rộng to hơn, màu hơi ám vàng đậm đà) */}
+          <aside className="w-60 sm:w-68 md:w-76 bg-[#dfd7c8] border border-[#a89f8d] flex flex-col p-3 text-[#000000] text-[13px] sm:text-[14px] shrink-0 select-text rounded-xs shadow-xs overflow-y-auto">
             
-            {/* Ảnh thẻ 3x4 sinh viên chuẩn phông xanh */}
-            <div className="flex justify-center mb-2.5">
-              <div className="w-[105px] h-[140px] bg-[#2563eb] border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+            {/* Ảnh thẻ 3x4 sinh viên chuẩn phông xanh to rõ ràng */}
+            <div className="flex justify-center mb-3">
+              <div className="w-[125px] h-[165px] bg-[#2563eb] border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
                 <img 
                   src={user?.avatar || "/images/itest_student.jpg"} 
                   alt="Ảnh thí sinh" 
@@ -444,12 +463,12 @@ export default function QuizPlayerPage() {
               </div>
             </div>
 
-            {/* Thông tin thí sinh chuẩn mẫu iTest trong ảnh */}
-            <div className="space-y-0.5 font-sans text-[12px] leading-tight text-[#000000] pb-2">
+            {/* Thông tin thí sinh chuẩn mẫu iTest */}
+            <div className="space-y-1 font-sans text-[13px] leading-tight text-[#000000] pb-2.5">
               <div className="font-sans font-normal truncate">
                 Mã: <strong className="font-bold">{studentCode}</strong>
               </div>
-              <div className="font-bold truncate text-[13px]">
+              <div className="font-bold truncate text-[14px]">
                 {studentName}
               </div>
               <div className="text-[#222]">
@@ -458,48 +477,71 @@ export default function QuizPlayerPage() {
               <div className="text-[#222]">
                 04
               </div>
-              <div className="text-[#333] pt-0.5">
+              <div className="text-[#333] pt-0.5 text-[12px]">
                 {examDateStr}
               </div>
             </div>
 
-            {/* Vạch kẻ ngăn cách mờ */}
-            <div className="border-t border-dashed border-[#888888] my-1.5"></div>
+            {/* Vạch kẻ ngăn cách */}
+            <div className="border-t border-dashed border-[#8c8474] my-1.5"></div>
 
             {/* Trạng thái thi: Câu: 58/ 60 & Làm bài còn: 23' */}
-            <div className="space-y-1 font-sans text-[13px] text-[#000000]">
+            <div className="space-y-1 font-sans text-[13px] sm:text-[14px] text-[#000000]">
               <div className="font-bold text-[#000000]">
                 Câu: {currentQuestionIndex + 1}/ {questions.length}
               </div>
               <div className="font-bold text-[#000000]">
                 Làm bài còn: {timerMinutes}' {timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}"
               </div>
-              <div className="text-[12px] text-[#444444] pt-0.5">
+              <div className="text-[12px] text-[#444444] pt-0.5 font-mono">
                 iTest v12.2025
               </div>
             </div>
 
-            {/* Nút nộp bài trực tiếp ở sidebar */}
-            <div className="mt-auto pt-2 space-y-1.5">
+            {/* Khu vực MỚI: Lưu câu hỏi để tí nữa làm sau (Theo yêu cầu người dùng) */}
+            <div className="bg-[#ede7da] border border-[#b8b09e] p-2.5 rounded-xs space-y-2 my-2.5 shadow-2xs">
+              <div className="flex items-center justify-between text-[11px] font-bold text-[#554d3e] uppercase">
+                <span className="flex items-center gap-1">
+                  <Bookmark className="w-3.5 h-3.5 text-[#b45309]" />
+                  Lưu câu hỏi làm sau
+                </span>
+                <span className="bg-[#dfd8ca] px-1.5 py-0.5 rounded text-[11px] font-bold text-[#333]">
+                  {savedCount} câu
+                </span>
+              </div>
+
               <button
                 type="button"
                 onClick={toggleFlagCurrent}
                 className={cn(
-                  "w-full py-1 px-2 rounded-xs border text-xs font-sans font-semibold flex items-center justify-center gap-1 transition-colors",
-                  flaggedQuestions[currentQuestion.id]
-                    ? "bg-amber-100 text-amber-900 border-amber-400 font-bold"
-                    : "bg-[#e8ebed] hover:bg-white text-gray-800 border-[#9aa5b1]"
+                  "w-full py-2 px-2 rounded-xs border text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all shadow-xs active:translate-y-px",
+                  isSavedCurrent
+                    ? "bg-[#fef3c7] text-[#92400e] border-[#d97706] shadow-xs"
+                    : "bg-[#ffffff] hover:bg-[#faf7f0] text-[#222222] border-[#9e9788]"
                 )}
               >
-                <Flag className={cn("w-3 h-3", flaggedQuestions[currentQuestion.id] && "fill-amber-600 text-amber-600")} />
-                <span>{flaggedQuestions[currentQuestion.id] ? "Đã đánh dấu" : "Đánh dấu xem lại"}</span>
+                <Bookmark className={cn("w-4 h-4", isSavedCurrent && "fill-[#d97706] text-[#d97706]")} />
+                <span>{isSavedCurrent ? "✓ Đã lưu câu này (Làm sau)" : "📌 Lưu câu này để làm sau"}</span>
               </button>
 
+              {savedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={jumpToNextSaved}
+                  className="w-full py-1.5 px-2 bg-[#dfd7c7] hover:bg-[#d5ccba] text-[#2e281f] text-[11px] font-bold rounded-xs border border-[#aba18e] flex items-center justify-center gap-1 transition-colors active:translate-y-px"
+                >
+                  <span>⏭ Xem câu đã lưu tiếp theo ({savedCount})</span>
+                </button>
+              )}
+            </div>
+
+            {/* Nút nộp bài trực tiếp ở sidebar */}
+            <div className="mt-auto pt-2">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full py-1.5 px-2 bg-[#b91c1c] hover:bg-[#991b1b] text-white text-xs font-bold font-sans rounded-xs shadow-xs tracking-wide transition-all disabled:opacity-50"
+                className="w-full py-2 px-2 bg-[#b91c1c] hover:bg-[#991b1b] text-white text-[13px] font-bold font-sans rounded-xs shadow-xs tracking-wide transition-all disabled:opacity-50 active:translate-y-px"
               >
                 {submitting ? "Đang nộp bài..." : "Nộp bài thi"}
               </button>
@@ -507,50 +549,56 @@ export default function QuizPlayerPage() {
 
           </aside>
 
-          {/* CỘT PHẢI: Khung giấy thi (Bao quanh bởi viền xám, nền trắng phẳng, font Times New Roman) */}
-          <main className="flex-1 flex flex-col bg-white border border-[#9aa5b1] rounded-xs shadow-xs overflow-hidden">
+          {/* CỘT PHẢI: Khung giấy thi (Màu giấy thi hơi ám vàng đậm đà #fcf9f0, font Times New Roman chuẩn) */}
+          <main className="flex-1 flex flex-col bg-[#fcf9f0] border border-[#aba18e] rounded-xs shadow-xs overflow-hidden">
             
             {/* Nội dung đề thi cuộn mượt mà */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 font-serif text-[#000000] select-text">
               
               {/* Vạch kẻ phân đoạn :: Câu hỏi :: */}
               <div className="relative flex items-center justify-center my-2 text-xs md:text-sm text-[#444444] font-mono">
-                <div className="border-t border-dashed border-[#888888] w-full"></div>
-                <span className="absolute bg-white px-3 font-serif font-normal text-[15px] text-[#222222]">
+                <div className="border-t border-dashed border-[#8c8474] w-full"></div>
+                <span className="absolute bg-[#fcf9f0] px-3 font-serif font-normal text-[15px] text-[#222222]">
                   :: Câu hỏi ::
                 </span>
               </div>
 
-              {/* Nội dung câu hỏi và code snippet (Times New Roman, thụt lề chuẩn) */}
-              <div className="text-[16px] md:text-[17px] leading-relaxed my-4 text-[#000000] font-serif whitespace-pre-wrap break-words">
+              {/* Nội dung câu hỏi và code snippet (Times New Roman, thụt lề chuẩn, font 17-18px to rõ) */}
+              <div 
+                className="text-[17px] md:text-[18px] leading-relaxed my-4 text-[#000000] whitespace-pre-wrap break-words"
+                style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+              >
                 <FormattedText text={currentQuestion.question_text} />
               </div>
 
               {/* Vạch kẻ phân đoạn :: Trả lời :: */}
               <div className="relative flex items-center justify-center my-6 text-xs md:text-sm text-[#444444] font-mono">
-                <div className="border-t border-dashed border-[#888888] w-full"></div>
-                <span className="absolute bg-white px-3 font-serif font-normal text-[15px] text-[#222222]">
+                <div className="border-t border-dashed border-[#8c8474] w-full"></div>
+                <span className="absolute bg-[#fcf9f0] px-3 font-serif font-normal text-[15px] text-[#222222]">
                   :: Trả lời ::
                 </span>
               </div>
 
-              {/* Danh sách lựa chọn A, B, C, D hiển thị cách dòng chuẩn theo ảnh */}
-              <div className="space-y-4 font-serif text-[15px] md:text-[16px] text-[#000000] max-w-4xl pt-1">
+              {/* Danh sách lựa chọn A, B, C, D hiển thị cách dòng chuẩn theo ảnh, font 16-17px */}
+              <div 
+                className="space-y-4 text-[16px] md:text-[17px] text-[#000000] max-w-4xl pt-1"
+                style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+              >
                 {currentQuestion.options.map((option, idx) => {
                   const isSelected = currentAnsId === option.id;
                   const hasAnswered = !!currentAnsId;
                   const isCorrect = option.is_correct === 1 || option.is_correct === true || String(option.is_correct) === '1' || String(option.is_correct) === 'true';
 
-                  let optHighlight = "hover:bg-gray-100/60";
+                  let optHighlight = "hover:bg-[#f3efe4]/80";
                   if (isSelected) {
-                    optHighlight = "bg-blue-50/80 font-semibold text-blue-900 border-l-2 border-blue-600 pl-2";
+                    optHighlight = "bg-[#e8f0fe] font-semibold text-[#0f2e5c] border-l-4 border-[#1a569d] pl-2.5";
                   }
 
                   if (isPractice && hasAnswered) {
                     if (isCorrect) {
-                      optHighlight = "bg-emerald-50 text-emerald-900 font-semibold border-l-2 border-emerald-600 pl-2";
+                      optHighlight = "bg-emerald-100 text-emerald-950 font-semibold border-l-4 border-emerald-600 pl-2.5";
                     } else if (isSelected && !isCorrect) {
-                      optHighlight = "bg-rose-50 text-rose-900 font-semibold border-l-2 border-rose-600 pl-2";
+                      optHighlight = "bg-rose-100 text-rose-950 font-semibold border-l-4 border-rose-600 pl-2.5";
                     }
                   }
 
@@ -559,7 +607,7 @@ export default function QuizPlayerPage() {
                       key={option.id}
                       onClick={() => !hasAnswered && handleSelectOption(option.id)}
                       className={cn(
-                        "py-1.5 px-2 rounded-xs transition-colors cursor-pointer flex items-baseline gap-2 leading-relaxed",
+                        "py-2 px-2.5 rounded-xs transition-colors cursor-pointer flex items-baseline gap-2.5 leading-relaxed",
                         optHighlight
                       )}
                     >
@@ -581,37 +629,37 @@ export default function QuizPlayerPage() {
 
               {/* Vùng giải thích nếu ở chế độ ôn tập */}
               {isPractice && currentAnsId && (
-                <div className="mt-8 p-3 bg-[#f8fafc] border border-[#cbd5e1] rounded-xs text-xs font-sans text-gray-700">
+                <div className="mt-8 p-3.5 bg-[#f4f0e6] border border-[#c4bcae] rounded-xs text-xs sm:text-sm font-sans text-gray-800">
                   <div className="font-bold text-[#1e293b] mb-1">
                     ✓ Đã ghi nhận câu trả lời.
                   </div>
                   {currentQuestion.options.find(o => o.id === currentAnsId)?.is_correct ? (
-                    <p className="text-emerald-700 font-medium">Bạn đã trả lời chính xác!</p>
+                    <p className="text-emerald-700 font-semibold">Bạn đã trả lời chính xác!</p>
                   ) : (
-                    <p className="text-rose-700 font-medium">Đáp án chưa chính xác, hãy chú ý nhé!</p>
+                    <p className="text-rose-700 font-semibold">Đáp án chưa chính xác, hãy chú ý nhé!</p>
                   )}
                 </div>
               )}
             </div>
 
-            {/* THANH ĐIỀU KHIỂN DƯỚI: [ Bảng câu hỏi ] đứng sát [ A ] [ B ] [ C ] [ D ] đúng như ảnh chụp */}
-            <div className="h-12 bg-[#d8dde3] border-t border-[#9aa5b1] px-3 flex items-center justify-between shrink-0 shadow-inner">
+            {/* THANH ĐIỀU KHIỂN DƯỚI: Các nút [ A ] [ B ] [ C ] [ D ] to hơn, màu hơi ám vàng đậm đà */}
+            <div className="h-14 md:h-15 bg-[#dfd7c8] border-t border-[#a89f8d] px-3.5 flex items-center justify-between shrink-0 shadow-inner">
               
-              {/* Nhóm bên trái: [ Bảng câu hỏi ] và các phím [ A ] [ B ] [ C ] [ D ] nằm liền kề */}
-              <div className="flex items-center gap-2 sm:gap-3">
+              {/* Nhóm bên trái: [ Bảng câu hỏi ] và các phím [ A ] [ B ] [ C ] [ D ] to rõ */}
+              <div className="flex items-center gap-2.5 sm:gap-4">
                 
-                {/* Nút Bảng câu hỏi */}
+                {/* Nút Bảng câu hỏi to hơn */}
                 <button
                   type="button"
                   onClick={() => setShowQuestionPalette(true)}
-                  className="h-8 px-2.5 bg-[#e9ecef] hover:bg-white text-gray-800 text-[12px] font-sans font-bold rounded-xs border border-[#707070] shadow-xs flex items-center gap-1 active:translate-y-px"
+                  className="h-10 px-3 sm:px-4 bg-[#fbf8f1] hover:bg-white text-gray-900 text-xs sm:text-sm font-sans font-bold rounded-xs border-2 border-[#6d6657] shadow-xs flex items-center gap-1.5 active:translate-y-px"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 text-blue-700" />
+                  <LayoutGrid className="w-4 h-4 text-blue-800" />
                   <span>Bảng câu hỏi</span>
                 </button>
 
-                {/* Các nút [ A ] [ B ] [ C ] [ D ] vuông vắn chuẩn Windows */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Các nút [ A ] [ B ] [ C ] [ D ] TO HƠN RÕ RỆT chuẩn Windows */}
+                <div className="flex items-center gap-2 sm:gap-2.5">
                   {['A', 'B', 'C', 'D'].map((letter, idx) => {
                     const opt = currentQuestion.options[idx];
                     if (!opt) return null;
@@ -624,10 +672,10 @@ export default function QuizPlayerPage() {
                         onClick={() => handleSelectOption(opt.id)}
                         title={`Bấm phím ${letter} trên bàn phím`}
                         className={cn(
-                          "w-9 sm:w-11 h-8 rounded-xs font-sans font-bold text-sm border transition-all flex items-center justify-center shadow-xs",
+                          "w-12 sm:w-15 h-10 sm:h-11 rounded-xs font-sans font-black text-base sm:text-lg border-2 transition-all flex items-center justify-center shadow-xs",
                           isSelected
-                            ? "bg-[#0f3d75] text-white border-[#092547] ring-1 ring-blue-300 font-black shadow-inner"
-                            : "bg-[#f1f3f5] text-black border-[#707070] hover:bg-white active:bg-[#e2e6ea]"
+                            ? "bg-[#0f3d75] text-white border-[#082242] ring-2 ring-blue-400 font-black shadow-md"
+                            : "bg-[#fbf8f1] text-black border-[#6d6657] hover:bg-white active:bg-[#ede7da]"
                         )}
                       >
                         {letter}
@@ -637,12 +685,12 @@ export default function QuizPlayerPage() {
                 </div>
               </div>
 
-              {/* Nhóm bên phải: Câu trước / Câu sau & Chuyển nhanh */}
-              <div className="flex items-center gap-1.5">
+              {/* Nhóm bên phải: Câu trước / Câu sau to rõ */}
+              <div className="flex items-center gap-2">
                 <button
                   disabled={currentQuestionIndex === 0}
                   onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-                  className="h-8 px-2.5 bg-[#e9ecef] hover:bg-white text-gray-800 text-[12px] font-sans font-bold rounded-xs border border-[#707070] disabled:opacity-40 shadow-xs flex items-center gap-1 active:translate-y-px"
+                  className="h-10 px-3 sm:px-4 bg-[#fbf8f1] hover:bg-white text-gray-900 text-xs sm:text-sm font-sans font-bold rounded-xs border-2 border-[#6d6657] disabled:opacity-40 shadow-xs flex items-center gap-1 active:translate-y-px"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span className="hidden sm:inline">Câu trước</span>
@@ -650,7 +698,7 @@ export default function QuizPlayerPage() {
                 <button
                   disabled={currentQuestionIndex === questions.length - 1}
                   onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-                  className="h-8 px-2.5 bg-[#0f3d75] hover:bg-[#1a569d] text-white text-[12px] font-sans font-bold rounded-xs border border-[#092547] shadow-xs flex items-center gap-1 disabled:opacity-40 active:translate-y-px"
+                  className="h-10 px-3 sm:px-4 bg-[#0f3d75] hover:bg-[#1a569d] text-white text-xs sm:text-sm font-sans font-bold rounded-xs border-2 border-[#082242] shadow-xs flex items-center gap-1 disabled:opacity-40 active:translate-y-px"
                 >
                   <span className="hidden sm:inline">Câu sau</span>
                   <ChevronRight className="w-4 h-4" />
@@ -665,31 +713,31 @@ export default function QuizPlayerPage() {
         {/* Modal Bảng câu hỏi (Question Grid Palette) cho iTest */}
         {showQuestionPalette && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-            <div className="w-full max-w-xl bg-[#dbe0e6] rounded-xs shadow-2xl border-2 border-[#707070] overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="w-full max-w-xl bg-[#dfd7c8] rounded-xs shadow-2xl border-2 border-[#6d6657] overflow-hidden flex flex-col max-h-[85vh]">
               
-              <div className="bg-[#0a192f] text-[#ffea00] px-3 py-2 flex items-center justify-between border-b border-[#707070]">
-                <div className="flex items-center gap-2 font-bold font-sans text-xs">
+              <div className="bg-[#0a192f] text-[#ffea00] px-3.5 py-2.5 flex items-center justify-between border-b-2 border-[#6d6657]">
+                <div className="flex items-center gap-2 font-bold font-sans text-xs sm:text-sm">
                   <LayoutGrid className="w-4 h-4 text-[#ffea00]" />
                   <span>DANH SÁCH CÂU HỎI ({Object.keys(answers).length}/{questions.length} ĐÃ LÀM)</span>
                 </div>
                 <button
                   onClick={() => setShowQuestionPalette(false)}
-                  className="text-gray-300 hover:text-white px-1.5 hover:bg-white/10 rounded-xs text-xs"
+                  className="text-gray-300 hover:text-white px-2 py-0.5 hover:bg-white/10 rounded-xs text-xs font-bold"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="p-3 overflow-y-auto flex-1 bg-white">
-                <div className="grid grid-cols-6 sm:grid-cols-10 gap-1.5 font-sans">
+              <div className="p-3.5 overflow-y-auto flex-1 bg-[#fcf9f0]">
+                <div className="grid grid-cols-6 sm:grid-cols-10 gap-2 font-sans">
                   {questions.map((q, idx) => {
                     const isAnswered = !!answers[q.id];
                     const isCurrent = currentQuestionIndex === idx;
                     const isFlagged = !!flaggedQuestions[q.id];
 
-                    let colorClass = "bg-[#f1f3f5] text-gray-800 border-[#9aa5b1] hover:bg-gray-200";
+                    let colorClass = "bg-[#fbf8f1] text-gray-800 border-[#aba18e] hover:bg-[#ede7da]";
                     if (isAnswered) {
-                      colorClass = "bg-[#0f3d75] text-white border-[#092547] font-bold";
+                      colorClass = "bg-[#0f3d75] text-white border-[#082242] font-bold";
                     }
                     if (isCurrent) {
                       colorClass += " ring-2 ring-amber-500 font-black";
@@ -704,13 +752,13 @@ export default function QuizPlayerPage() {
                           setShowQuestionPalette(false);
                         }}
                         className={cn(
-                          "h-8 rounded-xs border flex items-center justify-center text-xs relative font-medium transition-all shadow-xs",
+                          "h-9 rounded-xs border flex items-center justify-center text-xs relative font-medium transition-all shadow-xs",
                           colorClass
                         )}
                       >
                         {idx + 1}
                         {isFlagged && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold">
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[8px] font-bold">
                             ⚑
                           </span>
                         )}
@@ -720,22 +768,22 @@ export default function QuizPlayerPage() {
                 </div>
               </div>
 
-              <div className="p-2.5 bg-[#dbe0e6] border-t border-[#9aa5b1] flex items-center justify-between text-xs text-gray-700 font-sans">
+              <div className="p-3 bg-[#dfd7c8] border-t border-[#aba18e] flex items-center justify-between text-xs text-gray-800 font-sans">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-[#0f3d75] rounded-xs border border-[#092547]"></span> Đã làm
+                    <span className="w-3.5 h-3.5 bg-[#0f3d75] rounded-xs border border-[#082242]"></span> Đã làm
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-[#f1f3f5] border border-[#9aa5b1] rounded-xs"></span> Chưa làm
+                    <span className="w-3.5 h-3.5 bg-[#fbf8f1] border border-[#aba18e] rounded-xs"></span> Chưa làm
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-amber-500 rounded-xs"></span> Đánh dấu
+                    <span className="w-3.5 h-3.5 bg-amber-500 rounded-xs"></span> Đã lưu
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowQuestionPalette(false)}
-                  className="px-3 py-1 bg-[#475569] hover:bg-[#334155] text-white font-bold rounded-xs text-xs"
+                  className="px-3.5 py-1.5 bg-[#475569] hover:bg-[#334155] text-white font-bold rounded-xs text-xs"
                 >
                   Đóng
                 </button>

@@ -15,7 +15,7 @@ interface FormattedTextProps {
  */
 export function normalizeLineBreaks(text?: string | null): string {
   if (!text) return "";
-  let res = String(text);
+  let res = String(text).normalize("NFC");
 
   // 1. Replace <br> and &lt;br&gt; variations with newline
   res = res
@@ -33,6 +33,11 @@ export function normalizeLineBreaks(text?: string | null): string {
     .replace(/&quot;/g, '"')
     .replace(/&#039;|&#39;/g, "'")
     .replace(/&nbsp;/g, " ");
+
+  // 3. Fix stray typewriter backticks or accents glued inside Vietnamese words (e.g. cấ`p -> cấp, điề`u -> điều, Phầ`n -> Phần, mề`m -> mềm)
+  res = res
+    .replace(/([a-zA-ZăâđêôơưĂÂĐÊÔƠƯáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ])[`'‘´]([a-zA-ZăâđêôơưĂÂĐÊÔƠƯáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ])/gu, "$1$2")
+    .replace(/([a-zA-ZăâđêôơưĂÂĐÊÔƠƯáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ])[`'‘´]/gu, "$1");
 
   return res;
 }
