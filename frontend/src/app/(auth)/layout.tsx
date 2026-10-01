@@ -43,12 +43,12 @@ export default function AuthLayout({
         <div className="relative z-10 text-center max-w-md mt-8">
           <div className="flex items-center justify-center mb-6">
             <div className="w-14 h-14 bg-primary rounded-md flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-foreground tracking-tighter">EQ</span>
+              <span className="text-2xl font-bold text-primary-foreground tracking-tighter">OQ</span>
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 tracking-tight text-foreground">EduQuiz</h1>
+          <h1 className="text-4xl font-bold mb-4 tracking-tight text-foreground">OpenQuiz</h1>
           <p className="text-base text-muted-foreground font-normal leading-relaxed">
-            Learn smarter. Practice faster. Achieve more.
+            Nền tảng luyện thi trắc nghiệm mở & phi lợi nhuận cho sinh viên.
           </p>
         </div>
       </div>

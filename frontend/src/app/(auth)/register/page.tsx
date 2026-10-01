@@ -63,7 +63,7 @@ export default function RegisterPage() {
       <div className="text-center">
         <h2 className="text-3xl font-extrabold tracking-tight">Tạo tài khoản</h2>
         <p className="text-sm text-muted-foreground mt-2">
-          Gia nhập EduQuiz ngay hôm nay
+          Gia nhập OpenQuiz ngay hôm nay
         </p>
       </div>
 

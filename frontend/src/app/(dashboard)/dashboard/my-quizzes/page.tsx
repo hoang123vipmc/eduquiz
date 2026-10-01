@@ -488,7 +488,7 @@ export default function MyQuizzesPage() {
                         className="w-6 h-6 rounded-full object-cover border border-border shrink-0"
                       />
                       <span className="text-xs text-muted-foreground truncate max-w-[110px]">
-                        {quiz.author?.name || "EduQuiz"}
+                        {quiz.author?.name || "OpenQuiz"}
                       </span>
                     </div>
 

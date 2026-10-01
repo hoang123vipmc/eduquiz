@@ -61,7 +61,7 @@ export default function QuizResultPage() {
   const handleShare = async () => {
     const url = window.location.href;
     const title = result?.attempt?.quiz?.title || "Kết quả thi";
-    const text = `Tôi vừa hoàn thành bài thi "${title}" với điểm số ${result?.score}/100 trên EduQuiz!`;
+    const text = `Tôi vừa hoàn thành bài thi "${title}" với điểm số ${result?.score}/100 trên OpenQuiz!`;
 
     if (navigator.share) {
       try {
@@ -230,8 +230,8 @@ export default function QuizResultPage() {
 
         {/* Printable Official Header (only visible when printing) */}
         <div className="hidden print:block text-center border-b border-gray-300 pb-4 mb-6">
-          <h1 className="text-2xl font-bold uppercase tracking-wider text-black">EduQuiz — Báo Cáo Kết Quả Bài Thi</h1>
-          <p className="text-sm text-gray-600 mt-1">Hệ thống khảo sát & Đánh giá năng lực học tập trực tuyến</p>
+          <h1 className="text-2xl font-bold uppercase tracking-wider text-black">OpenQuiz — Báo Cáo Kết Quả Bài Thi</h1>
+          <p className="text-sm text-gray-600 mt-1">Hệ thống khảo sát & Đánh giá năng lực học tập trực tuyến (Phi thương mại)</p>
         </div>
 
         {/* Buttons Action Bar */}

@@ -111,7 +111,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle, total
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 font-bold text-sm text-foreground">
                     <Sparkles className="w-4 h-4 text-primary" />
-                    <span>EduQuiz Hiện đại</span>
+                    <span>OpenQuiz Hiện đại</span>
                   </div>
                   {theme === 'modern' && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
                 </div>

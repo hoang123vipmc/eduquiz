@@ -118,7 +118,7 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
               {/* Paper Header */}
               <div className="border-b-2 border-black dark:border-border pb-4 text-center space-y-1.5">
                 <div className="flex justify-between items-center text-xs text-muted-foreground font-mono">
-                  <span>HỆ THỐNG LUYỆN THI EDUQUIZ</span>
+                  <span>HỆ THỐNG LUYỆN THI OPENQUIZ</span>
                   <span>{quiz.category?.name || "HỌC PHẦN ÔN THI"}</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight text-foreground">
@@ -193,7 +193,7 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
 
               {/* Footer */}
               <div className="border-t border-border pt-4 text-center text-xs text-muted-foreground">
-                <p>EduQuiz — Học tập thông minh • Chúc bạn ôn tập tốt và đạt kết quả cao!</p>
+                <p>OpenQuiz — Học tập phi lợi nhuận • Chúc bạn ôn tập tốt và đạt kết quả cao!</p>
               </div>
 
             </div>

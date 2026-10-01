@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EduQuiz - Nền tảng thi trắc nghiệm trực tuyến",
-  description: "Hệ thống thi và luyện tập trắc nghiệm chuyên nghiệp, nhanh chóng và mượt mà.",
+  title: "OpenQuiz - Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận",
+  description: "Hệ thống luyện thi trắc nghiệm và mô phỏng phòng thi iTest chuẩn trường, hoàn toàn miễn phí phục vụ học tập.",
 };
 
 export default function RootLayout({

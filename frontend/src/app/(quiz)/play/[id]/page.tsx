@@ -406,7 +406,7 @@ export default function QuizPlayerPage() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setTheme('modern')}
-              title="Đổi sang giao diện EduQuiz hiện đại"
+              title="Đổi sang giao diện OpenQuiz hiện đại"
               className="px-2 py-0.2 bg-[#ece9d8] hover:bg-white text-black text-[10px] font-sans border border-[#707070] rounded-xs shadow-xs"
             >
               🌟 Đổi giao diện Hiện đại
@@ -798,7 +798,7 @@ export default function QuizPlayerPage() {
   }
 
   // =========================================================================
-  // GIAO DIỆN 2: EDUQUIZ HIỆN ĐẠI (MODERN UI)
+  // GIAO DIỆN 2: OPENQUIZ HIỆN ĐẠI (MODERN UI)
   // =========================================================================
   return (
     <div className="fixed inset-0 flex flex-col bg-background text-foreground z-50 overflow-hidden font-sans">

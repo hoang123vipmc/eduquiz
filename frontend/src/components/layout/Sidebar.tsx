@@ -64,14 +64,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <div className="pt-7 pb-6 px-6 border-b border-border/40">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-base shadow-sm shadow-primary/25">
-            <span>EQ</span>
+            <span>OQ</span>
           </div>
           <div>
             <div className="text-foreground font-bold text-xl tracking-tight leading-tight">
-              EduQuiz
+              OpenQuiz
             </div>
             <div className="text-xs text-muted-foreground font-medium">
-              Học tập thông minh
+              Học tập phi lợi nhuận
             </div>
           </div>
         </div>
@@ -121,6 +121,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </Link>
           );
         })}
+      </div>
+
+      {/* Non-profit & Educational Disclaimer */}
+      <div className="px-3 pb-2">
+        <div className="bg-primary/5 border border-primary/15 rounded-xl p-2.5 text-[11px] text-muted-foreground leading-snug">
+          <div className="font-semibold text-foreground flex items-center gap-1 mb-0.5">
+            <span>🌱</span> OpenQuiz Phi lợi nhuận
+          </div>
+          Dự án cá nhân phục vụ học tập và nghiên cứu công nghệ, miễn phí 100%.
+        </div>
       </div>
 
       {/* Bottom User Card */}

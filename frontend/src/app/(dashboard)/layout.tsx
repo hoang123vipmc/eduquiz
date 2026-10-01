@@ -38,6 +38,16 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
             {children}
+            
+            {/* Footer Disclaimer */}
+            <footer className="mt-16 py-6 border-t border-border/40 text-center text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground/80">
+                OpenQuiz — Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận
+              </p>
+              <p>
+                Dự án cá nhân độc lập phục vụ mục đích học tập, ôn thi và nghiên cứu công nghệ cho sinh viên. Hoàn toàn miễn phí.
+              </p>
+            </footer>
           </div>
         </main>
       </div>

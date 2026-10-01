@@ -91,7 +91,7 @@ export default function DashboardPage() {
         <div className="relative z-10 max-w-xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Nền tảng ôn thi trắc nghiệm EduQuiz</span>
+            <span>Nền tảng ôn thi trắc nghiệm OpenQuiz</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
             Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
@@ -119,7 +119,7 @@ export default function DashboardPage() {
         <div className="relative w-full md:w-72 lg:w-96 h-48 md:h-52 rounded-2xl overflow-hidden shrink-0 border border-border/80 shadow-md group">
           <img 
             src="/images/hero-learning.jpg" 
-            alt="Học tập thông minh EduQuiz" 
+            alt="Học tập thông minh OpenQuiz" 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
