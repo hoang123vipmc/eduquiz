@@ -54,7 +54,15 @@ class QuizController extends Controller
 
     public function show($slug)
     {
-        $quiz = Quiz::with(['user', 'category'])->where('slug', $slug)->firstOrFail();
+        $quiz = Quiz::with(['user', 'category'])
+            ->where(function($q) use ($slug) {
+                if (is_numeric($slug)) {
+                    $q->where('id', $slug)->orWhere('slug', $slug);
+                } else {
+                    $q->where('slug', $slug);
+                }
+            })
+            ->firstOrFail();
         
         return response()->json([
             'success' => true,

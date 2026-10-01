@@ -46,7 +46,9 @@ export default function QuizResultPage() {
       shuffleO: config.shuffleOptions ? '1' : '0',
       delay: config.autoNextDelay,
       unlimited: config.unlimitedTime ? '1' : '0',
-      fresh: '1'
+      fresh: '1',
+      limit: config.questionLimit ? String(config.questionLimit) : '0',
+      theme: config.theme || 'modern'
     }).toString();
     setShowSettingsModal(false);
     router.push(`/play/${quizId}?${query}`);
@@ -460,6 +462,7 @@ export default function QuizResultPage() {
           onClose={() => setShowSettingsModal(false)}
           onConfirm={handleStartWithConfig}
           quizTitle={result?.attempt?.quiz?.title}
+          totalQuestions={result?.attempt?.quiz?.total_questions || result?.attempt?.quiz?.questions_count}
         />
       )}
     </div>

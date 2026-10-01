@@ -53,9 +53,22 @@ class AttemptController extends Controller
             $isUnlimited = $request->input('unlimited', false) || $request->mode === 'practice';
             $remainingTime = $isUnlimited ? null : $quiz->duration_minutes * 60;
 
+            // Xử lý rút ngẫu nhiên số lượng câu hỏi từ đề cương (ví dụ: 40, 60, 120 câu)
+            $limit = (int) $request->input('question_limit', 0);
+            $totalInQuiz = $quiz->questions()->count();
+
+            if ($limit > 0 && $limit < $totalInQuiz) {
+                $questionsCollection = $quiz->questions()->with('options')->inRandomOrder()->limit($limit)->get();
+                $questionIds = $questionsCollection->pluck('id')->values()->all();
+            } else {
+                $questionsCollection = $quiz->questions()->with('options')->get();
+                $questionIds = null;
+            }
+
             $attempt = QuizAttempt::create([
                 'user_id' => $request->user()->id,
                 'quiz_id' => $quiz->id,
+                'question_ids' => $questionIds,
                 'mode' => $request->mode,
                 'started_at' => now(),
                 'remaining_time' => $remainingTime,
@@ -76,7 +89,8 @@ class AttemptController extends Controller
                     'mode' => $attempt->mode,
                     'remaining_time' => $attempt->remaining_time,
                     'elapsed_time' => 0,
-                    'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
+                    'total_questions' => $questionsCollection->count(),
+                    'questions' => \App\Http\Resources\QuestionResource::collection($questionsCollection)
                 ]
             ]);
         });
@@ -115,6 +129,12 @@ class AttemptController extends Controller
 
         // Cũng trả về luôn danh sách câu hỏi để giao diện lấy (bởi vì resume không có payload từ trước)
         $quiz = $attempt->quiz;
+        $qQuery = $quiz->questions()->with('options');
+        if (!empty($attempt->question_ids)) {
+            $qQuery->whereIn('id', $attempt->question_ids);
+        }
+        $resumeQuestions = $qQuery->get();
+
         return response()->json([
             'success' => true,
             'message' => 'Khôi phục trạng thái làm bài.',
@@ -124,7 +144,8 @@ class AttemptController extends Controller
                 'remaining_time' => $attempt->remaining_time,
                 'elapsed_time' => now()->diffInSeconds($attempt->started_at),
                 'answers' => $attempt->answers()->pluck('option_id', 'question_id'),
-                'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
+                'total_questions' => $resumeQuestions->count(),
+                'questions' => \App\Http\Resources\QuestionResource::collection($resumeQuestions)
             ]
         ]);
     }
@@ -217,10 +238,14 @@ class AttemptController extends Controller
             }
 
             $answers = UserAnswer::where('attempt_id', $attempt->id)->get();
-            $questions = $attempt->quiz->questions;
-            $questionsMap = $questions->keyBy('id');
+            $targetQuestions = $attempt->quiz->questions;
+            if (!empty($attempt->question_ids)) {
+                $allowedIds = collect($attempt->question_ids)->flip();
+                $targetQuestions = $targetQuestions->filter(fn($q) => $allowedIds->has($q->id))->values();
+            }
+            $questionsMap = $targetQuestions->keyBy('id');
 
-            $totalPoints = $questions->sum('points');
+            $totalPoints = $targetQuestions->sum('points');
             $correctPoints = 0;
             $correctCount = 0;
             $wrongCount = 0;
@@ -237,9 +262,9 @@ class AttemptController extends Controller
                 }
             }
 
-            $skippedCount = max(0, $questions->count() - $answers->count());
+            $skippedCount = max(0, $targetQuestions->count() - $answers->count());
             $score = $totalPoints > 0 ? ($correctPoints / $totalPoints) * 100 : 0;
-            $accuracy = $questions->count() > 0 ? ($correctCount / $questions->count()) * 100 : 0;
+            $accuracy = $targetQuestions->count() > 0 ? ($correctCount / $targetQuestions->count()) * 100 : 0;
             $timeTaken = (int) abs(now()->diffInSeconds($attempt->started_at));
 
             $result = Result::updateOrCreate(
@@ -280,9 +305,15 @@ class AttemptController extends Controller
         $quiz = $result->attempt->quiz;
         $userAnswers = $result->attempt->answers->keyBy('question_id');
 
+        $targetQuestions = $quiz ? $quiz->questions : collect();
+        if ($result->attempt && !empty($result->attempt->question_ids)) {
+            $allowedIds = collect($result->attempt->question_ids)->flip();
+            $targetQuestions = $targetQuestions->filter(fn($q) => $allowedIds->has($q->id))->values();
+        }
+
         $questionsDetail = [];
         if ($quiz && $quiz->relationLoaded('questions')) {
-            foreach ($quiz->questions as $question) {
+            foreach ($targetQuestions as $question) {
                 $ans = $userAnswers->get($question->id);
                 $questionsDetail[] = [
                     'id' => $question->id,
@@ -348,6 +379,7 @@ class AttemptController extends Controller
             $newAttempt = QuizAttempt::create([
                 'user_id' => $request->user()->id,
                 'quiz_id' => $oldAttempt->quiz_id,
+                'question_ids' => $oldAttempt->question_ids,
                 'mode' => 'practice',
                 'started_at' => now(),
                 'remaining_time' => null, // Mặc định không giới hạn thời gian cho việc làm lại
@@ -384,10 +416,18 @@ class AttemptController extends Controller
             $quiz = $newAttempt->quiz;
             $request->attributes->set('quiz_owner_id', $quiz->user_id);
 
-            $allQuestionIds = $quiz->questions()->pluck('id')->toArray();
+            $allQuestionIds = !empty($oldAttempt->question_ids)
+                ? $oldAttempt->question_ids
+                : $quiz->questions()->pluck('id')->toArray();
             $wrongQuestionIds = array_values(array_diff($allQuestionIds, $correctQuestionIds));
 
             $answersMap = (object) $newAttempt->answers()->pluck('option_id', 'question_id')->toArray();
+
+            $questionsQuery = $quiz->questions()->with('options');
+            if (!empty($newAttempt->question_ids)) {
+                $questionsQuery->whereIn('id', $newAttempt->question_ids);
+            }
+            $targetQuestions = $questionsQuery->get();
 
             return response()->json([
                 'success' => true,
@@ -399,7 +439,7 @@ class AttemptController extends Controller
                     'remaining_time' => null,
                     'answers' => $answersMap,
                     'wrong_question_ids' => $wrongQuestionIds,
-                    'questions' => \App\Http\Resources\QuestionResource::collection($quiz->questions()->with('options')->get())
+                    'questions' => \App\Http\Resources\QuestionResource::collection($targetQuestions)
                 ]
             ]);
         } catch (\Exception $e) {

@@ -25,7 +25,7 @@ interface QuizState {
     status: 'idle' | 'doing' | 'submitted';
     isPractice: boolean;
     
-    startQuiz: (quizId: number, mode: string, unlimited?: boolean, shuffleQuestions?: boolean, shuffleOptions?: boolean, fresh?: boolean) => Promise<void>;
+    startQuiz: (quizId: number, mode: string, unlimited?: boolean, shuffleQuestions?: boolean, shuffleOptions?: boolean, fresh?: boolean, questionLimit?: number) => Promise<void>;
     retryWrong: (oldAttemptId: number) => Promise<any>;
     clearWrongAnswers: () => Promise<void>;
     resumeQuiz: (attemptId: number) => Promise<void>;
@@ -46,7 +46,7 @@ export const useQuizStore = create<QuizState>()(
             status: 'idle',
             isPractice: false,
 
-            startQuiz: async (quizId, mode, unlimited = false, shuffleQuestions = false, shuffleOptions = false, fresh = true) => {
+            startQuiz: async (quizId, mode, unlimited = false, shuffleQuestions = false, shuffleOptions = false, fresh = true, questionLimit?: number) => {
                 // Luôn dọn dẹp state trước khi bắt đầu bài mới để không bị dính câu trả lời của phiên trước
                 set({
                     attemptId: null,
@@ -62,7 +62,8 @@ export const useQuizStore = create<QuizState>()(
                     quiz_id: quizId, 
                     mode, 
                     unlimited,
-                    fresh: true
+                    fresh: true,
+                    question_limit: questionLimit && questionLimit > 0 ? questionLimit : undefined
                 });
 
                 if (data.success) {

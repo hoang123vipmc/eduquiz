@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['user_id', 'quiz_id', 'mode', 'started_at', 'ended_at', 'remaining_time', 'status'])]
+#[Fillable(['user_id', 'quiz_id', 'question_ids', 'mode', 'started_at', 'ended_at', 'remaining_time', 'status'])]
 class QuizAttempt extends Model
 {
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'question_ids' => 'array',
     ];
 
     public function user(): BelongsTo

@@ -166,7 +166,9 @@ export default function MyQuizzesPage() {
       shuffleO: config.shuffleOptions ? "1" : "0",
       delay: config.autoNextDelay,
       unlimited: config.unlimitedTime ? "1" : "0",
-      fresh: "1"
+      fresh: "1",
+      limit: config.questionLimit ? String(config.questionLimit) : '0',
+      theme: config.theme || 'modern'
     }).toString();
 
     router.push(`/play/${selectedQuiz.id}?${query}`);
@@ -526,6 +528,7 @@ export default function MyQuizzesPage() {
         isOpen={!!selectedQuiz}
         onClose={() => setSelectedQuiz(null)}
         quizTitle={selectedQuiz?.title}
+        totalQuestions={selectedQuiz?.total_questions || selectedQuiz?.questions_count}
         onConfirm={handleStartQuiz}
       />
 
