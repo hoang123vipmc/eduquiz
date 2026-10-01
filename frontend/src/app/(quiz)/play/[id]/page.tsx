@@ -369,183 +369,188 @@ export default function QuizPlayerPage() {
 
   // =========================================================================
   // GIAO DIỆN 1: MÔ PHỎNG PHÒNG THI CHUẨN TRƯỜNG iTest (v12.2025)
+  // Chuẩn 1:1 theo ảnh chụp phòng máy thật của trường
   // =========================================================================
   if (theme === 'itest') {
     const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
     const currentAnsId = answers[currentQuestion.id];
 
     return (
-      <div className="fixed inset-0 flex flex-col bg-[#e2e8f0] text-[#1e293b] z-50 overflow-hidden font-sans select-none">
+      <div className="fixed inset-0 flex flex-col bg-[#bfc7d0] text-[#000000] z-50 overflow-hidden font-sans select-none">
         
-        {/* Thanh tiêu đề giả lập cửa sổ Windows iTest */}
-        <div className="h-7 bg-[#0b2447] text-white flex items-center justify-between px-3 text-xs shrink-0 border-b border-[#19376d]">
-          <div className="flex items-center gap-2 font-mono text-[11px] truncate">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-            <span className="font-bold tracking-wider">TRẮC NGHIỆM :: Hệ thống khảo sát & đánh giá chất lượng iTest</span>
+        {/* 1. Thanh tiêu đề cửa sổ Windows classic */}
+        <div className="h-6 bg-gradient-to-r from-[#0a246a] via-[#104f96] to-[#a6caf0] text-white flex items-center justify-between px-2 text-[11px] font-sans shrink-0 border-b border-[#001040]">
+          <div className="flex items-center gap-1.5 font-bold tracking-tight truncate">
+            <span className="w-3 h-3 bg-blue-300 rounded-xs inline-block"></span>
+            <span>TRẮC NGHIỆM :: iTest v12.2025</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setTheme('modern')}
               title="Đổi sang giao diện EduQuiz hiện đại"
-              className="px-2 py-0.5 rounded bg-blue-800 hover:bg-blue-700 text-[10px] text-white flex items-center gap-1 font-sans"
+              className="px-2 py-0.2 bg-[#ece9d8] hover:bg-white text-black text-[10px] font-sans border border-[#707070] rounded-xs shadow-xs"
             >
-              <Sparkles className="w-3 h-3 text-yellow-400" />
-              <span>Giao diện Hiện đại</span>
+              🌟 Đổi giao diện Hiện đại
             </button>
             <button
               onClick={handleExit}
-              title="Đóng phòng thi"
-              className="text-gray-300 hover:text-white px-1.5 hover:bg-red-600 rounded"
+              title="Thoát phòng thi"
+              className="px-1.5 py-0.2 bg-[#c0392b] hover:bg-[#e74c3c] text-white text-[10px] font-bold rounded-xs"
             >
               ✕
             </button>
           </div>
         </div>
 
-        {/* Thanh Header chính: Dark Navy với Chữ Vàng Rực Rỡ như ảnh chụp */}
-        <div className="h-12 bg-[#122846] border-b-2 border-[#facc15]/80 flex items-center justify-between px-4 shrink-0 shadow-md">
+        {/* 2. Thanh Header iTest đặc trưng: Nền Dark Navy + Chữ Vàng Rực Rỡ */}
+        <div className="h-11 bg-[#0a192f] border-b-2 border-[#ffea00] flex items-center justify-between px-3 md:px-5 shrink-0 shadow-md">
+          {/* MÁY : 12 / PHÒNG THI */}
           <div className="flex items-center gap-2">
-            <span className="text-[#facc15] font-black text-lg md:text-xl tracking-wider uppercase font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-              PHÒNG THI : 12
+            <span className="text-[#ffea00] font-black text-xl md:text-2xl font-mono tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              MÁY : 12
             </span>
           </div>
 
+          {/* MÔN HỌC */}
           <div className="text-center truncate px-2">
-            <span className="text-[#facc15] font-black text-base md:text-xl tracking-wider uppercase font-sans drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-              MÔN {quizInfo?.title ? quizInfo.title.toUpperCase() : "CÔNG NGHỆ THÔNG TIN"}
+            <span className="text-[#ffea00] font-bold text-base md:text-lg uppercase tracking-wider font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              MÔN {quizInfo?.title ? quizInfo.title.toUpperCase() : "CÔNG NGHỆ JAVA"}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowQuestionPalette(true)}
-              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm flex items-center gap-1.5"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Bảng câu hỏi</span>
-            </button>
-
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-black px-3.5 py-1.5 rounded shadow-sm tracking-wide disabled:opacity-50"
-            >
-              {submitting ? "Đang nộp..." : "Nộp bài thi"}
-            </button>
+          {/* Góc phải để trống hoặc hiển thị số báo danh */}
+          <div className="w-16 md:w-24 text-right">
+            <span className="text-[#a0aec0] font-mono text-xs hidden sm:inline">iTest Online</span>
           </div>
         </div>
 
-        {/* Nội dung trung tâm: Cột thông tin Sinh viên (Trái) & Trang giấy đề thi (Phải) */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* 3. Thân ứng dụng: Cột Thí sinh bên trái & Trang giấy thi bên phải */}
+        <div className="flex-1 flex overflow-hidden p-1.5 md:p-2.5 gap-2 bg-[#cfd5dd]">
           
-          {/* CỘT TRÁI: Thẻ Sinh Viên & Thông số iTest */}
-          <aside className="w-56 md:w-64 bg-[#d0d7de] border-r border-[#9aa5b1] flex flex-col p-3 text-[#111827] text-xs shrink-0 select-text overflow-y-auto">
+          {/* CỘT TRÁI: Thẻ Sinh Viên Chuẩn Phòng Thi (Flat grey, font Arial/Tahoma, không icon thừa) */}
+          <aside className="w-48 sm:w-52 md:w-56 bg-[#dbe0e6] border border-[#9aa5b1] flex flex-col p-2.5 text-[#000000] text-[13px] shrink-0 select-text rounded-xs shadow-xs">
             
             {/* Ảnh thẻ 3x4 sinh viên chuẩn phông xanh */}
-            <div className="flex justify-center mb-3">
-              <div className="w-[100px] h-[130px] bg-[#1d4ed8] border-2 border-white shadow-md rounded-xs overflow-hidden flex flex-col items-center justify-center relative">
-                {user?.avatar ? (
-                  <img 
-                    src={user.avatar} 
-                    alt="Ảnh thí sinh" 
-                    className="w-full h-full object-cover" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-white bg-gradient-to-b from-[#2563eb] to-[#1e40af]">
-                    <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/50 flex items-center justify-center mb-2 font-bold text-base">
-                      {studentName.charAt(0)}
-                    </div>
-                    <span className="text-[10px] font-mono opacity-80 uppercase tracking-tighter">THÍ SINH</span>
-                  </div>
-                )}
+            <div className="flex justify-center mb-2.5">
+              <div className="w-[105px] h-[140px] bg-[#2563eb] border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+                <img 
+                  src={user?.avatar || "/images/itest_student.jpg"} 
+                  alt="Ảnh thí sinh" 
+                  className="w-full h-full object-cover object-top" 
+                  onError={(e: any) => {
+                    e.currentTarget.src = "/images/itest_student.jpg";
+                  }}
+                />
               </div>
             </div>
 
-            {/* Thông tin thí sinh chuẩn mẫu iTest */}
-            <div className="space-y-1 font-mono text-[12px] pb-3 border-b border-dashed border-[#64748b]">
-              <div className="truncate"><span className="text-[#475569]">Mã SV:</span> <strong className="font-bold">{studentCode}</strong></div>
-              <div className="truncate"><span className="text-[#475569]">Họ tên:</span> <strong className="font-bold">{studentName}</strong></div>
-              <div><span className="text-[#475569]">Ngày sinh:</span> 13/12/2005</div>
-              <div><span className="text-[#475569]">Lớp:</span> D18-CNTT04</div>
-              <div className="text-[11px] text-[#475569] pt-0.5">{examDateStr}</div>
+            {/* Thông tin thí sinh chuẩn mẫu iTest trong ảnh */}
+            <div className="space-y-0.5 font-sans text-[12px] leading-tight text-[#000000] pb-2">
+              <div className="font-sans font-normal truncate">
+                Mã: <strong className="font-bold">{studentCode}</strong>
+              </div>
+              <div className="font-bold truncate text-[13px]">
+                {studentName}
+              </div>
+              <div className="text-[#222]">
+                13/12/2005
+              </div>
+              <div className="text-[#222]">
+                04
+              </div>
+              <div className="text-[#333] pt-0.5">
+                {examDateStr}
+              </div>
             </div>
 
-            {/* Thông số câu hỏi & Thời gian đếm ngược */}
-            <div className="py-3 space-y-2 font-mono border-b border-dashed border-[#64748b]">
-              <div className="text-sm font-black text-[#0f172a]">
-                Câu: <span className="text-blue-700">{currentQuestionIndex + 1}</span>/ {questions.length}
+            {/* Vạch kẻ ngăn cách mờ */}
+            <div className="border-t border-dashed border-[#888888] my-1.5"></div>
+
+            {/* Trạng thái thi: Câu: 58/ 60 & Làm bài còn: 23' */}
+            <div className="space-y-1 font-sans text-[13px] text-[#000000]">
+              <div className="font-bold text-[#000000]">
+                Câu: {currentQuestionIndex + 1}/ {questions.length}
               </div>
-              <div className="text-xs font-bold text-[#b91c1c] flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                <span>Làm bài còn: {timerMinutes}' {timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}"</span>
+              <div className="font-bold text-[#000000]">
+                Làm bài còn: {timerMinutes}' {timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}"
+              </div>
+              <div className="text-[12px] text-[#444444] pt-0.5">
+                iTest v12.2025
               </div>
             </div>
 
-            {/* Cờ đánh dấu câu hỏi xem lại */}
-            <div className="py-2.5">
+            {/* Nút nộp bài trực tiếp ở sidebar */}
+            <div className="mt-auto pt-2 space-y-1.5">
               <button
                 type="button"
                 onClick={toggleFlagCurrent}
                 className={cn(
-                  "w-full py-1.5 px-2 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors",
+                  "w-full py-1 px-2 rounded-xs border text-xs font-sans font-semibold flex items-center justify-center gap-1 transition-colors",
                   flaggedQuestions[currentQuestion.id]
-                    ? "bg-amber-100 text-amber-800 border-amber-400 font-bold"
-                    : "bg-white/80 hover:bg-white text-gray-700 border-gray-400"
+                    ? "bg-amber-100 text-amber-900 border-amber-400 font-bold"
+                    : "bg-[#e8ebed] hover:bg-white text-gray-800 border-[#9aa5b1]"
                 )}
               >
-                <Flag className={cn("w-3.5 h-3.5", flaggedQuestions[currentQuestion.id] && "fill-amber-600 text-amber-600")} />
-                <span>{flaggedQuestions[currentQuestion.id] ? "Đã đánh dấu xem lại" : "Đánh dấu xem lại"}</span>
+                <Flag className={cn("w-3 h-3", flaggedQuestions[currentQuestion.id] && "fill-amber-600 text-amber-600")} />
+                <span>{flaggedQuestions[currentQuestion.id] ? "Đã đánh dấu" : "Đánh dấu xem lại"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="w-full py-1.5 px-2 bg-[#b91c1c] hover:bg-[#991b1b] text-white text-xs font-bold font-sans rounded-xs shadow-xs tracking-wide transition-all disabled:opacity-50"
+              >
+                {submitting ? "Đang nộp bài..." : "Nộp bài thi"}
               </button>
             </div>
 
-            {/* Watermark v12.2025 ở góc dưới */}
-            <div className="mt-auto pt-3 text-[11px] font-mono text-[#64748b] tracking-wider text-center">
-              iTest v12.2025
-            </div>
           </aside>
 
-          {/* CỘT PHẢI: Khung giấy thi (Times New Roman / Serif, có vạch :: Câu hỏi :: và :: Trả lời ::) */}
-          <main className="flex-1 flex flex-col bg-[#ffffff] overflow-hidden">
+          {/* CỘT PHẢI: Khung giấy thi (Bao quanh bởi viền xám, nền trắng phẳng, font Times New Roman) */}
+          <main className="flex-1 flex flex-col bg-white border border-[#9aa5b1] rounded-xs shadow-xs overflow-hidden">
             
-            {/* Vùng cuộn đọc đề thi */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 font-serif text-[#111827] select-text">
+            {/* Nội dung đề thi cuộn mượt mà */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 font-serif text-[#000000] select-text">
               
               {/* Vạch kẻ phân đoạn :: Câu hỏi :: */}
-              <div className="flex items-center justify-center my-2 text-xs md:text-sm text-[#475569] font-mono">
-                <span className="text-[#94a3b8] tracking-widest hidden sm:inline">---------------------------</span>
-                <span className="px-3 font-bold text-[#334155]">:: Câu hỏi ::</span>
-                <span className="text-[#94a3b8] tracking-widest hidden sm:inline">---------------------------</span>
+              <div className="relative flex items-center justify-center my-2 text-xs md:text-sm text-[#444444] font-mono">
+                <div className="border-t border-dashed border-[#888888] w-full"></div>
+                <span className="absolute bg-white px-3 font-serif font-normal text-[15px] text-[#222222]">
+                  :: Câu hỏi ::
+                </span>
               </div>
 
-              {/* Nội dung câu hỏi (Serif, giữ nguyên thụt dòng code) */}
-              <div className="text-[16px] md:text-[17px] leading-relaxed my-4 text-[#000000] font-serif whitespace-pre-wrap">
+              {/* Nội dung câu hỏi và code snippet (Times New Roman, thụt lề chuẩn) */}
+              <div className="text-[16px] md:text-[17px] leading-relaxed my-4 text-[#000000] font-serif whitespace-pre-wrap break-words">
                 <FormattedText text={currentQuestion.question_text} />
               </div>
 
               {/* Vạch kẻ phân đoạn :: Trả lời :: */}
-              <div className="flex items-center justify-center my-6 text-xs md:text-sm text-[#475569] font-mono">
-                <span className="text-[#94a3b8] tracking-widest hidden sm:inline">---------------------------</span>
-                <span className="px-3 font-bold text-[#334155]">:: Trả lời ::</span>
-                <span className="text-[#94a3b8] tracking-widest hidden sm:inline">---------------------------</span>
+              <div className="relative flex items-center justify-center my-6 text-xs md:text-sm text-[#444444] font-mono">
+                <div className="border-t border-dashed border-[#888888] w-full"></div>
+                <span className="absolute bg-white px-3 font-serif font-normal text-[15px] text-[#222222]">
+                  :: Trả lời ::
+                </span>
               </div>
 
-              {/* Danh sách lựa chọn A, B, C, D */}
-              <div className="space-y-3 font-serif text-[15px] md:text-[16px] max-w-4xl">
+              {/* Danh sách lựa chọn A, B, C, D hiển thị cách dòng chuẩn theo ảnh */}
+              <div className="space-y-4 font-serif text-[15px] md:text-[16px] text-[#000000] max-w-4xl pt-1">
                 {currentQuestion.options.map((option, idx) => {
                   const isSelected = currentAnsId === option.id;
                   const hasAnswered = !!currentAnsId;
                   const isCorrect = option.is_correct === 1 || option.is_correct === true || String(option.is_correct) === '1' || String(option.is_correct) === 'true';
 
-                  let optHighlight = "hover:bg-blue-50/60";
+                  let optHighlight = "hover:bg-gray-100/60";
                   if (isSelected) {
-                    optHighlight = "bg-blue-100/80 font-semibold text-blue-900 border-l-4 border-blue-600 pl-2";
+                    optHighlight = "bg-blue-50/80 font-semibold text-blue-900 border-l-2 border-blue-600 pl-2";
                   }
 
                   if (isPractice && hasAnswered) {
                     if (isCorrect) {
-                      optHighlight = "bg-emerald-100 text-emerald-900 font-semibold border-l-4 border-emerald-600 pl-2";
+                      optHighlight = "bg-emerald-50 text-emerald-900 font-semibold border-l-2 border-emerald-600 pl-2";
                     } else if (isSelected && !isCorrect) {
-                      optHighlight = "bg-rose-100 text-rose-900 font-semibold border-l-4 border-rose-600 pl-2";
+                      optHighlight = "bg-rose-50 text-rose-900 font-semibold border-l-2 border-rose-600 pl-2";
                     }
                   }
 
@@ -554,18 +559,18 @@ export default function QuizPlayerPage() {
                       key={option.id}
                       onClick={() => !hasAnswered && handleSelectOption(option.id)}
                       className={cn(
-                        "py-2 px-3 rounded transition-colors cursor-pointer flex items-baseline gap-2 leading-relaxed",
+                        "py-1.5 px-2 rounded-xs transition-colors cursor-pointer flex items-baseline gap-2 leading-relaxed",
                         optHighlight
                       )}
                     >
-                      <span className="font-bold text-[#1e293b] font-mono shrink-0">
+                      <span className="font-serif font-bold text-[#000000] shrink-0">
                         {letters[idx]})
                       </span>
                       <div className="flex-1 break-words">
                         <FormattedText text={cleanOptionPrefix(option.option_text)} />
                       </div>
                       {isPractice && hasAnswered && isCorrect && (
-                        <span className="text-xs bg-emerald-600 text-white font-sans px-2 py-0.5 rounded font-bold shrink-0">
+                        <span className="text-xs bg-emerald-600 text-white font-sans px-2 py-0.5 rounded-xs font-bold shrink-0">
                           Đáp án đúng
                         </span>
                       )}
@@ -574,75 +579,80 @@ export default function QuizPlayerPage() {
                 })}
               </div>
 
-              {/* Giải thích chi tiết nếu là chế độ ôn thi và đã trả lời */}
-              {isPractice && currentAnsId && currentQuestion.options.some(o => o.id === currentAnsId) && (
-                <div className="mt-6 p-4 rounded bg-amber-50 border border-amber-200 text-xs md:text-sm font-sans text-amber-900">
-                  <div className="font-bold mb-1 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Giải thích đáp án:</span>
+              {/* Vùng giải thích nếu ở chế độ ôn tập */}
+              {isPractice && currentAnsId && (
+                <div className="mt-8 p-3 bg-[#f8fafc] border border-[#cbd5e1] rounded-xs text-xs font-sans text-gray-700">
+                  <div className="font-bold text-[#1e293b] mb-1">
+                    ✓ Đã ghi nhận câu trả lời.
                   </div>
-                  <p className="leading-relaxed">
-                    Hệ thống đã ghi nhận lựa chọn của bạn. Nhấn <strong>Câu sau</strong> để tiếp tục hoặc chọn câu khác trong bảng.
-                  </p>
+                  {currentQuestion.options.find(o => o.id === currentAnsId)?.is_correct ? (
+                    <p className="text-emerald-700 font-medium">Bạn đã trả lời chính xác!</p>
+                  ) : (
+                    <p className="text-rose-700 font-medium">Đáp án chưa chính xác, hãy chú ý nhé!</p>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* THANH ĐIỀU KHIỂN DƯỚI: Các nút lớn [ A ] [ B ] [ C ] [ D ] và Nút Chuyển Câu */}
-            <div className="h-16 bg-[#e2e8f0] border-t border-[#cbd5e1] px-4 flex items-center justify-between shrink-0 shadow-inner">
+            {/* THANH ĐIỀU KHIỂN DƯỚI: [ Bảng câu hỏi ] đứng sát [ A ] [ B ] [ C ] [ D ] đúng như ảnh chụp */}
+            <div className="h-12 bg-[#d8dde3] border-t border-[#9aa5b1] px-3 flex items-center justify-between shrink-0 shadow-inner">
               
-              {/* Nút mở Bảng câu hỏi */}
-              <button
-                type="button"
-                onClick={() => setShowQuestionPalette(true)}
-                className="px-3 py-2 bg-white hover:bg-gray-100 text-gray-800 text-xs font-bold rounded border border-gray-400 shadow-xs flex items-center gap-1.5"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Bảng câu hỏi</span>
-              </button>
-
-              {/* 4 Nút to chọn đáp án [ A ] [ B ] [ C ] [ D ] đặc trưng của iTest */}
+              {/* Nhóm bên trái: [ Bảng câu hỏi ] và các phím [ A ] [ B ] [ C ] [ D ] nằm liền kề */}
               <div className="flex items-center gap-2 sm:gap-3">
-                {['A', 'B', 'C', 'D'].map((letter, idx) => {
-                  const opt = currentQuestion.options[idx];
-                  if (!opt) return null;
-                  const isSelected = currentAnsId === opt.id;
+                
+                {/* Nút Bảng câu hỏi */}
+                <button
+                  type="button"
+                  onClick={() => setShowQuestionPalette(true)}
+                  className="h-8 px-2.5 bg-[#e9ecef] hover:bg-white text-gray-800 text-[12px] font-sans font-bold rounded-xs border border-[#707070] shadow-xs flex items-center gap-1 active:translate-y-px"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 text-blue-700" />
+                  <span>Bảng câu hỏi</span>
+                </button>
 
-                  return (
-                    <button
-                      key={letter}
-                      type="button"
-                      onClick={() => handleSelectOption(opt.id)}
-                      title={`Bấm phím ${letter} trên bàn phím để chọn`}
-                      className={cn(
-                        "w-11 sm:w-14 h-10 rounded font-mono font-black text-sm sm:text-base border-2 transition-all flex items-center justify-center shadow-xs active:scale-95",
-                        isSelected
-                          ? "bg-[#1e3a8a] text-white border-[#1e3a8a] ring-2 ring-blue-400 shadow-md"
-                          : "bg-white text-gray-800 border-gray-400 hover:bg-gray-100 hover:border-gray-500"
-                      )}
-                    >
-                      {letter}
-                    </button>
-                  );
-                })}
+                {/* Các nút [ A ] [ B ] [ C ] [ D ] vuông vắn chuẩn Windows */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {['A', 'B', 'C', 'D'].map((letter, idx) => {
+                    const opt = currentQuestion.options[idx];
+                    if (!opt) return null;
+                    const isSelected = currentAnsId === opt.id;
+
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        onClick={() => handleSelectOption(opt.id)}
+                        title={`Bấm phím ${letter} trên bàn phím`}
+                        className={cn(
+                          "w-9 sm:w-11 h-8 rounded-xs font-sans font-bold text-sm border transition-all flex items-center justify-center shadow-xs",
+                          isSelected
+                            ? "bg-[#0f3d75] text-white border-[#092547] ring-1 ring-blue-300 font-black shadow-inner"
+                            : "bg-[#f1f3f5] text-black border-[#707070] hover:bg-white active:bg-[#e2e6ea]"
+                        )}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Điều hướng chuyển câu Trước / Sau */}
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Nhóm bên phải: Câu trước / Câu sau & Chuyển nhanh */}
+              <div className="flex items-center gap-1.5">
                 <button
                   disabled={currentQuestionIndex === 0}
                   onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
-                  className="px-2.5 sm:px-3.5 py-2 bg-white hover:bg-gray-100 text-gray-800 text-xs font-bold rounded border border-gray-400 disabled:opacity-40 shadow-xs flex items-center gap-1"
+                  className="h-8 px-2.5 bg-[#e9ecef] hover:bg-white text-gray-800 text-[12px] font-sans font-bold rounded-xs border border-[#707070] disabled:opacity-40 shadow-xs flex items-center gap-1 active:translate-y-px"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden md:inline">Câu trước</span>
+                  <span className="hidden sm:inline">Câu trước</span>
                 </button>
                 <button
                   disabled={currentQuestionIndex === questions.length - 1}
                   onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
-                  className="px-2.5 sm:px-3.5 py-2 bg-[#1e40af] hover:bg-[#1d4ed8] text-white text-xs font-bold rounded shadow-xs flex items-center gap-1 disabled:opacity-40"
+                  className="h-8 px-2.5 bg-[#0f3d75] hover:bg-[#1a569d] text-white text-[12px] font-sans font-bold rounded-xs border border-[#092547] shadow-xs flex items-center gap-1 disabled:opacity-40 active:translate-y-px"
                 >
-                  <span className="hidden md:inline">Câu sau</span>
+                  <span className="hidden sm:inline">Câu sau</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -654,35 +664,35 @@ export default function QuizPlayerPage() {
 
         {/* Modal Bảng câu hỏi (Question Grid Palette) cho iTest */}
         {showQuestionPalette && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-gray-300 overflow-hidden flex flex-col max-h-[85vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="w-full max-w-xl bg-[#dbe0e6] rounded-xs shadow-2xl border-2 border-[#707070] overflow-hidden flex flex-col max-h-[85vh]">
               
-              <div className="bg-[#122846] text-white px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 font-bold font-mono">
-                  <LayoutGrid className="w-4 h-4 text-yellow-400" />
-                  <span>BẢNG CÂU HỎI ({Object.keys(answers).length}/{questions.length} đã làm)</span>
+              <div className="bg-[#0a192f] text-[#ffea00] px-3 py-2 flex items-center justify-between border-b border-[#707070]">
+                <div className="flex items-center gap-2 font-bold font-sans text-xs">
+                  <LayoutGrid className="w-4 h-4 text-[#ffea00]" />
+                  <span>DANH SÁCH CÂU HỎI ({Object.keys(answers).length}/{questions.length} ĐÃ LÀM)</span>
                 </div>
                 <button
                   onClick={() => setShowQuestionPalette(false)}
-                  className="text-gray-300 hover:text-white p-1 hover:bg-white/10 rounded"
+                  className="text-gray-300 hover:text-white px-1.5 hover:bg-white/10 rounded-xs text-xs"
                 >
-                  <X className="w-5 h-5" />
+                  ✕
                 </button>
               </div>
 
-              <div className="p-4 overflow-y-auto flex-1 bg-gray-50">
-                <div className="grid grid-cols-6 sm:grid-cols-10 gap-2 font-mono">
+              <div className="p-3 overflow-y-auto flex-1 bg-white">
+                <div className="grid grid-cols-6 sm:grid-cols-10 gap-1.5 font-sans">
                   {questions.map((q, idx) => {
                     const isAnswered = !!answers[q.id];
                     const isCurrent = currentQuestionIndex === idx;
                     const isFlagged = !!flaggedQuestions[q.id];
 
-                    let colorClass = "bg-white text-gray-700 border-gray-300 hover:bg-gray-100";
+                    let colorClass = "bg-[#f1f3f5] text-gray-800 border-[#9aa5b1] hover:bg-gray-200";
                     if (isAnswered) {
-                      colorClass = "bg-blue-600 text-white border-blue-700 font-bold";
+                      colorClass = "bg-[#0f3d75] text-white border-[#092547] font-bold";
                     }
                     if (isCurrent) {
-                      colorClass += " ring-2 ring-yellow-400 ring-offset-1";
+                      colorClass += " ring-2 ring-amber-500 font-black";
                     }
 
                     return (
@@ -694,13 +704,13 @@ export default function QuizPlayerPage() {
                           setShowQuestionPalette(false);
                         }}
                         className={cn(
-                          "h-10 rounded border flex items-center justify-center text-xs relative font-semibold transition-all",
+                          "h-8 rounded-xs border flex items-center justify-center text-xs relative font-medium transition-all shadow-xs",
                           colorClass
                         )}
                       >
                         {idx + 1}
                         {isFlagged && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[8px]">
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 text-white rounded-full flex items-center justify-center text-[7px] font-bold">
                             ⚑
                           </span>
                         )}
@@ -710,22 +720,22 @@ export default function QuizPlayerPage() {
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-100 border-t border-gray-300 flex items-center justify-between text-xs text-gray-600 font-mono">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 bg-blue-600 rounded"></span> Đã làm
+              <div className="p-2.5 bg-[#dbe0e6] border-t border-[#9aa5b1] flex items-center justify-between text-xs text-gray-700 font-sans">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-[#0f3d75] rounded-xs border border-[#092547]"></span> Đã làm
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 bg-white border border-gray-300 rounded"></span> Chưa làm
+                  <div className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-[#f1f3f5] border border-[#9aa5b1] rounded-xs"></span> Chưa làm
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 bg-amber-500 rounded"></span> Đánh dấu
+                  <div className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-amber-500 rounded-xs"></span> Đánh dấu
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowQuestionPalette(false)}
-                  className="px-4 py-1.5 bg-gray-800 text-white font-sans font-bold rounded text-xs hover:bg-gray-700"
+                  className="px-3 py-1 bg-[#475569] hover:bg-[#334155] text-white font-bold rounded-xs text-xs"
                 >
                   Đóng
                 </button>
