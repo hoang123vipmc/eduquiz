@@ -81,12 +81,14 @@ export default function QuizPlayerPage() {
   const startQuiz = useQuizStore(s => s.startQuiz);
   const selectAnswer = useQuizStore(s => s.selectAnswer);
   const submitQuiz = useQuizStore(s => s.submitQuiz);
+  const clearQuiz = useQuizStore(s => s.clearQuiz);
   const retryWrong = useQuizStore(s => s.retryWrong);
   const clearWrongAnswers = useQuizStore(s => s.clearWrongAnswers);
   const status = useQuizStore(s => s.status);
   const questions = useQuizStore(s => s.questions);
   const answers = useQuizStore(s => s.answers);
   const isPractice = useQuizStore(s => s.isPractice);
+  const remainingTime = useQuizStore(s => s.remainingTime);
   const tick = useQuizStore(s => s.tick);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -117,19 +119,12 @@ export default function QuizPlayerPage() {
     return () => clearInterval(timer);
   }, [status, tick]);
 
-  // Auto-redirect if quiz times out and submits
-  useEffect(() => {
-    if (status === 'submitted') {
-      const attemptId = useQuizStore.getState().attemptId;
-      if (attemptId) {
-        router.push(`/result/${attemptId}`);
-      }
-    }
-  }, [status, router]);
-
   const initQuiz = async () => {
     setLoading(true);
     setLoadError(null);
+    setCurrentQuestionIndex(0);
+    setFlaggedQuestions({});
+
     const params = new URLSearchParams(window.location.search);
     const retryAttemptId = params.get('retry_attempt');
 
@@ -144,15 +139,16 @@ export default function QuizPlayerPage() {
           }
         }
       } else {
+        const modeParam = params.get('mode');
         const config = {
-          mode: params.get('mode') || 'exam',
+          mode: modeParam || 'practice',
           shuffleQuestions: params.get('shuffleQ') === '1',
           shuffleOptions: params.get('shuffleO') === '1',
           autoNextDelay: Number(params.get('delay')) || 0,
-          unlimitedTime: params.get('unlimited') === '1'
+          unlimitedTime: params.get('unlimited') === '1' || modeParam === 'practice' || !modeParam
         };
         setAutoNextDelay(config.autoNextDelay);
-        await startQuiz(Number(id), config.mode, config.unlimitedTime, config.shuffleQuestions, config.shuffleOptions);
+        await startQuiz(Number(id), config.mode, config.unlimitedTime, config.shuffleQuestions, config.shuffleOptions, true);
       }
     } catch (error: any) {
       if (error.response?.status !== 401) {
@@ -197,27 +193,35 @@ export default function QuizPlayerPage() {
   const handleExit = () => {
     const answeredCount = Object.keys(answers).length;
     if (answeredCount > 0) {
-      if (!window.confirm("Bạn có bài thi đang làm dở. Bạn có chắc chắn muốn quay về trang chủ không?")) {
+      if (!window.confirm("Bạn có bài đang làm dở. Bạn có chắc chắn muốn quay về trang chủ không?")) {
         return;
       }
     }
+    clearQuiz();
     router.push('/dashboard');
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isAutoTimeout = false) => {
     if (submitting) return;
 
-    const unansweredCount = questions.length - Object.keys(answers).length;
-    const confirmMsg = unansweredCount > 0 
-      ? `Bạn còn ${unansweredCount} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài thi ngay không?`
-      : "Bạn có chắc chắn muốn nộp bài thi?";
+    if (!isAutoTimeout) {
+      const unansweredCount = questions.length - Object.keys(answers).length;
+      const confirmMsg = isPractice
+        ? (unansweredCount > 0 
+            ? `Bạn còn ${unansweredCount} câu chưa hoàn thành. Bạn có chắc chắn muốn kết thúc và nộp bài ôn tập không?`
+            : "Bạn có chắc chắn muốn hoàn thành bài ôn tập?")
+        : (unansweredCount > 0 
+            ? `Bạn còn ${unansweredCount} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài thi ngay không?`
+            : "Bạn có chắc chắn muốn nộp bài thi?");
 
-    if (!window.confirm(confirmMsg)) return;
+      if (!window.confirm(confirmMsg)) return;
+    }
 
     setSubmitting(true);
     try {
       const result = await submitQuiz();
       if (result) {
+        setFlaggedQuestions({});
         router.push(`/result/${result.id}`);
       }
     } catch (error: any) {
@@ -226,6 +230,13 @@ export default function QuizPlayerPage() {
       setSubmitting(false);
     }
   };
+
+  // Tự động nộp bài khi hết giờ ở chế độ có tính giờ
+  useEffect(() => {
+    if (status === 'doing' && remainingTime !== null && remainingTime <= 0 && !submitting && !loading) {
+      handleSubmit(true);
+    }
+  }, [status, remainingTime, submitting, loading]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = questions.length > 0 ? (Object.keys(answers).length / questions.length) * 100 : 0;

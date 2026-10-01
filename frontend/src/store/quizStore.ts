@@ -25,7 +25,7 @@ interface QuizState {
     status: 'idle' | 'doing' | 'submitted';
     isPractice: boolean;
     
-    startQuiz: (quizId: number, mode: string, unlimited?: boolean, shuffleQuestions?: boolean, shuffleOptions?: boolean) => Promise<void>;
+    startQuiz: (quizId: number, mode: string, unlimited?: boolean, shuffleQuestions?: boolean, shuffleOptions?: boolean, fresh?: boolean) => Promise<void>;
     retryWrong: (oldAttemptId: number) => Promise<any>;
     clearWrongAnswers: () => Promise<void>;
     resumeQuiz: (attemptId: number) => Promise<void>;
@@ -46,8 +46,25 @@ export const useQuizStore = create<QuizState>()(
             status: 'idle',
             isPractice: false,
 
-            startQuiz: async (quizId, mode, unlimited = false, shuffleQuestions = false, shuffleOptions = false) => {
-                const { data } = await api.post('/attempts/start', { quiz_id: quizId, mode, unlimited });
+            startQuiz: async (quizId, mode, unlimited = false, shuffleQuestions = false, shuffleOptions = false, fresh = true) => {
+                // Luôn dọn dẹp state trước khi bắt đầu bài mới để không bị dính câu trả lời của phiên trước
+                set({
+                    attemptId: null,
+                    questions: [],
+                    answers: {},
+                    remainingTime: null,
+                    elapsedTime: 0,
+                    status: 'doing',
+                    isPractice: mode === 'practice',
+                });
+
+                const { data } = await api.post('/attempts/start', { 
+                    quiz_id: quizId, 
+                    mode, 
+                    unlimited,
+                    fresh: true
+                });
+
                 if (data.success) {
                     let questions = [...data.data.questions];
                     
@@ -161,7 +178,18 @@ export const useQuizStore = create<QuizState>()(
                 try {
                     const { data } = await api.post(`/attempts/${attemptId}/submit`);
                     if (data.success) {
-                        return data.data; // Trả về object result
+                        const result = data.data;
+                        // Nộp bài thành công: Kết thúc dứt điểm phiên làm bài, giải phóng toàn bộ state và storage
+                        set({
+                            attemptId: null,
+                            questions: [],
+                            answers: {},
+                            remainingTime: null,
+                            elapsedTime: 0,
+                            status: 'idle',
+                            isPractice: false,
+                        });
+                        return result;
                     }
                 } catch (e: any) {
                     // Nếu lỗi, khôi phục trạng thái 'doing' để người dùng có thể bấm thử lại

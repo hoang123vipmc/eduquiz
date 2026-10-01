@@ -345,7 +345,8 @@ export default function DashboardPage() {
             shuffleQ: config.shuffleQuestions ? '1' : '0',
             shuffleO: config.shuffleOptions ? '1' : '0',
             delay: config.autoNextDelay,
-            unlimited: config.unlimitedTime ? '1' : '0'
+            unlimited: config.unlimitedTime ? '1' : '0',
+            fresh: '1'
           }).toString();
           router.push(`/play/${selectedQuiz.id}?${query}`);
           setSelectedQuiz(null);

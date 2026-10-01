@@ -19,10 +19,12 @@ import {
   Filter,
   Printer,
   Share2,
-  Check
+  Check,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
+import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
 
 export default function QuizResultPage() {
   const { id } = useParams();
@@ -33,6 +35,22 @@ export default function QuizResultPage() {
   const [showReview, setShowReview] = useState(true);
   const [filterMode, setFilterMode] = useState<"all" | "wrong" | "correct">("all");
   const [copied, setCopied] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  const handleStartWithConfig = (config: any) => {
+    const quizId = result?.attempt?.quiz_id || result?.quiz_id;
+    if (!quizId) return;
+    const query = new URLSearchParams({
+      mode: config.examMode,
+      shuffleQ: config.shuffleQuestions ? '1' : '0',
+      shuffleO: config.shuffleOptions ? '1' : '0',
+      delay: config.autoNextDelay,
+      unlimited: config.unlimitedTime ? '1' : '0',
+      fresh: '1'
+    }).toString();
+    setShowSettingsModal(false);
+    router.push(`/play/${quizId}?${query}`);
+  };
 
   const handlePrint = () => {
     window.print();
@@ -222,11 +240,29 @@ export default function QuizResultPage() {
           >
             <Home className="w-4 h-4" /> Về trang chủ
           </button>
+          {/* Nút làm lại chính: Tự động phân biệt Ôn tập lại hoặc Thi lại từ đầu */}
           <button 
-            onClick={() => router.push(`/play/${result.attempt?.quiz_id || id}`)}
+            onClick={() => {
+              const quizId = result?.attempt?.quiz_id || result?.quiz_id || id;
+              const mode = result?.attempt?.mode || 'practice';
+              const query = new URLSearchParams({
+                mode: mode,
+                unlimited: mode === 'practice' ? '1' : '0',
+                fresh: '1'
+              }).toString();
+              router.push(`/play/${quizId}?${query}`);
+            }}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold text-sm transition-all shadow-md shadow-primary/20"
           >
-            <RefreshCcw className="w-4 h-4" /> Thi lại từ đầu
+            <RefreshCcw className="w-4 h-4" /> 
+            {result?.attempt?.mode === 'practice' ? 'Ôn tập lại từ đầu' : 'Thi lại từ đầu'}
+          </button>
+          <button 
+            onClick={() => setShowSettingsModal(true)}
+            title="Đổi chế độ làm bài (Ôn thi / Thi thử, xáo trộn câu hỏi...)"
+            className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+          >
+            <Settings className="w-4 h-4 text-primary" /> Chế độ khác
           </button>
           {result.wrong_answers > 0 && (
             <button 
@@ -417,6 +453,15 @@ export default function QuizResultPage() {
         )}
 
       </div>
+
+      {showSettingsModal && (
+        <QuizSettingsModal 
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          onConfirm={handleStartWithConfig}
+          quizTitle={result?.attempt?.quiz?.title}
+        />
+      )}
     </div>
   );
 }

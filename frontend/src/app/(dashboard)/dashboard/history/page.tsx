@@ -334,8 +334,16 @@ export default function HistoryPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           {quizId && (
                             <button
-                              onClick={() => router.push(`/play/${quizId}`)}
-                              title="Làm lại đề thi này"
+                              onClick={() => {
+                                const mode = h.attempt?.mode || 'practice';
+                                const query = new URLSearchParams({
+                                  mode: mode,
+                                  unlimited: mode === 'practice' ? '1' : '0',
+                                  fresh: '1'
+                                }).toString();
+                                router.push(`/play/${quizId}?${query}`);
+                              }}
+                              title={h.attempt?.mode === 'practice' ? "Ôn tập lại đề thi này" : "Thi lại đề thi này"}
                               className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                             >
                               <RotateCcw className="w-4 h-4" />

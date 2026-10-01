@@ -17,25 +17,40 @@ class AttemptController extends Controller
         $request->validate([
             'quiz_id' => 'required|exists:quizzes,id',
             'mode' => 'required|in:practice,exam',
-            'unlimited' => 'nullable|boolean'
+            'unlimited' => 'nullable|boolean',
+            'fresh' => 'nullable|boolean'
         ]);
 
         $quiz = Quiz::findOrFail($request->quiz_id);
 
         return DB::transaction(function () use ($request, $quiz) {
-            // Kiểm tra xem có bài đang làm dở với cùng chế độ không (lock để tránh duplicate race condition)
-            $existingAttempt = QuizAttempt::where('user_id', $request->user()->id)
-                ->where('quiz_id', $quiz->id)
-                ->where('mode', $request->mode)
-                ->where('status', 'doing')
-                ->lockForUpdate()
-                ->first();
+            $isFresh = $request->boolean('fresh') || $request->mode === 'practice';
 
-            if ($existingAttempt) {
-                return $this->resume($request, $existingAttempt->id);
+            // Nếu là chế độ ôn tập (practice) hoặc có cờ fresh: kết thúc dứt điểm mọi phiên làm dở dang cũ để bắt đầu bài mới tinh
+            if ($isFresh) {
+                QuizAttempt::where('user_id', $request->user()->id)
+                    ->where('quiz_id', $quiz->id)
+                    ->where('mode', $request->mode)
+                    ->where('status', 'doing')
+                    ->update([
+                        'status' => 'submitted',
+                        'ended_at' => now()
+                    ]);
+            } else {
+                // Kiểm tra xem có bài đang làm dở với cùng chế độ không (lock để tránh duplicate race condition)
+                $existingAttempt = QuizAttempt::where('user_id', $request->user()->id)
+                    ->where('quiz_id', $quiz->id)
+                    ->where('mode', $request->mode)
+                    ->where('status', 'doing')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($existingAttempt) {
+                    return $this->resume($request, $existingAttempt->id);
+                }
             }
 
-            $isUnlimited = $request->input('unlimited', false);
+            $isUnlimited = $request->input('unlimited', false) || $request->mode === 'practice';
             $remainingTime = $isUnlimited ? null : $quiz->duration_minutes * 60;
 
             $attempt = QuizAttempt::create([
@@ -188,6 +203,19 @@ class AttemptController extends Controller
                 'ended_at' => now()
             ]);
 
+            // Nếu là bài ôn tập (practice), đảm bảo đóng tất cả các attempt doing dở dang khác của đề này
+            if ($attempt->mode === 'practice') {
+                QuizAttempt::where('user_id', $request->user()->id)
+                    ->where('quiz_id', $attempt->quiz_id)
+                    ->where('mode', 'practice')
+                    ->where('status', 'doing')
+                    ->where('id', '!=', $attempt->id)
+                    ->update([
+                        'status' => 'submitted',
+                        'ended_at' => now()
+                    ]);
+            }
+
             $answers = UserAnswer::where('attempt_id', $attempt->id)->get();
             $questions = $attempt->quiz->questions;
             $questionsMap = $questions->keyBy('id');
@@ -311,6 +339,12 @@ class AttemptController extends Controller
 
         DB::beginTransaction();
         try {
+            // Đóng bất kỳ attempt nào đang làm dở của đề này
+            QuizAttempt::where('user_id', $request->user()->id)
+                ->where('quiz_id', $oldAttempt->quiz_id)
+                ->where('status', 'doing')
+                ->update(['status' => 'submitted', 'ended_at' => now()]);
+
             $newAttempt = QuizAttempt::create([
                 'user_id' => $request->user()->id,
                 'quiz_id' => $oldAttempt->quiz_id,
