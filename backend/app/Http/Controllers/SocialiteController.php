@@ -27,7 +27,7 @@ class SocialiteController extends Controller
 
     public function callback(Request $request, $provider)
     {
-        $frontendUrl = rtrim(config('app.frontend_url') ?: env('FRONTEND_URL') ?: 'https://eduquiz-delta.vercel.app', '/');
+        $frontendUrl = rtrim(config('app.frontend_url') ?: env('FRONTEND_URL') ?: 'https://openquiz-free.vercel.app', '/');
 
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();

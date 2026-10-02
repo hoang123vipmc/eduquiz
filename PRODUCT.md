@@ -50,20 +50,20 @@ Unlike complex enterprise Learning Management Systems (LMS) or generic flashcard
   - Gamified Leaderboard with rankings and user statistics (accuracy, study time, streak days).
   - Full Responsive layout with mobile drawer navigation.
 - **Technical Architecture**:
-  - Frontend: Next.js 15 (Turbopack, App Router), React 19, Tailwind CSS v4, Zustand, Lucide Icons, Recharts. Deployed on Vercel (`eduquiz-delta.vercel.app`).
+  - Frontend: Next.js 15 (Turbopack, App Router), React 19, Tailwind CSS v4, Zustand, Lucide Icons, Recharts. Deployed on Vercel (`openquiz-free.vercel.app`).
   - Backend: Laravel 11 / PHP 8.4 REST API with Laravel Sanctum authentication. Dockerized and deployed on Render.
   - Database: Relational DB (PostgreSQL / MySQL / SQLite support).
 
 ## Brand Commitments
 
-- **Name**: EduQuiz (EQ)
-- **Tagline**: Học tập thông minh.
+- **Name**: OpenQuiz (OQ)
+- **Tagline**: Học tập phi lợi nhuận.
 - **Aesthetic Direction**: Sáng sủa, giáo dục thân thiện (Friendly Educational / Clean Modern Light Mode as primary orientation, supported by sleek dark themes).
 - **Tone & Voice**: Khích lệ, chuyên nghiệp, gọn gàng, tôn trọng thời gian của người học.
 
 ## Evidence on Hand
 
-- Live web application deployed at: `https://eduquiz-delta.vercel.app`
+- Live web application deployed at: `https://openquiz-free.vercel.app`
 - GitHub repository: `https://github.com/hoang123vipmc/eduquiz`
 - Real syllabus test files: `de_cuong.docx`, `de_cuong.txt`, `sample_data.json`
 
