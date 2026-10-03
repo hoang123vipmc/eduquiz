@@ -26,12 +26,16 @@ import {
   ShieldCheck, 
   Layers, 
   FolderPlus,
-  UserCheck
+  UserCheck,
+  Pencil,
+  Tag,
+  X as XIcon
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
 import { ImportQuizModal } from "@/components/quiz/ImportQuizModal";
 import { PrintQuizModal } from "@/components/quiz/PrintQuizModal";
+import { EditQuizModal } from "@/components/quiz/EditQuizModal";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
@@ -85,11 +89,13 @@ export default function MyQuizzesPage() {
 
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [printingQuiz, setPrintingQuiz] = useState<any>(null);
+  const [editingQuiz, setEditingQuiz] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<"newest" | "questions" | "duration">("newest");
+  const [activeTagFilter, setActiveTagFilter] = useState<string>("");
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -147,6 +153,16 @@ export default function MyQuizzesPage() {
       result = result.filter((q) => q.category?.name === selectedCategory);
     }
 
+    // Tag filter (tìm trong title + description + category)
+    if (activeTagFilter) {
+      const tag = activeTagFilter.toLowerCase();
+      result = result.filter((q) =>
+        q.title?.toLowerCase().includes(tag) ||
+        q.description?.toLowerCase().includes(tag) ||
+        q.category?.name?.toLowerCase().includes(tag)
+      );
+    }
+
     if (sortBy === "questions") {
       result.sort((a, b) => (b.total_questions || 0) - (a.total_questions || 0));
     } else if (sortBy === "duration") {
@@ -156,7 +172,7 @@ export default function MyQuizzesPage() {
     }
 
     return result;
-  }, [quizzes, selectedCategory, sortBy]);
+  }, [quizzes, selectedCategory, sortBy, activeTagFilter]);
 
   const handleStartQuiz = (config: any) => {
     if (!selectedQuiz) return;
@@ -316,6 +332,36 @@ export default function MyQuizzesPage() {
         </div>
       </div>
 
+      {/* Tag / Quick-filter pills */}
+      {categories.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <span className="text-xs text-muted-foreground font-medium shrink-0">Tag:</span>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveTagFilter(activeTagFilter === cat ? "" : cat)}
+              className={cn(
+                "px-2.5 py-1 rounded-full text-xs font-medium transition-all border",
+                activeTagFilter === cat
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                  : "bg-muted/60 text-muted-foreground border-border/60 hover:border-primary/50 hover:text-foreground"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+          {activeTagFilter && (
+            <button
+              onClick={() => setActiveTagFilter("")}
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-destructive/80 hover:text-destructive border border-destructive/30 hover:border-destructive/60 transition-all"
+            >
+              <XIcon className="w-3 h-3" /> Bỏ lọc
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Grid of Quizzes */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -430,20 +476,26 @@ export default function MyQuizzesPage() {
                     )}
                   </div>
 
-                  {/* Delete button (Top Right) */}
+                  {/* Edit + Delete buttons (Top Right) */}
                   {canManage && (
-                    <button
-                      onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
-                      className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 shadow-sm"
-                      aria-label={`Xóa đề thi ${quiz.title}`}
-                      title={
-                        user?.role === "admin" && !isOwner
-                          ? "Quản trị viên xóa đề thi này"
-                          : "Xóa đề thi của bạn"
-                      }
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}
+                        className="p-2 bg-black/40 hover:bg-primary text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
+                        aria-label={`Chỉnh sửa đề thi ${quiz.title}`}
+                        title="Chỉnh sửa câu hỏi & thông tin"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
+                        className="p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
+                        aria-label={`Xóa đề thi ${quiz.title}`}
+                        title={user?.role === "admin" && !isOwner ? "Quản trị viên xóa đề thi này" : "Xóa đề thi của bạn"}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
 
                   {/* Bottom of Cover: Quick Stats */}
@@ -493,22 +545,25 @@ export default function MyQuizzesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {canManage && (
+                        <button
+                          title="Chỉnh sửa câu hỏi trong đề thi"
+                          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
                       <button
                         title="Xem & In đề thi ra giấy"
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPrintingQuiz(quiz);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); setPrintingQuiz(quiz); }}
                       >
                         <Printer className="w-4 h-4" />
                       </button>
 
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedQuiz(quiz);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); setSelectedQuiz(quiz); }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs transition-all shadow-xs hover:shadow active:scale-[0.98]"
                       >
                         <span>Luyện tập</span>
@@ -550,6 +605,14 @@ export default function MyQuizzesPage() {
           onClose={() => setPrintingQuiz(null)}
         />
       )}
+
+      {/* Edit Quiz Modal */}
+      <EditQuizModal
+        isOpen={!!editingQuiz}
+        quiz={editingQuiz}
+        onClose={() => setEditingQuiz(null)}
+        onSuccess={() => fetchQuizzes(debouncedSearch, adminViewAll)}
+      />
     </div>
   );
 }
