@@ -23,12 +23,14 @@ import {
   Filter,
   FileQuestion,
   Target,
-  Printer
+  Printer,
+  Pencil
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
 import { ImportQuizModal } from "@/components/quiz/ImportQuizModal";
 import { PrintQuizModal } from "@/components/quiz/PrintQuizModal";
+import { EditQuizModal } from "@/components/quiz/EditQuizModal";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +82,7 @@ export default function QuizzesPage() {
 
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [printingQuiz, setPrintingQuiz] = useState<any>(null);
+  const [editingQuiz, setEditingQuiz] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -390,17 +393,29 @@ export default function QuizzesPage() {
                     )}
                   </div>
 
-                  {/* Delete button (Top Right) - Only admin or owner can delete */}
-                  {canManage && (
-                    <button 
-                      onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
-                      className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all opacity-90 sm:opacity-0 group-hover:opacity-100 shadow-sm"
-                      aria-label={`Xóa đề thi ${quiz.title}`}
-                      title={user?.role === 'admin' ? "Quản trị viên xóa đề thi" : "Xóa đề thi của bạn"}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                  {/* Action buttons (Top Right) - Only admin or owner can edit/delete */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all">
+                    {canManage && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}
+                        className="p-2 bg-black/40 hover:bg-primary text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
+                        aria-label={`Chỉnh sửa đề thi ${quiz.title}`}
+                        title="Chỉnh sửa câu hỏi & thông tin"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    )}
+                    {canManage && (
+                      <button 
+                        onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
+                        className="p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
+                        aria-label={`Xóa đề thi ${quiz.title}`}
+                        title={user?.role === 'admin' ? "Quản trị viên xóa đề thi" : "Xóa đề thi của bạn"}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
 
                   {/* Bottom of Cover: Quick Stats */}
                   <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white/90 text-xs">
@@ -446,6 +461,18 @@ export default function QuizzesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {canManage && (
+                        <button
+                          title="Chỉnh sửa câu hỏi trong đề thi"
+                          className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingQuiz(quiz);
+                          }}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       <button 
                         title="Xem & In đề thi ra giấy"
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
@@ -498,6 +525,15 @@ export default function QuizzesPage() {
         isOpen={!!printingQuiz}
         onClose={() => setPrintingQuiz(null)}
         quiz={printingQuiz}
+      />
+
+      <EditQuizModal
+        isOpen={!!editingQuiz}
+        onClose={() => setEditingQuiz(null)}
+        quiz={editingQuiz}
+        onUpdated={() => {
+          fetchQuizzes();
+        }}
       />
     </div>
   );

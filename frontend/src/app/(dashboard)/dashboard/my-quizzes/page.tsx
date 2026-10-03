@@ -478,7 +478,7 @@ export default function MyQuizzesPage() {
 
                   {/* Edit + Delete buttons (Top Right) */}
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all">
-                    {isOwner && (
+                    {canManage && (
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}
                         className="p-2 bg-black/40 hover:bg-primary text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
@@ -547,7 +547,7 @@ export default function MyQuizzesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {isOwner && (
+                      {canManage && (
                         <button
                           title="Chỉnh sửa câu hỏi trong đề thi"
                           className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
