@@ -477,8 +477,8 @@ export default function MyQuizzesPage() {
                   </div>
 
                   {/* Edit + Delete buttons (Top Right) */}
-                  {canManage && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all">
+                    {isOwner && (
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}
                         className="p-2 bg-black/40 hover:bg-primary text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
@@ -487,6 +487,8 @@ export default function MyQuizzesPage() {
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
+                    )}
+                    {canManage && (
                       <button
                         onClick={(e) => handleDeleteQuiz(e, quiz.id, quiz.title)}
                         className="p-2 bg-black/40 hover:bg-destructive text-white/80 hover:text-white backdrop-blur-md rounded-full transition-all shadow-sm"
@@ -495,8 +497,8 @@ export default function MyQuizzesPage() {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Bottom of Cover: Quick Stats */}
                   <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white/90 text-xs">
@@ -545,7 +547,7 @@ export default function MyQuizzesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {canManage && (
+                      {isOwner && (
                         <button
                           title="Chỉnh sửa câu hỏi trong đề thi"
                           className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
