@@ -15,7 +15,8 @@ import {
   Trophy,
   LogOut,
   User,
-  X
+  X,
+  CalendarCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   
   const studentLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Lịch thi & Điểm thi", href: "/dashboard/schedule", icon: CalendarCheck, badge: "ITC" },
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
@@ -41,6 +43,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const adminLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Lịch thi & Điểm thi", href: "/dashboard/schedule", icon: CalendarCheck, badge: "ITC" },
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
@@ -128,7 +131,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 "w-5 h-5 transition-colors", 
                 reallyActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
               )} />
-              {link.name}
+              <span className="flex-1">{link.name}</span>
+              {(link as any).badge && (
+                <span className="px-1.5 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-bold border border-blue-500/25">
+                  {(link as any).badge}
+                </span>
+              )}
             </Link>
           );
         })}

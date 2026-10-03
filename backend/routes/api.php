@@ -85,4 +85,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/quizzes', [\App\Http\Controllers\QuizController::class, 'index']);
     Route::get('/quizzes/{slug}', [\App\Http\Controllers\QuizController::class, 'show']);
     Route::get('/quizzes/{quiz}/questions', [\App\Http\Controllers\QuestionController::class, 'index']);
+    Route::get('/exam-schedule/lookup', [\App\Http\Controllers\ExamScheduleController::class, 'lookup']);
 });

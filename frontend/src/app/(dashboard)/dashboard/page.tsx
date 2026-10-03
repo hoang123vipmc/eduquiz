@@ -16,7 +16,10 @@ import {
   HelpCircle,
   FileQuestion,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  CalendarCheck,
+  ArrowRight,
+  MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
@@ -46,6 +49,7 @@ export default function DashboardPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
+  const [nextExam, setNextExam] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +65,24 @@ export default function DashboardPage() {
         if (quizzesRes.data.success) {
           const quizzesList = Array.isArray(quizzesRes.data.data) ? quizzesRes.data.data : quizzesRes.data.data.data;
           setQuizzes(quizzesList.slice(0, 3));
+        }
+
+        // Tải lịch thi HUBT nhanh
+        const savedMsv = typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '2823231208' : '2823231208';
+        if (savedMsv) {
+          fetch(`/api/schedule?msv=${encodeURIComponent(savedMsv)}`)
+            .then(r => r.json())
+            .then(res => {
+              if (res.success && res.data?.schedules?.length > 0) {
+                const upcoming = res.data.schedules.find((s: any) => s.status === 'today' || s.status === 'upcoming') || res.data.schedules[0];
+                setNextExam({
+                  ...upcoming,
+                  studentName: res.data.student?.fullName || '',
+                  total: res.data.schedules.length
+                });
+              }
+            })
+            .catch(() => {});
         }
       } catch (error) {
         console.error("Lỗi tải dữ liệu dashboard", error);
@@ -186,6 +208,85 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Upcoming Exam Banner Widget */}
+      {nextExam ? (
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-card border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
+              <CalendarCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+                  Lịch thi học kỳ sắp tới • HUBT ITC
+                </span>
+                {nextExam.status === 'today' ? (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">
+                    Hôm nay thi!
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    {nextExam.countdownText || "Sắp thi"}
+                  </span>
+                )}
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-foreground mt-0.5">
+                {nextExam.subject}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-3 flex-wrap">
+                <span>Phòng: <strong className="text-foreground">{nextExam.room}</strong></span>
+                <span>•</span>
+                <span>Ngày: <strong className="text-foreground">{nextExam.date}</strong> lúc <strong className="text-foreground">{nextExam.time}</strong></span>
+                {nextExam.testScore !== null && (
+                  <>
+                    <span>•</span>
+                    <span>Điểm KT: <strong className="text-emerald-400">{nextExam.testScore}/10</strong></span>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button
+              onClick={() => router.push(`/dashboard/quizzes?search=${encodeURIComponent(nextExam.searchKeyword || nextExam.subject)}`)}
+              className="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Ôn thi môn này</span>
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/schedule')}
+              className="px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
+            >
+              <span>Xem tất cả ({nextExam.total})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <CalendarCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Tra cứu Lịch thi & Điểm thi trường HUBT</h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Nhập mã sinh viên hoặc tên lớp để xem ngay ngày thi, phòng thi và điểm kiểm tra điều kiện.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard/schedule')}
+            className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all self-start sm:self-auto shrink-0"
+          >
+            <span>Tra cứu ngay</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
