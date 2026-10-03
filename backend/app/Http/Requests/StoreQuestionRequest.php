@@ -13,6 +13,35 @@ class StoreQuestionRequest extends FormRequest
         return $this->user() && ($this->user()->role === 'admin' || ($quiz && $quiz->user_id === $this->user()->id));
     }
 
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+        if (!$this->has('type') && $this->has('question_type')) {
+            $merge['type'] = $this->question_type;
+        }
+        if (!$this->has('type')) {
+            $merge['type'] = 'single_choice';
+        }
+        if (!$this->has('difficulty')) {
+            $merge['difficulty'] = 'medium';
+        }
+        if (!$this->has('points')) {
+            $merge['points'] = 1;
+        }
+        if ($this->has('options') && is_array($this->options)) {
+            $opts = $this->options;
+            foreach ($opts as &$opt) {
+                if (is_array($opt) && isset($opt['text']) && !isset($opt['option_text'])) {
+                    $opt['option_text'] = $opt['text'];
+                }
+            }
+            $merge['options'] = $opts;
+        }
+        if (!empty($merge)) {
+            $this->merge($merge);
+        }
+    }
+
     public function rules(): array
     {
         return [

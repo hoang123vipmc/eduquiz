@@ -56,8 +56,12 @@ class QuestionController extends Controller
             $question = Question::create($data);
 
             if (isset($data['options']) && is_array($data['options'])) {
-                foreach ($data['options'] as $optionData) {
-                    $question->options()->create($optionData);
+                foreach ($data['options'] as $idx => $optionData) {
+                    $question->options()->create([
+                        'option_text' => $optionData['option_text'] ?? $optionData['text'] ?? '',
+                        'is_correct'  => !empty($optionData['is_correct']),
+                        'order'       => $optionData['order'] ?? $idx,
+                    ]);
                 }
             }
 
@@ -139,26 +143,40 @@ class QuestionController extends Controller
 
         $validated = $request->validate([
             'question_text' => 'sometimes|required|string',
-            'question_type' => 'sometimes|required|in:single_choice,multiple_choice,true_false',
+            'type'          => 'sometimes|nullable|string',
+            'question_type' => 'sometimes|nullable|string',
             'explanation'   => 'nullable|string',
             'points'        => 'sometimes|integer|min:1',
+            'difficulty'    => 'sometimes|in:easy,medium,hard',
             'options'       => 'sometimes|array|min:2',
-            'options.*.text' => 'required_with:options|string',
+            'options.*.text' => 'nullable|string',
+            'options.*.option_text' => 'nullable|string',
             'options.*.is_correct' => 'required_with:options|boolean',
         ]);
 
         DB::beginTransaction();
         try {
-            $question->update(collect($validated)->except('options')->toArray());
+            $type = $validated['type'] ?? $validated['question_type'] ?? null;
+            $questionData = collect($validated)->except(['options', 'question_type'])->toArray();
+            if ($type) {
+                $questionData['type'] = $type;
+            }
+            $question->update($questionData);
 
             if (isset($validated['options'])) {
                 $question->options()->delete();
-                foreach ($validated['options'] as $optionData) {
-                    $question->options()->create($optionData);
+                foreach ($validated['options'] as $idx => $optionData) {
+                    $question->options()->create([
+                        'option_text' => $optionData['option_text'] ?? $optionData['text'] ?? '',
+                        'is_correct'  => !empty($optionData['is_correct']),
+                        'order'       => $optionData['order'] ?? $idx,
+                    ]);
                 }
             }
 
             DB::commit();
+
+            $request->attributes->set('quiz_owner_id', $question->quiz->user_id);
 
             return response()->json([
                 'success' => true,
@@ -169,7 +187,7 @@ class QuestionController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi khi cập nhật câu hỏi.',
+                'message' => 'Lỗi khi cập nhật câu hỏi: ' . $e->getMessage(),
             ], 500);
         }
     }
