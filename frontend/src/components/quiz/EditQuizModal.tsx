@@ -384,7 +384,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
     if (!quiz?.id) return;
     setLoadingQuestions(true);
     try {
-      const { data } = await api.get(`/quizzes/${quiz.id}/questions`);
+      const { data } = await api.get(`/quizzes/${quiz.id}/questions?_t=${Date.now()}`);
       if (data.success) {
         const rawList = Array.isArray(data.data) ? data.data : (data.data?.data || []);
         setQuestions(
