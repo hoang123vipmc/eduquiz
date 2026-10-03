@@ -72,15 +72,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] space-y-8 z-10">
+    <div className="w-full max-w-[420px] space-y-6 sm:space-y-8 z-10 px-2 sm:px-0">
       <div className="text-center md:text-left">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
+        {/* Mobile Brand Logo */}
+        <div className="md:hidden flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/25">
+            OQ
+          </div>
+          <span className="font-extrabold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
         <p className="text-sm text-muted-foreground mt-2 font-normal">
           Please enter your details to sign in.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 mt-8">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-6 sm:mt-8">
         {error && (
           <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
             {error}

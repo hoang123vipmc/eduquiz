@@ -23,6 +23,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   const [loadingText, setLoadingText] = useState('');
   const [error, setError] = useState('');
   const [showGuide, setShowGuide] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
 
   const parsedQuestions = React.useMemo(() => {
     if (step === 2) return parseQuizText(rawText);
@@ -210,7 +211,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
 
         {/* Body */}
         {step === 1 ? (
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Quiz Title</label>
               <input 
@@ -370,13 +371,44 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
           </div>
         ) : (
           <div className="flex-1 flex flex-col min-h-0">
-            <div className="p-4 bg-[#4F7CFF]/10 border-b border-[#4F7CFF]/20 text-[13px] text-blue-100 shrink-0">
+            <div className="p-3 sm:p-4 bg-[#4F7CFF]/10 border-b border-[#4F7CFF]/20 text-xs sm:text-[13px] text-blue-100 shrink-0">
               <strong>Guide:</strong> Review your text format. Each question must be separated by <strong>1 blank line</strong>. Correct answer must have a <strong>*</strong> prefix (e.g. <i>*A. Answer</i>).
+            </div>
+
+            {/* Mobile Tab Switcher */}
+            <div className="md:hidden flex border-b border-border bg-muted/40 p-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setMobileTab('edit')}
+                className={cn(
+                  "flex-1 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all",
+                  mobileTab === 'edit' ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"
+                )}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Soạn thảo văn bản</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab('preview')}
+                className={cn(
+                  "flex-1 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all",
+                  mobileTab === 'preview' ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"
+                )}
+              >
+                <span>Xem trước</span>
+                <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-md text-[10px] font-bold">
+                  {parsedQuestions.length} câu
+                </span>
+              </button>
             </div>
             
             <div className="flex-1 flex flex-col md:flex-row min-h-0 relative bg-secondary overflow-y-auto md:overflow-hidden">
               {/* Left Column: Textarea */}
-              <div className="w-full md:w-1/2 p-4 md:p-5 flex flex-col border-b md:border-b-0 md:border-r border-border relative min-h-[300px] md:min-h-0 shrink-0">
+              <div className={cn(
+                "w-full md:w-1/2 p-4 md:p-5 flex-col border-b md:border-b-0 md:border-r border-border relative min-h-[300px] md:min-h-0 shrink-0",
+                mobileTab === 'edit' ? "flex" : "hidden md:flex"
+              )}>
                 <textarea 
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
@@ -392,10 +424,13 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               </div>
 
               {/* Right Column: Live Preview */}
-              <div className="w-full md:w-1/2 flex flex-col bg-card min-h-[400px] md:min-h-0 shrink-0">
-                <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between shrink-0">
-                  <span className="font-semibold text-foreground text-sm">Live Preview</span>
-                  <span className="px-3 py-1 bg-[#10B981]/10 text-[#10B981] text-xs font-bold rounded-full border border-[#10B981]/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+              <div className={cn(
+                "w-full md:w-1/2 flex-col bg-card min-h-[400px] md:min-h-0 shrink-0",
+                mobileTab === 'preview' ? "flex" : "hidden md:flex"
+              )}>
+                <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-b border-border bg-muted/30 flex items-center justify-between shrink-0">
+                  <span className="font-semibold text-foreground text-xs sm:text-sm">Live Preview</span>
+                  <span className="px-2.5 py-0.5 bg-[#10B981]/10 text-[#10B981] text-xs font-bold rounded-full border border-[#10B981]/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                     Đã nhận diện: {parsedQuestions.length} câu
                   </span>
                 </div>

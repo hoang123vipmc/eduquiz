@@ -145,36 +145,36 @@ export default function HistoryPage() {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center shrink-0">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center shrink-0">
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Tổng số lượt làm bài</p>
-            <p className="text-xl font-bold text-foreground mt-0.5">{totalCount} bài</p>
+            <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">Tổng số lượt làm bài</p>
+            <p className="text-lg sm:text-xl font-bold text-foreground mt-0.5">{totalCount} bài</p>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Điểm số cao nhất</p>
-            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {maxScore > 0 ? `${maxScore} điểm` : "Chưa có"}
+            <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">Điểm cao nhất</p>
+            <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {maxScore > 0 ? `${maxScore}đ` : "—"}
             </p>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <Target className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground">Tỷ lệ đạt kết quả</p>
-            <p className="text-xl font-bold text-foreground mt-0.5">
+            <p className="text-[11px] sm:text-xs font-medium text-muted-foreground">Tỷ lệ đạt</p>
+            <p className="text-lg sm:text-xl font-bold text-foreground mt-0.5">
               {history.length > 0 ? `${passRate}%` : "—"}
             </p>
           </div>
@@ -195,13 +195,13 @@ export default function HistoryPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-between sm:justify-start">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/60 text-xs font-semibold">
+          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/60 text-xs font-semibold overflow-x-auto max-w-full">
             <button
               onClick={() => setStatusFilter("all")}
               className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg transition-all whitespace-nowrap",
                 statusFilter === "all" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -210,7 +210,7 @@ export default function HistoryPage() {
             <button
               onClick={() => setStatusFilter("passed")}
               className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg transition-all whitespace-nowrap",
                 statusFilter === "passed" ? "bg-card text-emerald-700 dark:text-emerald-400 shadow-xs" : "text-muted-foreground hover:text-emerald-600"
               )}
             >
@@ -219,11 +219,11 @@ export default function HistoryPage() {
             <button
               onClick={() => setStatusFilter("failed")}
               className={cn(
-                "px-3 py-1.5 rounded-lg transition-all",
+                "px-2.5 sm:px-3 py-1.5 rounded-lg transition-all whitespace-nowrap",
                 statusFilter === "failed" ? "bg-card text-rose-700 dark:text-rose-400 shadow-xs" : "text-muted-foreground hover:text-rose-600"
               )}
             >
-              Chưa đạt (&lt; 50)
+              Chưa đạt
             </button>
           </div>
 
@@ -232,11 +232,12 @@ export default function HistoryPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
+              aria-label="Sắp xếp lịch sử làm bài"
               className="bg-card border border-border rounded-xl px-3 py-2 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer appearance-none pr-7"
             >
               <option value="newest">Mới nhất</option>
-              <option value="highest">Điểm cao nhất</option>
-              <option value="lowest">Điểm thấp nhất</option>
+              <option value="highest">Điểm cao</option>
+              <option value="lowest">Điểm thấp</option>
             </select>
           </div>
         </div>
@@ -247,7 +248,7 @@ export default function HistoryPage() {
         <div className="space-y-3">
           <div className="h-12 bg-muted/60 rounded-xl animate-pulse border border-border"></div>
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-16 bg-card rounded-xl animate-pulse border border-border"></div>
+            <div key={i} className="h-20 bg-card rounded-xl animate-pulse border border-border"></div>
           ))}
         </div>
       ) : sortedHistory.length === 0 ? (
@@ -270,7 +271,90 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* MOBILE CARDS VIEW (< md) */}
+          <div className="md:hidden divide-y divide-border">
+            {sortedHistory.map((h) => {
+              const scoreColor = getScoreColor(h.score);
+              const isPass = (h.score || 0) >= 50;
+              const quizId = h.quiz?.id || h.attempt?.quiz_id;
+
+              return (
+                <div 
+                  key={h.id}
+                  onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
+                  className="p-4 hover:bg-muted/30 transition-colors cursor-pointer active:bg-muted/50 space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-sm text-foreground line-clamp-2 leading-snug">
+                        {h.quiz?.title || "Đề thi đã bị xóa"}
+                      </h4>
+                      {h.quiz?.category?.name && (
+                        <span className="inline-block text-[11px] font-medium text-muted-foreground mt-0.5">
+                          {h.quiz.category.name}
+                        </span>
+                      )}
+                    </div>
+                    <span className={cn("px-2.5 py-1 rounded-lg border font-bold text-xs shrink-0 shadow-2xs", scoreColor)}>
+                      {h.score} điểm
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-0.5">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 font-medium text-foreground">
+                        {isPass ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                        )}
+                        <span>{h.correct_answers}/{h.total_questions || (h.correct_answers + (h.wrong_answers || 0) + (h.skipped_answers || 0))}</span>
+                      </span>
+
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatQuizDuration((h.time_taken_seconds || 0) * 1000, 'text')}
+                      </span>
+                    </div>
+
+                    <span className="text-[11px] text-muted-foreground/80">
+                      {formatDate(h.created_at)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                    {quizId && (
+                      <button
+                        onClick={() => {
+                          const mode = h.attempt?.mode || 'practice';
+                          const query = new URLSearchParams({
+                            mode: mode,
+                            unlimited: mode === 'practice' ? '1' : '0',
+                            fresh: '1'
+                          }).toString();
+                          router.push(`/play/${quizId}?${query}`);
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 flex items-center gap-1 transition-colors"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Làm lại</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => router.push(`/result/${h.id || h.attempt_id}`)}
+                      className="px-3 py-1 rounded-lg bg-muted text-foreground text-xs font-semibold hover:bg-muted/80 flex items-center gap-1 transition-colors"
+                    >
+                      <span>Xem kết quả</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* DESKTOP TABLE VIEW (>= md) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
               <thead className="bg-muted/50 text-muted-foreground font-semibold text-xs uppercase tracking-wider border-b border-border">
                 <tr>

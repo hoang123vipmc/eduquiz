@@ -205,26 +205,26 @@ export default function QuizResultPage() {
         </div>
 
         {/* Thống kê 4 ô chi tiết */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đúng</p>
-            <p className="text-2xl font-bold text-emerald-400">{result.correct_answers}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 mx-auto mb-1.5" />
+            <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đúng</p>
+            <p className="text-xl sm:text-2xl font-bold text-emerald-400">{result.correct_answers}</p>
           </div>
-          <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-            <XCircle className="w-6 h-6 text-rose-500 mx-auto mb-2" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sai</p>
-            <p className="text-2xl font-bold text-rose-500">{result.wrong_answers}</p>
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+            <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-rose-500 mx-auto mb-1.5" />
+            <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sai</p>
+            <p className="text-xl sm:text-2xl font-bold text-rose-500">{result.wrong_answers}</p>
           </div>
-          <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-            <AlertCircle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bỏ qua</p>
-            <p className="text-2xl font-bold text-amber-500">{result.skipped_answers}</p>
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mx-auto mb-1.5" />
+            <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bỏ qua</p>
+            <p className="text-xl sm:text-2xl font-bold text-amber-500">{result.skipped_answers}</p>
           </div>
-          <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-            <Clock className="w-6 h-6 text-[#4F7CFF] mx-auto mb-2" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thời gian</p>
-            <p className="text-xl font-bold text-foreground">{formatTime(result.time_taken_seconds)}</p>
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#4F7CFF] mx-auto mb-1.5" />
+            <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thời gian</p>
+            <p className="text-base sm:text-xl font-bold text-foreground">{formatTime(result.time_taken_seconds)}</p>
           </div>
         </div>
 
@@ -235,12 +235,12 @@ export default function QuizResultPage() {
         </div>
 
         {/* Buttons Action Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-3 print:hidden">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 print:hidden">
           <button 
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-xs sm:text-sm transition-all shadow-xs"
           >
-            <Home className="w-4 h-4" /> Về trang chủ
+            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Về trang chủ
           </button>
           {/* Nút làm lại chính: Tự động phân biệt Ôn tập lại hoặc Thi lại từ đầu */}
           <button 
@@ -254,17 +254,17 @@ export default function QuizResultPage() {
               }).toString();
               router.push(`/play/${quizId}?${query}`);
             }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold text-sm transition-all shadow-md shadow-primary/20"
+            className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-semibold text-xs sm:text-sm transition-all shadow-md shadow-primary/20"
           >
-            <RefreshCcw className="w-4 h-4" /> 
+            <RefreshCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
             {result?.attempt?.mode === 'practice' ? 'Ôn tập lại từ đầu' : 'Thi lại từ đầu'}
           </button>
           <button 
             onClick={() => setShowSettingsModal(true)}
             title="Đổi chế độ làm bài (Ôn thi / Thi thử, xáo trộn câu hỏi...)"
-            className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-xs sm:text-sm transition-all shadow-xs"
           >
-            <Settings className="w-4 h-4 text-primary" /> Chế độ khác
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" /> Chế độ khác
           </button>
           {result.wrong_answers > 0 && (
             <button 
@@ -277,31 +277,31 @@ export default function QuizResultPage() {
                   router.push(`/play/${id}?retry_attempt=${attemptId}`);
                 }
               }}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-sm transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 active:scale-[0.98] text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold text-xs sm:text-sm transition-all"
             >
-              <AlertCircle className="w-4 h-4" /> Làm lại {result.wrong_answers} câu sai
+              <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Làm lại {result.wrong_answers} câu sai
             </button>
           )}
           <button
             onClick={handlePrint}
             title="In hoặc lưu kết quả bài thi dưới dạng tệp PDF"
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-xs sm:text-sm transition-all shadow-xs"
           >
-            <Printer className="w-4 h-4 text-primary" /> In / Lưu PDF
+            <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" /> In / PDF
           </button>
           <button
             onClick={handleShare}
             title="Chia sẻ kết quả bài thi"
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-sm transition-all shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-border bg-card hover:bg-muted active:scale-[0.98] text-foreground font-semibold text-xs sm:text-sm transition-all shadow-xs"
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-500" />
+                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
                 <span className="text-emerald-500">Đã copy link!</span>
               </>
             ) : (
               <>
-                <Share2 className="w-4 h-4 text-blue-500" />
+                <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
                 <span>Chia sẻ</span>
               </>
             )}
@@ -311,34 +311,34 @@ export default function QuizResultPage() {
         {/* Review Breakdown Section */}
         {questionsDetail.length > 0 && (
           <div className="space-y-4 pt-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Eye className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-foreground">Chi tiết câu hỏi & Lời giải</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">Chi tiết câu hỏi & Lời giải</h3>
                   <p className="text-xs text-muted-foreground">Xem lại từng câu hỏi, lựa chọn của bạn và đáp án chính xác</p>
                 </div>
               </div>
 
               {/* Filters */}
-              <div className="flex items-center gap-1.5 bg-muted p-1 rounded-xl self-start sm:self-auto text-xs font-semibold print:hidden">
+              <div className="flex items-center gap-1 bg-muted p-1 rounded-xl self-start sm:self-auto text-xs font-semibold print:hidden overflow-x-auto max-w-full">
                 <button
                   onClick={() => setFilterMode("all")}
-                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                  className={cn("px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap", filterMode === "all" ? "bg-card text-foreground shadow-2xs" : "text-muted-foreground hover:text-foreground")}
                 >
                   Tất cả ({questionsDetail.length})
                 </button>
                 <button
                   onClick={() => setFilterMode("wrong")}
-                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "wrong" ? "bg-card text-rose-700 dark:text-rose-400 shadow-sm" : "text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400")}
+                  className={cn("px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap", filterMode === "wrong" ? "bg-card text-rose-700 dark:text-rose-400 shadow-2xs" : "text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400")}
                 >
                   Câu sai ({questionsDetail.filter(q => !q.is_correct).length})
                 </button>
                 <button
                   onClick={() => setFilterMode("correct")}
-                  className={cn("px-3 py-1.5 rounded-lg transition-colors", filterMode === "correct" ? "bg-card text-emerald-700 dark:text-emerald-400 shadow-sm" : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400")}
+                  className={cn("px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap", filterMode === "correct" ? "bg-card text-emerald-700 dark:text-emerald-400 shadow-2xs" : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400")}
                 >
                   Câu đúng ({questionsDetail.filter(q => q.is_correct).length})
                 </button>

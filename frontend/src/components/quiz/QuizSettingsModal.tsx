@@ -98,7 +98,7 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle, total
               </label>
               <span className="text-xs text-muted-foreground font-medium">Có thể đổi khi đang thi</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               <div 
                 onClick={() => setTheme('modern')}
                 className={cn(

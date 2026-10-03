@@ -78,10 +78,10 @@ export default function LeaderboardPage() {
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs relative">
         {/* Header */}
-        <div className="grid grid-cols-12 gap-4 p-4 border-b border-border bg-secondary/50 text-sm font-semibold text-muted-foreground">
+        <div className="grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4 border-b border-border bg-secondary/50 text-xs sm:text-sm font-semibold text-muted-foreground">
           <div className="col-span-2 md:col-span-1 text-center">Hạng</div>
-          <div className="col-span-5 md:col-span-4 pl-2">Người dùng</div>
-          <div className="col-span-5 md:col-span-3 text-center">Câu đúng</div>
+          <div className="col-span-6 md:col-span-4 pl-1 sm:pl-2">Người dùng</div>
+          <div className="col-span-4 md:col-span-3 text-center">Câu đúng</div>
           <div className="hidden md:block col-span-2 text-center">Đã làm</div>
           <div className="hidden md:block col-span-2 text-center">Chính xác</div>
         </div>
@@ -89,9 +89,9 @@ export default function LeaderboardPage() {
         {/* List */}
         <div className="divide-y divide-border">
           {leaderboard.length === 0 ? (
-            <div className="p-16 text-center text-muted-foreground flex flex-col items-center justify-center">
+            <div className="p-12 sm:p-16 text-center text-muted-foreground flex flex-col items-center justify-center">
               <Trophy className="w-10 h-10 mb-3 opacity-20 text-primary" />
-              <p className="font-semibold text-foreground">Chưa có ai tham gia bảng xếp hạng</p>
+              <p className="font-semibold text-foreground text-sm">Chưa có ai tham gia bảng xếp hạng</p>
               <p className="text-xs text-muted-foreground mt-1">Hãy là người đầu tiên hoàn thành đề thi để ghi tên lên bảng vinh danh!</p>
             </div>
           ) : (
@@ -99,39 +99,39 @@ export default function LeaderboardPage() {
               <div 
                 key={user.id} 
                 className={cn(
-                  "grid grid-cols-12 gap-4 p-4 items-center transition-colors hover:bg-muted/30",
+                  "grid grid-cols-12 gap-2 sm:gap-4 p-3 sm:p-4 items-center transition-colors hover:bg-muted/30",
                   currentUser?.id === user.id ? "bg-primary/5 border-l-2 border-primary" : ""
                 )}
               >
                 <div className="col-span-2 md:col-span-1 flex justify-center">
-                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border", getRankStyle(user.rank))}>
+                  <div className={cn("w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border", getRankStyle(user.rank))}>
                     {getRankIcon(user.rank)}
                   </div>
                 </div>
                 
-                <div className="col-span-5 md:col-span-4 flex items-center gap-3 pl-2 truncate">
+                <div className="col-span-6 md:col-span-4 flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2 truncate">
                   <img 
                     src={user.avatar || (user.id === currentUser?.id ? "/images/avatar-student.jpg" : `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(user.name || 'user')}`)} 
                     alt={user.name} 
-                    className="w-10 h-10 rounded-full object-cover shrink-0 border border-border/80 shadow-xs bg-muted" 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 border border-border/80 shadow-xs bg-muted" 
                   />
-                  <span className={cn("font-medium truncate", user.rank === 1 ? "text-amber-700 dark:text-amber-400 font-bold" : "text-foreground")}>
+                  <span className={cn("text-xs sm:text-sm font-medium truncate", user.rank === 1 ? "text-amber-700 dark:text-amber-400 font-bold" : "text-foreground")}>
                     {user.name}
                   </span>
                 </div>
 
-                <div className="col-span-5 md:col-span-3 flex items-center justify-center gap-1">
-                  <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="font-bold text-foreground text-lg">{user.total_correct}</span>
+                <div className="col-span-4 md:col-span-3 flex items-center justify-center gap-1">
+                  <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="font-bold text-foreground text-sm sm:text-lg">{user.total_correct}</span>
                 </div>
 
                 <div className="hidden md:flex col-span-2 items-center justify-center">
-                  <span className="text-muted-foreground font-medium">{user.total_quizzes} bài</span>
+                  <span className="text-muted-foreground font-medium text-xs sm:text-sm">{user.total_quizzes} bài</span>
                 </div>
 
                 <div className="hidden md:flex col-span-2 items-center justify-center gap-1">
                   <Award className={cn("w-4 h-4", user.avg_accuracy >= 80 ? "text-primary" : "text-muted-foreground")} />
-                  <span className="font-semibold text-foreground">{user.avg_accuracy}%</span>
+                  <span className="font-semibold text-foreground text-xs sm:text-sm">{user.avg_accuracy}%</span>
                 </div>
               </div>
             ))
@@ -140,41 +140,41 @@ export default function LeaderboardPage() {
 
         {/* Current User Sticky Bar */}
         {currentUser && (
-          <div className="sticky bottom-0 border-t border-border bg-card p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-            <div className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
+          <div className="sticky bottom-16 md:bottom-0 border-t border-border bg-card p-3 sm:p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-20">
+            <div className="text-[11px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 flex items-center justify-between">
               <span>Thành tích của bạn</span>
               {currentUser.rank !== '-' && Number(currentUser.rank) > 50 && (
-                <span className="text-primary">Bạn đang ở vị trí #{currentUser.rank}</span>
+                <span className="text-primary font-medium">Bạn đang ở vị trí #{currentUser.rank}</span>
               )}
             </div>
-            <div className="grid grid-cols-12 gap-4 items-center">
+            <div className="grid grid-cols-12 gap-2 sm:gap-4 items-center">
               <div className="col-span-2 md:col-span-1 flex justify-center">
-                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border", getRankStyle(currentUser.rank))}>
+                <div className={cn("w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border", getRankStyle(currentUser.rank))}>
                   {getRankIcon(currentUser.rank)}
                 </div>
               </div>
               
-              <div className="col-span-5 md:col-span-4 flex items-center gap-3 pl-2 truncate">
+              <div className="col-span-6 md:col-span-4 flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2 truncate">
                 <img 
                   src={currentUser.avatar || "/images/avatar-student.jpg"} 
                   alt={currentUser.name} 
-                  className="w-10 h-10 rounded-full object-cover shrink-0 border border-primary/40 shadow-xs" 
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 border border-primary/40 shadow-xs" 
                 />
-                <span className="font-bold text-foreground truncate">{currentUser.name} (Bạn)</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground truncate">{currentUser.name} (Bạn)</span>
               </div>
 
-              <div className="col-span-5 md:col-span-3 flex items-center justify-center gap-1">
-                <Target className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-bold text-foreground text-lg">{currentUser.total_correct}</span>
+              <div className="col-span-4 md:col-span-3 flex items-center justify-center gap-1">
+                <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 shrink-0" />
+                <span className="font-bold text-foreground text-sm sm:text-lg">{currentUser.total_correct}</span>
               </div>
 
               <div className="hidden md:flex col-span-2 items-center justify-center">
-                <span className="text-muted-foreground font-medium">{currentUser.total_quizzes} bài</span>
+                <span className="text-muted-foreground font-medium text-xs sm:text-sm">{currentUser.total_quizzes} bài</span>
               </div>
 
               <div className="hidden md:flex col-span-2 items-center justify-center gap-1">
                 <Award className={cn("w-4 h-4", currentUser.avg_accuracy >= 80 ? "text-primary" : "text-muted-foreground")} />
-                <span className="font-semibold text-foreground">{currentUser.avg_accuracy}%</span>
+                <span className="font-semibold text-foreground text-xs sm:text-sm">{currentUser.avg_accuracy}%</span>
               </div>
             </div>
           </div>

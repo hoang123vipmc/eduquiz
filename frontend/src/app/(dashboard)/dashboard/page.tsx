@@ -87,28 +87,28 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       
       {/* Hero Section with 3D Illustration */}
-      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 p-7 sm:p-8 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border shadow-sm">
+      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 p-4 sm:p-7 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border shadow-sm">
         <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-2 sm:mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Nền tảng ôn thi trắc nghiệm OpenQuiz</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-1.5 sm:mb-2">
             Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
           </h2>
-          <p className="text-muted-foreground text-sm sm:text-[15px] leading-relaxed mb-6">
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-[15px] leading-relaxed mb-4 sm:mb-6">
             Tiếp tục hành trình học tập, rèn luyện kỹ năng và chuẩn bị cho các kỳ thi học phần với ngân hàng đề thi thông minh.
           </p>
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button 
               onClick={() => router.push('/dashboard/quizzes')}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md active:scale-95"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md active:scale-95"
             >
               <Play className="w-4 h-4 fill-current" /> Bắt đầu luyện thi
             </button>
             <button 
               onClick={() => router.push('/dashboard/bank')}
-              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2.5 rounded-xl font-medium text-sm transition-colors border border-border/60"
+              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-colors border border-border/60"
             >
               <BookOpen className="w-4 h-4" /> Ngân hàng câu hỏi
             </button>
@@ -116,73 +116,73 @@ export default function DashboardPage() {
         </div>
 
         {/* 3D Learning Graphic Banner */}
-        <div className="relative w-full md:w-72 lg:w-96 h-48 md:h-52 rounded-2xl overflow-hidden shrink-0 border border-border/80 shadow-md group">
+        <div className="relative w-full md:w-72 lg:w-96 h-36 sm:h-48 md:h-52 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border border-border/80 shadow-md group">
           <img 
             src="/images/hero-learning.jpg" 
             alt="Học tập thông minh OpenQuiz" 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-          <div className="absolute bottom-3 left-3 text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
+          <div className="absolute bottom-2.5 left-2.5 text-white text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 drop-shadow">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             Luyện tập thông minh mỗi ngày
           </div>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5" />
+      {/* Statistics Cards - 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tổng đề đã làm</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Đã làm</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
-            <span className="text-xs text-muted-foreground">bộ đề</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
+            <span className="text-[11px] sm:text-xs text-muted-foreground">bộ đề</span>
           </div>
         </div>
         
-        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5" />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Độ chính xác TB</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chính xác</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-foreground">{stats.accuracy}%</div>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
-              <TrendingUp className="w-3.5 h-3.5" /> Chuẩn hóa
+          <div className="flex items-baseline gap-1.5 sm:gap-2">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.accuracy}%</div>
+            <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+              <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Chuẩn
             </span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5" />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Thời gian rèn luyện</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Thời gian</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
-            <span className="text-xs text-muted-foreground">tổng cộng</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
+            <span className="text-[11px] sm:text-xs text-muted-foreground hidden sm:inline">tổng cộng</span>
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-              <Flame className="w-5 h-5" />
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Chuỗi học tập</span>
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chuỗi ngày</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-foreground">{stats.streak_days} ngày</div>
-            <span className="text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
+          <div className="flex items-baseline gap-1.5 sm:gap-2">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.streak_days}d</div>
+            <span className="text-[10px] sm:text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
           </div>
         </div>
       </div>

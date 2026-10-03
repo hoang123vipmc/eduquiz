@@ -59,15 +59,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <div className="w-full max-w-md space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 px-2 sm:px-0">
       <div className="text-center">
-        <h2 className="text-3xl font-extrabold tracking-tight">Tạo tài khoản</h2>
+        {/* Mobile Brand Logo */}
+        <div className="md:hidden flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/25">
+            OQ
+          </div>
+          <span className="font-extrabold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Tạo tài khoản</h2>
         <p className="text-sm text-muted-foreground mt-2">
           Gia nhập OpenQuiz ngay hôm nay
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 mt-8">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-6 sm:mt-8">
         {error && (
           <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
             {error}

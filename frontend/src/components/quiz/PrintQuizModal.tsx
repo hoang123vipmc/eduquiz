@@ -56,34 +56,34 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Controls Bar (hidden during print) */}
-        <div className="flex items-center justify-between p-4 border-b border-border bg-muted/40 print:hidden">
-          <div className="flex items-center gap-2">
-            <Printer className="w-5 h-5 text-primary" />
-            <h2 className="font-bold text-foreground text-base">Xem & In Đề Thi Ra Giấy</h2>
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 p-3 sm:p-4 border-b border-border bg-muted/40 print:hidden">
+          <div className="flex items-center gap-2 min-w-0">
+            <Printer className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+            <h2 className="font-bold text-foreground text-sm sm:text-base truncate">In Đề Thi Ra Giấy</h2>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Toggle show answers */}
             <button
               onClick={() => setShowAnswers(!showAnswers)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
+                "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
                 showAnswers 
                   ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" 
                   : "bg-card text-muted-foreground border-border hover:text-foreground"
               )}
             >
               {showAnswers ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              <span>{showAnswers ? "Đang hiện đáp án" : "Ẩn đáp án (Đề trắng)"}</span>
+              <span>{showAnswers ? "Hiện đáp án" : "Đề trắng"}</span>
             </button>
 
             {/* Print Button */}
             <button
               onClick={handlePrint}
               disabled={loading || questions.length === 0}
-              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-1.5 rounded-lg font-bold text-xs transition-all shadow-xs disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 sm:px-4 py-1.5 rounded-lg font-bold text-xs transition-all shadow-xs disabled:opacity-50"
             >
-              <Printer className="w-4 h-4" /> In / Tải PDF
+              <Printer className="w-3.5 h-3.5" /> In / PDF
             </button>
 
             {/* Close Button */}
@@ -98,7 +98,7 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
         </div>
 
         {/* Printable Content Viewport */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-card text-foreground" id="printable-exam-sheet">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-card text-foreground" id="printable-exam-sheet">
           {loading ? (
             <div className="p-16 text-center">
               <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />

@@ -49,55 +49,55 @@ export default function StatisticsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-            <Trophy className="w-6 h-6" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Tổng bài đã thi</p>
-            <h4 className="text-2xl font-bold text-foreground">{stats.total_quizzes}</h4>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Tổng bài thi</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground">{stats.total_quizzes}</h4>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
-            <Target className="w-6 h-6" />
+        <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+            <Target className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Độ chính xác TB</p>
-            <h4 className="text-2xl font-bold text-foreground">{stats.accuracy}%</h4>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Độ chính xác</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground">{stats.accuracy}%</h4>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
-            <Clock className="w-6 h-6" />
+        <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Thời gian học</p>
-            <h4 className="text-2xl font-bold text-foreground">{Math.round(stats.total_time_seconds / 60)} phút</h4>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Thời gian học</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground">{Math.round(stats.total_time_seconds / 60)} phút</h4>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
-            <Flame className="w-6 h-6" />
+        <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+            <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Chuỗi ngày học</p>
-            <h4 className="text-2xl font-bold text-foreground">{stats.streak_days} ngày</h4>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">Chuỗi ngày</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground">{stats.streak_days} ngày</h4>
           </div>
         </div>
       </div>
 
       {/* Charts */}
       {stats.trend && stats.trend.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Accuracy Trend */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground mb-6">Biến thiên độ chính xác (7 ngày)</h3>
-            <div className="h-[300px] w-full">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-xs">
+            <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 sm:mb-6">Biến thiên độ chính xác (7 ngày)</h3>
+            <div className="h-[260px] sm:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats.trend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -120,9 +120,9 @@ export default function StatisticsPage() {
           </div>
 
           {/* Time & Activity Bar Chart */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground mb-6">Thời gian học tập (Phút)</h3>
-            <div className="h-[300px] w-full">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-xs">
+            <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 sm:mb-6">Thời gian học tập (Phút)</h3>
+            <div className="h-[260px] sm:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.trend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border opacity-50" vertical={false} />
@@ -132,7 +132,7 @@ export default function StatisticsPage() {
                     contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '12px', color: 'var(--foreground)' }}
                     cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
                   />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
                   <Bar dataKey="time_minutes" name="Thời gian (Phút)" fill="#4F7CFF" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="quizzes" name="Số bài đã làm" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -141,7 +141,7 @@ export default function StatisticsPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-8 sm:p-12 text-center shadow-xs">
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <BarChart2 className="w-8 h-8 text-muted-foreground" />
           </div>

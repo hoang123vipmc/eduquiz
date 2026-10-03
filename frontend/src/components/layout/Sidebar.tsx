@@ -14,7 +14,8 @@ import {
   BarChart2,
   Trophy,
   LogOut,
-  User
+  User,
+  X
 } from "lucide-react";
 
 interface SidebarProps {
@@ -61,7 +62,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const navContent = (
     <div className="flex flex-col h-full text-foreground">
       {/* Brand & Slogan */}
-      <div className="pt-7 pb-6 px-6 border-b border-border/40">
+      <div className="pt-6 sm:pt-7 pb-5 sm:pb-6 px-5 sm:px-6 border-b border-border/40 flex items-center justify-between">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-base shadow-sm shadow-primary/25">
             <span>OQ</span>
@@ -75,6 +76,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </div>
           </div>
         </div>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Đóng menu"
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Menu */}

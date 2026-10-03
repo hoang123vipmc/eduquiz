@@ -213,8 +213,85 @@ export default function QuestionBankPage() {
       </div>
 
       {/* Table */}
+      {/* Table & Mobile Cards */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
+        {/* MOBILE CARDS VIEW (< md) */}
+        <div className="md:hidden divide-y divide-border">
+          {loading ? (
+            <div className="p-8 text-center">
+              <Loader2 className="w-7 h-7 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">Đang tải câu hỏi...</p>
+            </div>
+          ) : questions.length === 0 ? (
+            <div className="p-8 text-center">
+              <FileQuestion className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-foreground font-semibold text-sm">Không tìm thấy câu hỏi</p>
+              <p className="text-muted-foreground text-xs mt-1">Hãy thử xóa bộ lọc hoặc tìm kiếm bằng từ khóa khác</p>
+            </div>
+          ) : (
+            questions.map((q) => (
+              <div
+                key={q.id}
+                onClick={() => setActiveQuestion(q)}
+                className="p-4 hover:bg-muted/40 active:bg-muted/60 transition-colors cursor-pointer space-y-2.5"
+              >
+                <p className="text-sm font-medium text-foreground line-clamp-3 leading-relaxed">
+                  <FormattedText text={q.question_text} />
+                </p>
+
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md font-semibold text-[11px] border", getDifficultyColor(q.difficulty))}>
+                    {getDifficultyLabel(q.difficulty)}
+                  </span>
+
+                  <span className="text-[11px] font-semibold text-foreground/80 bg-muted px-2 py-0.5 rounded-md border border-border/60">
+                    {q.points || 1} điểm
+                  </span>
+
+                  {q.quiz && (
+                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground truncate max-w-[170px]" title={q.quiz.title}>
+                      <BookOpen className="w-3 h-3 text-primary/70 shrink-0" />
+                      <span className="truncate">{q.quiz.title}</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-1.5 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                  <span className="text-[11px] text-muted-foreground">
+                    {q.options?.length ? `${q.options.length} lựa chọn` : 'Câu hỏi'}
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setActiveQuestion(q)}
+                      className="px-2.5 py-1 rounded-lg bg-muted text-foreground hover:bg-muted/80 text-xs font-semibold flex items-center gap-1 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-primary" />
+                      <span>Xem đáp án</span>
+                    </button>
+                    {(user?.role === 'admin' || (user?.id && (!q.quiz || (q.quiz as any).user_id === user.id))) && (
+                      <button
+                        onClick={(e) => handleDeleteQuestion(q.id, e)}
+                        disabled={deletingId === q.id}
+                        aria-label="Xóa câu hỏi"
+                        className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === q.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP TABLE VIEW (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-muted/50 border-b border-border">
@@ -341,28 +418,28 @@ export default function QuestionBankPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/30">
-              <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-between p-3.5 sm:p-5 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-semibold border", getDifficultyColor(activeQuestion.difficulty))}>
                   Độ khó: {getDifficultyLabel(activeQuestion.difficulty)}
                 </span>
                 {activeQuestion.quiz && (
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    • <BookOpen className="w-3.5 h-3.5 text-primary" /> {activeQuestion.quiz.title}
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 truncate max-w-[200px]">
+                    • <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" /> <span className="truncate">{activeQuestion.quiz.title}</span>
                   </span>
                 )}
               </div>
               <button 
                 onClick={() => setActiveQuestion(null)}
                 aria-label="Đóng chi tiết"
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6">
               {/* Question Text */}
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Câu hỏi:</p>

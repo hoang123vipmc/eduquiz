@@ -25,14 +25,14 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
   };
 
   return (
-    <header className="h-[72px] bg-background/80 backdrop-blur-md sticky top-0 z-30 px-6 flex items-center justify-between border-b border-border">
-      <div className="flex items-center gap-4 flex-1">
+    <header className="h-16 sm:h-[72px] bg-background/80 backdrop-blur-md sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between border-b border-border">
+      <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={onOpenMobile}
           aria-label="Mở menu điều hướng"
-          className="md:hidden text-muted-foreground hover:text-foreground"
+          className="md:hidden text-muted-foreground hover:text-foreground shrink-0 h-9 w-9"
         >
           <Menu className="w-5 h-5" />
         </Button>
@@ -47,9 +47,24 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
             className="h-10 w-full rounded-full border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
           />
         </form>
+        {/* Mobile brand badge in Topbar */}
+        <div className="sm:hidden flex items-center gap-2 font-bold text-foreground">
+          <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-xs font-black shadow-xs">
+            OQ
+          </div>
+          <span className="text-base tracking-tight">OpenQuiz</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2.5 sm:gap-5 shrink-0">
+        <button 
+          onClick={() => router.push('/dashboard/quizzes')}
+          aria-label="Tìm kiếm đề thi"
+          className="sm:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
+        >
+          <Search className="w-5 h-5" />
+        </button>
+
         <button 
           aria-label="Thông báo hệ thống" 
           className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary"
@@ -58,14 +73,18 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
           <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
         </button>
 
-        <div className="h-6 w-px bg-border"></div>
+        <div className="h-5 sm:h-6 w-px bg-border"></div>
 
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="flex flex-col items-end">
+        <div 
+          onClick={() => router.push('/dashboard/settings')}
+          className="flex items-center gap-2.5 cursor-pointer group"
+          title="Tài khoản cá nhân"
+        >
+          <div className="hidden sm:flex flex-col items-end">
             <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{user?.name || "Học viên"}</span>
-            <span className="text-[11px] text-muted-foreground capitalize">{user?.role === 'admin' ? 'Quản trị viên' : 'Tài khoản miễn phí'}</span>
+            <span className="text-[11px] text-muted-foreground capitalize">{user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}</span>
           </div>
-          <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center overflow-hidden shadow-xs shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 border-2 border-border flex items-center justify-center overflow-hidden shadow-xs shrink-0 group-hover:border-primary/50 transition-colors">
             <img 
               src={user?.avatar || "/images/avatar-student.jpg"} 
               alt={user?.name || "Avatar"} 
