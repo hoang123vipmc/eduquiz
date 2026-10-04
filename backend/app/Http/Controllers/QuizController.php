@@ -23,9 +23,44 @@ class QuizController extends Controller
                     'message' => 'Vui lòng đăng nhập để xem danh sách đề thi của bạn.',
                 ], 401);
             }
+
+            // Cache khi không có search (trang mặc định)
+            $search = $request->filled('search') ? trim($request->search) : null;
+            if (!$search) {
+                $cacheKey = "my_quizzes_user_{$user->id}_v1";
+                $cachedData = Cache::remember($cacheKey, 120, function () use ($user) {
+                    $quizzes = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])
+                        ->where('user_id', $user->id)
+                        ->latest('id')
+                        ->paginate(50);
+                    return QuizResource::collection($quizzes)->response()->getData(true);
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy danh sách đề thi thành công.',
+                    'data' => $cachedData
+                ]);
+            }
+
             $query = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])->where('user_id', $user->id);
         } elseif ($user && $user->role === 'admin' && $request->boolean('admin_all')) {
             // Admin có quyền kiểm soát toàn bộ đề thi trong hệ thống
+            $search = $request->filled('search') ? trim($request->search) : null;
+            if (!$search) {
+                $cachedData = Cache::remember('admin_all_quizzes_v1', 60, function () {
+                    $quizzes = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])
+                        ->latest('id')
+                        ->paginate(50);
+                    return QuizResource::collection($quizzes)->response()->getData(true);
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy danh sách đề thi thành công.',
+                    'data' => $cachedData
+                ]);
+            }
             $query = Quiz::with(['user:id,name,avatar', 'category:id,name,icon']);
         } else {
             // Danh sách đề thi công khai chung cho mọi học viên - Cache 60s để tăng tốc tối đa
@@ -123,6 +158,8 @@ class QuizController extends Controller
 
         $quiz = Quiz::create($data);
         Cache::forget('public_quizzes_default_v1');
+        Cache::forget("my_quizzes_user_{$data['user_id']}_v1");
+        Cache::forget('admin_all_quizzes_v1');
 
         return response()->json([
             'success' => true,
@@ -163,6 +200,8 @@ class QuizController extends Controller
 
         $quiz->update($validated);
         Cache::forget('public_quizzes_default_v1');
+        Cache::forget("my_quizzes_user_{$quiz->user_id}_v1");
+        Cache::forget('admin_all_quizzes_v1');
 
         return response()->json([
             'success' => true,
@@ -183,8 +222,11 @@ class QuizController extends Controller
             ], 403);
         }
 
+        $ownerId = $quiz->user_id;
         $quiz->delete();
         Cache::forget('public_quizzes_default_v1');
+        Cache::forget("my_quizzes_user_{$ownerId}_v1");
+        Cache::forget('admin_all_quizzes_v1');
 
         return response()->json([
             'success' => true,

@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
 import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 import { soundManager } from "@/lib/soundEffects";
+import { AskAIModal } from "@/components/quiz/AskAIModal";
 
 const QuizTimer = () => {
   const remainingTime = useQuizStore(s => s.remainingTime);
@@ -126,6 +127,7 @@ export default function QuizPlayerPage() {
   const [clearing, setClearing] = useState(false);
   const [autoNextDelay, setAutoNextDelay] = useState(0);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
+  const [showAskAI, setShowAskAI] = useState(false);
 
   const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
 
@@ -1176,6 +1178,17 @@ export default function QuizPlayerPage() {
                   <Bookmark className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", bookmarkedIds.includes(currentQuestion.id) && "fill-amber-500 text-amber-500")} />
                   <span>{bookmarkedIds.includes(currentQuestion.id) ? "Sổ tay ✓" : "+ Sổ tay"}</span>
                 </button>
+
+                {/* Nút Hỏi AI */}
+                <button
+                  type="button"
+                  onClick={() => setShowAskAI(true)}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-600 dark:text-violet-400 border-violet-500/40 hover:from-violet-500/25 hover:to-indigo-500/25"
+                  title="Hỏi AI giải thích hoặc tranh luận đáp án"
+                >
+                  <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>Hỏi AI</span>
+                </button>
               </div>
               <span className="bg-muted px-2.5 sm:px-3 py-1 rounded-full border border-border text-primary font-bold text-xs">1 Điểm</span>
             </div>
@@ -1339,6 +1352,25 @@ export default function QuizPlayerPage() {
           </div>
         </div>
       )}
+
+      {/* Hỏi AI Modal */}
+      <AskAIModal
+        isOpen={showAskAI}
+        onClose={() => setShowAskAI(false)}
+        questionText={currentQuestion.question_text}
+        options={currentQuestion.options}
+        correctOptionText={
+          currentQuestion.options.find(
+            (o: any) => o.is_correct === 1 || o.is_correct === true || String(o.is_correct) === '1' || String(o.is_correct) === 'true'
+          )?.option_text
+        }
+        selectedOptionText={
+          answers[currentQuestion.id]
+            ? currentQuestion.options.find((o: any) => o.id === answers[currentQuestion.id])?.option_text
+            : undefined
+        }
+        quizTitle={quizInfo?.title}
+      />
     </div>
   );
 }

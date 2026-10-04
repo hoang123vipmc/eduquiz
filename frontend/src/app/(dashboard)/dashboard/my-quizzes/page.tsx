@@ -97,6 +97,30 @@ export default function MyQuizzesPage() {
   const [sortBy, setSortBy] = useState<"newest" | "questions" | "duration">("newest");
   const [activeTagFilter, setActiveTagFilter] = useState<string>("");
 
+  // Cache key helper
+  const getCacheKey = (userId: number | undefined, query: string, isViewAll: boolean) =>
+    `cache_my_quizzes_${userId}_${isViewAll ? 'all' : 'mine'}_${query}`;
+
+  // ── BƯỚC 1: Đọc cache NGAY LẬP TỨC khi mount (0ms, không cần chờ user auth) ──
+  useEffect(() => {
+    try {
+      // Thử các cache key có thể có (không biết userId ngay)
+      const keys = Object.keys(sessionStorage).filter(k =>
+        k.startsWith('cache_my_quizzes_') && k.endsWith('_mine_')
+      );
+      if (keys.length > 0) {
+        const cached = sessionStorage.getItem(keys[0]);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.length > 0) {
+            setQuizzes(parsed);
+            setLoading(false);
+          }
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -105,7 +129,18 @@ export default function MyQuizzesPage() {
   }, [search]);
 
   const fetchQuizzes = async (query = debouncedSearch, isViewAll = adminViewAll) => {
-    setLoading(true);
+    const cacheKey = getCacheKey(user?.id, query, isViewAll);
+
+    // 1. Hiển thị cache ngay lập tức (0ms)
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        setQuizzes(JSON.parse(cached));
+        setLoading(false); // Tắt loading ngay khi có cache
+      }
+    } catch { /* ignore */ }
+
+    // 2. Fetch fresh data trong background
     try {
       const params = new URLSearchParams();
       if (query) params.append("search", query);
@@ -121,7 +156,10 @@ export default function MyQuizzesPage() {
       const { data } = await api.get(`/quizzes?${params.toString()}`);
       if (data.success) {
         const quizzesList = Array.isArray(data.data) ? data.data : data.data.data;
-        setQuizzes(quizzesList || []);
+        const list = quizzesList || [];
+        setQuizzes(list);
+        // Lưu cache với userId đầy đủ
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(list)); } catch { /* ignore */ }
       }
     } catch (error) {
       console.error("Lỗi tải đề thi của tôi", error);
@@ -197,6 +235,12 @@ export default function MyQuizzesPage() {
       try {
         const { data } = await api.delete(`/quizzes/${id}`);
         if (data.success) {
+          // Xóa cache để fetch lại dữ liệu mới
+          try {
+            Object.keys(sessionStorage)
+              .filter(k => k.startsWith('cache_my_quizzes_'))
+              .forEach(k => sessionStorage.removeItem(k));
+          } catch { /* ignore */ }
           fetchQuizzes(debouncedSearch, adminViewAll);
         }
       } catch (error) {
@@ -595,6 +639,12 @@ export default function MyQuizzesPage() {
         onClose={() => setShowImportModal(false)}
         onSuccess={() => {
           setShowImportModal(false);
+          // Xóa cache để fetch lại danh sách mới nhất
+          try {
+            Object.keys(sessionStorage)
+              .filter(k => k.startsWith('cache_my_quizzes_'))
+              .forEach(k => sessionStorage.removeItem(k));
+          } catch { /* ignore */ }
           fetchQuizzes(debouncedSearch, adminViewAll);
         }}
       />
