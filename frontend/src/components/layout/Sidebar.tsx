@@ -87,7 +87,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <button
             onClick={onClose}
             aria-label="Đóng menu"
-            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted active:scale-90 active:rotate-90 transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -120,7 +120,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               href={link.href}
               onClick={() => onClose?.()}
               className={cn(
-                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all active:scale-[0.98]",
                 reallyActive 
                   ? "bg-primary/10 text-primary font-semibold" 
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -197,10 +197,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
             onClick={onClose}
           />
-          <aside className="relative w-[280px] max-w-[80vw] bg-card border-r border-border z-10 flex flex-col h-full shadow-2xl animate-in slide-in-from-left duration-300">
+          <aside className="relative w-[285px] max-w-[82vw] bg-card border-r border-border z-10 flex flex-col h-full shadow-2xl animate-in slide-in-from-left duration-300 ease-out will-change-transform">
             {navContent}
           </aside>
         </div>

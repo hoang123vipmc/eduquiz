@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
       },
+      signal: AbortSignal.timeout(5000),
       next: { revalidate: 300 } // Next.js fetch cache 5 mins
     });
 

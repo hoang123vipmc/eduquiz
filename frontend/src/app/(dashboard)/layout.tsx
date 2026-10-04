@@ -90,14 +90,23 @@ export default function DashboardLayout({
           })}
           
           <button
-            onClick={() => setMobileOpen(true)}
+            onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Thêm mục khác"
-            className="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground active:scale-95 transition-colors"
+            className="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground active:scale-90 transition-all duration-150 group"
           >
-            <div className="p-1 rounded-xl">
-              <Menu className="w-5 h-5" />
+            <div className={cn(
+              "p-1 rounded-xl transition-all duration-200 group-hover:bg-primary/10 group-active:scale-80 group-active:rotate-12",
+              mobileOpen && "bg-primary/15 text-primary scale-105"
+            )}>
+              <Menu className={cn(
+                "w-5 h-5 transition-transform duration-300 ease-out",
+                mobileOpen && "rotate-90 text-primary scale-110"
+              )} />
             </div>
-            <span className="mt-0.5 tracking-tight">Thêm</span>
+            <span className={cn(
+              "mt-0.5 tracking-tight transition-colors duration-200",
+              mobileOpen && "text-primary font-bold"
+            )}>Thêm</span>
           </button>
         </nav>
       </div>

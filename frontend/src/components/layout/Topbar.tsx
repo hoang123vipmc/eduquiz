@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { Button } from "@/components/ui/button";
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 
 interface TopbarProps {
   onOpenMobile?: () => void;
@@ -27,15 +26,6 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
   return (
     <header className="h-16 sm:h-[72px] bg-background/80 backdrop-blur-md sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between border-b border-border">
       <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onOpenMobile}
-          aria-label="Mở menu điều hướng"
-          className="md:hidden text-muted-foreground hover:text-foreground shrink-0 h-9 w-9"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
         <form onSubmit={handleSearch} className="relative hidden sm:block max-w-md w-full">
           <Search className="w-[18px] h-[18px] absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input 
@@ -47,12 +37,15 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
             className="h-10 w-full rounded-full border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
           />
         </form>
-        {/* Mobile brand badge in Topbar */}
-        <div className="sm:hidden flex items-center gap-2 font-bold text-foreground">
-          <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-xs font-black shadow-xs">
+        {/* Mobile brand badge in Topbar - tinh giản, loại bỏ nút 3 gạch trùng lặp */}
+        <div 
+          onClick={() => router.push('/dashboard')}
+          className="sm:hidden flex items-center gap-2.5 font-bold text-foreground cursor-pointer active:scale-95 transition-transform"
+        >
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-primary-foreground flex items-center justify-center text-xs font-black shadow-xs">
             OQ
           </div>
-          <span className="text-base tracking-tight">OpenQuiz</span>
+          <span className="text-base tracking-tight font-extrabold bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text">OpenQuiz</span>
         </div>
       </div>
 

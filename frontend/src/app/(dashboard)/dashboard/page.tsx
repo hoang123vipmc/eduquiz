@@ -55,54 +55,101 @@ export default function DashboardPage() {
   const [userMsv, setUserMsv] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
+  // 1. Khôi phục nhanh từ bộ nhớ đệm (Instant Render 0ms)
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem('openquiz_dashboard_data');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.stats) setStats(parsed.stats);
+        if (parsed.history) setHistory(parsed.history);
+        if (parsed.quizzes) setQuizzes(parsed.quizzes);
+        if (parsed.nextExam) setNextExam(parsed.nextExam);
+        setLoading(false);
+      }
+    } catch {
+      // Bỏ qua lỗi parse cache
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
-      setLoading(true);
+      // Chỉ hiện skeleton nếu chưa có cache
+      const hasCached = typeof window !== 'undefined' && !!sessionStorage.getItem('openquiz_dashboard_data');
+      if (!hasCached) {
+        setLoading(true);
+      }
+
       try {
         const targetMsv = user?.student_id || (typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '' : '');
         if (isMounted) setUserMsv(targetMsv);
 
-        let schedulesList: any[] = [];
+        // Chạy song song cả tải lịch thi HUBT và dữ liệu Backend (tránh waterfall làm chậm web)
+        const schedPromise = targetMsv
+          ? fetch(`/api/schedule?msv=${encodeURIComponent(targetMsv)}`)
+              .then(res => res.json())
+              .catch(err => {
+                console.warn("Lỗi tải lịch thi HUBT", err);
+                return null;
+              })
+          : Promise.resolve(null);
 
-        // 1. Tải lịch thi HUBT nếu có MSV
-        if (targetMsv) {
-          try {
-            const schedRes = await fetch(`/api/schedule?msv=${encodeURIComponent(targetMsv)}`);
-            const schedJson = await schedRes.json();
-            if (schedJson.success && schedJson.data?.schedules?.length > 0) {
-              schedulesList = schedJson.data.schedules;
-              const upcoming = schedulesList.find((s: any) => s.status === 'today' || s.status === 'upcoming') || schedulesList[0];
-              if (isMounted) {
-                setNextExam({
-                  ...upcoming,
-                  studentName: schedJson.data.student?.fullName || '',
-                  total: schedulesList.length
-                });
-              }
-            }
-          } catch (schedErr) {
-            console.warn("Lỗi tải lịch thi HUBT", schedErr);
-          }
-        }
-
-        // 2. Tải thống kê, lịch sử và đề thi
-        const [statsRes, historyRes, quizzesRes] = await Promise.all([
+        const corePromise = Promise.allSettled([
           api.get('/user/stats'),
           api.get('/user/history'),
           api.get('/quizzes')
         ]);
-        
-        if (isMounted) {
-          if (statsRes.data?.success) setStats(statsRes.data.data);
-          if (historyRes.data?.success) setHistory(historyRes.data.data.slice(0, 4));
-          if (quizzesRes.data?.success) {
-            const quizzesList = Array.isArray(quizzesRes.data.data) ? quizzesRes.data.data : quizzesRes.data.data.data;
-            // Tự động phân tích và ưu tiên đề thi theo lịch thi học kỳ của sinh viên
-            const ranked = rankQuizzesBySchedule(quizzesList || [], schedulesList);
-            setQuizzes(ranked.slice(0, 4));
-          }
+
+        const [coreResults, schedJson] = await Promise.all([corePromise, schedPromise]);
+
+        if (!isMounted) return;
+
+        let schedulesList: any[] = [];
+        let nextExamData: any = null;
+
+        if (schedJson?.success && schedJson.data?.schedules?.length > 0) {
+          schedulesList = schedJson.data.schedules;
+          const upcoming = schedulesList.find((s: any) => s.status === 'today' || s.status === 'upcoming') || schedulesList[0];
+          nextExamData = {
+            ...upcoming,
+            studentName: schedJson.data.student?.fullName || '',
+            total: schedulesList.length
+          };
+          setNextExam(nextExamData);
         }
+
+        const [statsRes, historyRes, quizzesRes] = coreResults;
+        let newStats = stats;
+        let newHistory = history;
+        let newQuizzes = quizzes;
+
+        if (statsRes.status === 'fulfilled' && statsRes.value.data?.success) {
+          newStats = statsRes.value.data.data;
+          setStats(newStats);
+        }
+        if (historyRes.status === 'fulfilled' && historyRes.value.data?.success) {
+          newHistory = historyRes.value.data.data.slice(0, 4);
+          setHistory(newHistory);
+        }
+        if (quizzesRes.status === 'fulfilled' && quizzesRes.value.data?.success) {
+          const rawList = Array.isArray(quizzesRes.value.data.data) 
+            ? quizzesRes.value.data.data 
+            : (quizzesRes.value.data.data?.data || []);
+          const ranked = rankQuizzesBySchedule(rawList || [], schedulesList);
+          newQuizzes = ranked.slice(0, 4);
+          setQuizzes(newQuizzes);
+        }
+
+        // Lưu bản snapshot mới nhất vào cache để lần chuyển trang tiếp theo mở tức thì
+        try {
+          sessionStorage.setItem('openquiz_dashboard_data', JSON.stringify({
+            stats: newStats,
+            history: newHistory,
+            quizzes: newQuizzes,
+            nextExam: nextExamData
+          }));
+        } catch {}
       } catch (error) {
         console.error("Lỗi tải dữ liệu dashboard", error);
       } finally {
