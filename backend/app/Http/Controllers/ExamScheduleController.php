@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 
 class ExamScheduleController extends Controller
 {
     /**
-     * Tra cứu lịch thi & điểm thi từ cổng HUBT ITC
+     * Tra cứu lịch thi & điểm thi (Ưu tiên Khoa CNTT fit.hubt.edu.vn, fallback ITC)
      */
     public function lookup(Request $request)
     {
@@ -29,10 +30,211 @@ class ExamScheduleController extends Controller
         }
 
         try {
-            $targetUrl = 'https://itc.hubt.edu.vn/tra-cuu/lich-thi?msv=' . urlencode($msv);
-            
+            // 1. ƯU TIÊN SỐ 1: Cổng tra cứu Khoa CNTT - HUBT (fit.hubt.edu.vn)
+            $fitData = $this->lookupFit($msv);
+            if ($fitData && !empty($fitData['schedules'])) {
+                $payload = [
+                    'success' => true,
+                    'data' => $fitData
+                ];
+                Cache::put($cacheKey, $payload, 300);
+                return response()->json($payload);
+            }
+
+            // 2. FALLBACK SỐ 2: Cổng ITC (itc.hubt.edu.vn) cho sinh viên khoa khác hoặc lớp
+            $itcData = $this->lookupItc($msv);
+            if ($itcData && !empty($itcData['schedules'])) {
+                $payload = [
+                    'success' => true,
+                    'data' => $itcData
+                ];
+                Cache::put($cacheKey, $payload, 300);
+                return response()->json($payload);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy dữ liệu lịch thi cho mã sinh viên hoặc lớp này. Vui lòng kiểm tra lại.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi kết nối khi tra cứu lịch thi HUBT.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy dữ liệu từ cổng Khoa CNTT: https://fit.hubt.edu.vn/wp-json/hubt/v1/lookup
+     */
+    private function lookupFit($msv)
+    {
+        try {
             $response = Http::withoutVerifying()
-                ->timeout(10)
+                ->timeout(8)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Content-Type' => 'application/json',
+                    'Origin' => 'https://fit.hubt.edu.vn',
+                    'Referer' => 'https://fit.hubt.edu.vn/lichthi/',
+                ])
+                ->post('https://fit.hubt.edu.vn/wp-json/hubt/v1/lookup', [
+                    'mssv' => $msv
+                ]);
+
+            if (!$response->successful()) {
+                return null;
+            }
+
+            $json = $response->json();
+            $html = $json['html'] ?? '';
+
+            if (empty($html) || str_contains($html, 'hubt-error') || mb_strlen($html) < 100) {
+                return null;
+            }
+
+            // Parse student info
+            $fullName = '';
+            $className = '';
+            if (preg_match_all('/class="hubt-info-value"[^>]*>(.*?)<\/[^>]+>/is', $html, $infoMatches)) {
+                $values = array_map(function ($val) {
+                    return trim(strip_tags($val));
+                }, $infoMatches[1] ?? []);
+
+                if (count($values) >= 3) {
+                    $fullName = $values[0];
+                    $className = $values[2];
+                }
+            }
+
+            // Học kỳ
+            $semester = 'LỊCH THI HỌC KỲ I - NĂM HỌC 2026-2027';
+            if (preg_match('/Học kỳ\s*\d+[^<"]*/iu', $html, $semMatch)) {
+                $semester = trim($semMatch[0]);
+            }
+
+            // Bảng ca thi
+            $schedules = [];
+            $tbodyHtml = $html;
+            if (preg_match('/<tbody[^>]*>(.*?)<\/tbody>/is', $html, $tbMatch)) {
+                $tbodyHtml = $tbMatch[1];
+            }
+
+            preg_match_all('/<tr[^>]*>(.*?)<\/tr>/is', $tbodyHtml, $rows);
+            $now = Carbon::now();
+
+            if (!empty($rows[1])) {
+                foreach ($rows[1] as $rHtml) {
+                    preg_match_all('/<td[^>]*>(.*?)<\/td>/is', $rHtml, $tdMatches);
+                    $rawCells = $tdMatches[1] ?? [];
+
+                    if (count($rawCells) >= 4) {
+                        $dotCongBo = trim(strip_tags($rawCells[0]));
+                        $subject = trim(strip_tags($rawCells[1]));
+                        $scoreStr = trim(strip_tags($rawCells[2]));
+                        $cell3Raw = $rawCells[3];
+                        $room = isset($rawCells[4]) ? trim(strip_tags($rawCells[4])) : '';
+                        $duration = isset($rawCells[5]) ? trim(strip_tags(str_replace('&#039;', "'", $rawCells[5]))) : '';
+
+                        // Tách ngày và giờ
+                        $dateStr = '';
+                        $timeStr = '';
+                        if (preg_match('/(\d{2}\/\d{2}\/\d{4})/', $cell3Raw, $dMatch)) {
+                            $dateStr = $dMatch[1];
+                        }
+                        if (preg_match('/(\d{1,2}[:h]\d{2})/i', $cell3Raw, $tMatch)) {
+                            $timeStr = str_replace(':', 'h', $tMatch[1]);
+                        }
+
+                        // Status badge
+                        $status = 'upcoming';
+                        $countdownText = '';
+                        if (preg_match('/class="status-badge[^"]*"[^>]*>(.*?)<\/span>/is', $cell3Raw, $badgeMatch)) {
+                            $countdownText = trim(strip_tags($badgeMatch[1]));
+                            if (str_contains($cell3Raw, 'status-past') || str_contains($countdownText, 'Đã thi')) {
+                                $status = 'passed';
+                            } elseif (str_contains($cell3Raw, 'status-today') || str_contains($countdownText, 'Hôm nay')) {
+                                $status = 'today';
+                            } else {
+                                $status = 'upcoming';
+                            }
+                        }
+
+                        // Điểm số
+                        $testScore = null;
+                        if (!empty($scoreStr) && is_numeric(str_replace(',', '.', $scoreStr))) {
+                            $testScore = (float) str_replace(',', '.', $scoreStr);
+                        }
+
+                        // Keyword tìm đề thi
+                        $searchKeyword = $this->guessKeyword($subject);
+
+                        if (!empty($subject)) {
+                            $schedules[] = [
+                                'index' => (string) (count($schedules) + 1),
+                                'msv' => $msv,
+                                'lastName' => '',
+                                'firstName' => $fullName,
+                                'fullName' => $fullName,
+                                'dob' => '',
+                                'className' => $className,
+                                'subject' => $subject,
+                                'room' => $room,
+                                'date' => $dateStr,
+                                'time' => $timeStr,
+                                'duration' => $duration,
+                                'testScore' => $testScore,
+                                'note' => $dotCongBo,
+                                'status' => $status,
+                                'countdownText' => $countdownText,
+                                'searchKeyword' => $searchKeyword,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Lưu ý
+            $warningNote = 'Lưu ý: Có mặt trước giờ thi 15 phút, mang theo Thẻ sinh viên hoặc CCCD.';
+            if (preg_match('/<ul[^>]*class="hubt-warning-list"[^>]*>(.*?)<\/ul>/is', $html, $wlMatch)) {
+                preg_match_all('/<li[^>]*>(.*?)<\/li>/is', $wlMatch[1], $liMatches);
+                if (!empty($liMatches[1])) {
+                    $notes = array_map(function ($li) {
+                        return trim(strip_tags($li));
+                    }, $liMatches[1]);
+                    $warningNote = implode(' • ', $notes);
+                }
+            }
+
+            return [
+                'semester' => $semester,
+                'student' => $fullName ? [
+                    'msv' => $msv,
+                    'fullName' => $fullName,
+                    'dob' => '',
+                    'className' => $className,
+                ] : null,
+                'schedules' => $schedules,
+                'examResultNote' => $warningNote,
+                'totalSubjects' => count($schedules),
+                'source' => 'Khoa CNTT - HUBT (fit.hubt.edu.vn)',
+            ];
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Lấy dữ liệu từ cổng ITC: https://itc.hubt.edu.vn/tra-cuu/lich-thi
+     */
+    private function lookupItc($msv)
+    {
+        try {
+            $targetUrl = 'https://itc.hubt.edu.vn/tra-cuu/lich-thi?msv=' . urlencode($msv);
+            $response = Http::withoutVerifying()
+                ->timeout(8)
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -41,43 +243,28 @@ class ExamScheduleController extends Controller
                 ->get($targetUrl);
 
             if (!$response->successful()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể kết nối đến cổng tra cứu ITC HUBT (' . $response->status() . ').'
-                ], 502);
+                return null;
             }
 
             $html = $response->body();
-
-            // Kiểm tra bảng lịch thi
             if (!preg_match('/<table[^>]*>(.*?)<\/table>/is', $html, $tableMatch)) {
-                $msg = 'Chưa có lịch thi chi tiết cho thông tin tìm kiếm này hoặc không tìm thấy sinh viên.';
-                if (preg_match('/<p[^>]*class="[^"]*text-slate-500[^"]*"[^>]*>(.*?)<\/p>/is', $html, $msgMatch)) {
-                    $msg = trim(strip_tags($msgMatch[1]));
-                }
-                return response()->json([
-                    'success' => false,
-                    'message' => $msg
-                ]);
+                return null;
             }
 
-            // Lấy thông tin học kỳ
             $semester = 'LỊCH THI HỌC KỲ';
             if (preg_match('/<h2[^>]*>(.*?)<\/h2>/is', $html, $semMatch)) {
                 $semester = trim(preg_replace('/\s+/', ' ', strip_tags($semMatch[1])));
             }
 
-            // Phân tích các hàng
             $tbodyHtml = $tableMatch[1];
             if (preg_match('/<tbody[^>]*>(.*?)<\/tbody>/is', $tableMatch[1], $tbMatch)) {
                 $tbodyHtml = $tbMatch[1];
             }
 
             preg_match_all('/<tr[^>]*>(.*?)<\/tr>/is', $tbodyHtml, $rows);
-
             $schedules = [];
             $studentInfo = null;
-            $now = now();
+            $now = Carbon::now();
 
             if (!empty($rows[1])) {
                 foreach ($rows[1] as $rowHtml) {
@@ -89,7 +276,6 @@ class ExamScheduleController extends Controller
                     if (count($cells) >= 10) {
                         $itemDateStr = $cells[8] ?? '';
                         $itemTimeStr = $cells[9] ?? '';
-
                         $status = 'upcoming';
                         $countdownText = '';
 
@@ -99,9 +285,9 @@ class ExamScheduleController extends Controller
                                 $timeParts = explode('h', strtolower($itemTimeStr));
                                 $h = (int) ($timeParts[0] ?? 8);
                                 $m = (int) ($timeParts[1] ?? 0);
-                                
+
                                 try {
-                                    $examDt = \Carbon\Carbon::create((int)$parts[2], (int)$parts[1], (int)$parts[0], $h, $m);
+                                    $examDt = Carbon::create((int)$parts[2], (int)$parts[1], (int)$parts[0], $h, $m);
                                     if ($examDt->isPast() && $examDt->diffInHours($now) > 4) {
                                         $status = 'passed';
                                         $countdownText = 'Đã thi xong';
@@ -125,15 +311,7 @@ class ExamScheduleController extends Controller
 
                         $fullName = trim(($cells[2] ?? '') . ' ' . ($cells[3] ?? ''));
                         $subject = $cells[6] ?? '';
-
-                        // Search keyword for quiz matching
-                        $searchKeyword = '';
-                        $subLower = mb_strtolower($subject);
-                        if (str_contains($subLower, 'java')) $searchKeyword = 'java';
-                        elseif (str_contains($subLower, 'đám mây') || str_contains($subLower, 'đtdm')) $searchKeyword = 'đám mây';
-                        elseif (str_contains($subLower, 'mạng') || str_contains($subLower, 'qtm')) $searchKeyword = 'mạng';
-                        elseif (str_contains($subLower, 'cơ sở dữ liệu') || str_contains($subLower, 'csdl')) $searchKeyword = 'csdl';
-                        elseif (str_contains($subLower, 'web')) $searchKeyword = 'web';
+                        $searchKeyword = $this->guessKeyword($subject);
 
                         $testScore = null;
                         if (!empty($cells[10])) {
@@ -181,27 +359,30 @@ class ExamScheduleController extends Controller
                 }
             }
 
-            $payload = [
-                'success' => true,
-                'data' => [
-                    'semester' => $semester,
-                    'student' => $studentInfo,
-                    'schedules' => $schedules,
-                    'examResultNote' => $examResultNote,
-                    'totalSubjects' => count($schedules),
-                    'source' => 'HUBT ITC (Trung tâm Tin học ứng dụng)'
-                ]
+            return [
+                'semester' => $semester,
+                'student' => $studentInfo,
+                'schedules' => $schedules,
+                'examResultNote' => $examResultNote,
+                'totalSubjects' => count($schedules),
+                'source' => 'HUBT ITC (Trung tâm Tin học ứng dụng)'
             ];
-
-            Cache::put($cacheKey, $payload, 300); // 5 mins
-
-            return response()->json($payload);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi kết nối khi tra cứu lịch thi từ hệ thống ITC HUBT.',
-                'error' => $e->getMessage()
-            ], 500);
+            return null;
         }
+    }
+
+    private function guessKeyword($subject)
+    {
+        $subLower = mb_strtolower($subject);
+        if (str_contains($subLower, 'java')) return 'java';
+        if (str_contains($subLower, 'đám mây') || str_contains($subLower, 'dtdm') || str_contains($subLower, 'điện toán')) return 'đám mây';
+        if (str_contains($subLower, 'mã nguồn mở') || str_contains($subLower, 'open source')) return 'mã nguồn mở';
+        if (str_contains($subLower, 'mạng') || str_contains($subLower, 'qtm')) return 'mạng';
+        if (str_contains($subLower, 'cơ sở dữ liệu') || str_contains($subLower, 'csdl')) return 'cơ sở dữ liệu';
+        if (str_contains($subLower, 'web')) return 'web';
+        if (str_contains($subLower, 'python')) return 'python';
+        if (str_contains($subLower, 'hệ điều hành')) return 'hệ điều hành';
+        return explode(' ', $subject)[0] ?? '';
     }
 }

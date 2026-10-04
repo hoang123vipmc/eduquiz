@@ -42,6 +42,7 @@ interface ScheduleItem {
   room: string;
   date: string;
   time: string;
+  duration?: string;
   testScore: number | null;
   note: string;
   status: "upcoming" | "today" | "passed";
@@ -246,12 +247,12 @@ export default function ExamSchedulePage() {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Lịch thi & Điểm thi
               </h1>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                HUBT ITC Live
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                {data?.source ? data.source : "Khoa CNTT - HUBT Live"}
               </span>
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Tra cứu trực tuyến lịch thi học kỳ, điểm kiểm tra (KT) và kết quả thi trắc nghiệm từ cổng trường.
+              Tra cứu trực tuyến lịch thi học kỳ, điểm kiểm tra điều kiện (KT) và thời gian thi từ Khoa CNTT - HUBT.
             </p>
           </div>
         </div>
@@ -266,12 +267,12 @@ export default function ExamSchedulePage() {
           </button>
 
           <a
-            href="https://itc.hubt.edu.vn/tra-cuu/lich-thi"
+            href="https://fit.hubt.edu.vn/lichthi/"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground text-xs font-semibold transition-all border border-border"
           >
-            <span>Cổng trường HUBT</span>
+            <span>Cổng Khoa CNTT HUBT</span>
             <ExternalLink className="w-3 h-3 text-muted-foreground" />
           </a>
         </div>
@@ -368,7 +369,7 @@ export default function ExamSchedulePage() {
             )}
           >
             <Building2 className="w-4 h-4" />
-            <span>Lịch thi HUBT ITC</span>
+            <span>Lịch thi HUBT</span>
             {data?.schedules && (
               <span className="px-1.5 py-0.2 rounded-full text-[11px] bg-white/20 text-white font-bold">
                 {data.schedules.length}
@@ -412,8 +413,8 @@ export default function ExamSchedulePage() {
           {loading ? (
             <div className="p-12 text-center bg-card border border-border rounded-2xl shadow-xs space-y-3">
               <RefreshCcw className="w-8 h-8 animate-spin text-primary mx-auto" />
-              <p className="text-foreground font-semibold text-sm">Đang kết nối đến cổng ITC HUBT...</p>
-              <p className="text-xs text-muted-foreground">Đang tải lịch thi chi tiết và điểm kiểm tra điều kiện</p>
+              <p className="text-foreground font-semibold text-sm">Đang kết nối đến cổng Khoa CNTT - HUBT...</p>
+              <p className="text-xs text-muted-foreground">Đang tải lịch thi chi tiết, phòng thi và điểm kiểm tra điều kiện</p>
             </div>
           ) : error ? (
             <div className="p-8 text-center bg-card border border-destructive/30 rounded-2xl shadow-xs space-y-3">
@@ -476,7 +477,7 @@ export default function ExamSchedulePage() {
                     <span>Danh sách ca thi chính thức</span>
                   </h3>
                   <span className="text-xs text-muted-foreground">
-                    Dữ liệu đồng bộ trực tiếp từ ITC HUBT
+                    {data.source ? `Dữ liệu đồng bộ trực tiếp từ ${data.source}` : "Dữ liệu đồng bộ từ Khoa CNTT - HUBT"}
                   </span>
                 </div>
 
@@ -551,9 +552,14 @@ export default function ExamSchedulePage() {
                       </div>
 
                       {/* Action: Open Quiz corresponding to this subject */}
-                      <div className="pt-2 border-t border-border/40 flex items-center justify-between">
-                        <span className="text-[11px] text-muted-foreground">
-                          {item.note || "Hình thức: Trắc nghiệm iTest"}
+                      <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          {item.duration && (
+                            <span className="font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded">
+                              ⏱ {item.duration}
+                            </span>
+                          )}
+                          <span>{item.note || "Trắc nghiệm iTest"}</span>
                         </span>
 
                         <Link
@@ -576,9 +582,9 @@ export default function ExamSchedulePage() {
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-foreground">Kết quả thi trắc nghiệm chính thức</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {data.examResultNote || "Chưa có kết quả thi trắc nghiệm từ trung tâm."}
+                    <h4 className="text-sm font-bold text-foreground">Lưu ý phòng thi & Kết quả chính thức</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      {data.examResultNote || "Sinh viên chú ý mang theo Thẻ sinh viên hoặc CCCD và có mặt trước giờ thi ít nhất 15 phút."}
                     </p>
                   </div>
                 </div>
