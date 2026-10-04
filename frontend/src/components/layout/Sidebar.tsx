@@ -72,7 +72,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const links = user?.role === "admin" ? adminLinks : studentLinks;
 
-  const handleLogout = () => {
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    onClose?.();
     logout();
     router.push("/login");
   };
@@ -80,16 +84,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const navContent = (
     <div className="flex flex-col h-full text-foreground">
       {/* Brand & Slogan */}
-      <div className="pt-6 sm:pt-7 pb-5 sm:pb-6 px-5 sm:px-6 border-b border-border/40 flex items-center justify-between">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-base shadow-sm shadow-primary/25">
+      <div className="pt-5 sm:pt-6 pb-4 sm:pb-5 px-4 sm:px-5 border-b border-border/40 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-sm shadow-xs shadow-primary/25">
             <span>OQ</span>
           </div>
           <div>
-            <div className="text-foreground font-bold text-xl tracking-tight leading-tight">
+            <div className="text-foreground font-bold text-lg tracking-tight leading-tight">
               OpenQuiz
             </div>
-            <div className="text-xs text-muted-foreground font-medium">
+            <div className="text-[11px] text-muted-foreground font-medium">
               Học tập phi lợi nhuận
             </div>
           </div>
@@ -104,6 +108,45 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <X className="w-5 h-5" />
           </button>
         )}
+      </div>
+
+      {/* User Info & Nút Đăng Xuất ở TRÊN CÙNG */}
+      <div className="p-2.5 mx-3 mt-3 mb-1 rounded-xl bg-card border border-border/80 flex items-center justify-between gap-2 shadow-xs">
+        <div 
+          onClick={() => {
+            onClose?.();
+            router.push('/dashboard/settings');
+          }}
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group"
+          title="Xem thông tin tài khoản"
+        >
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-border shrink-0 group-hover:border-primary/50 transition-colors shadow-xs">
+            <img 
+              src={user?.avatar || "/images/avatar-student.jpg"} 
+              alt={user?.name || "Avatar"} 
+              className="w-full h-full object-cover" 
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs sm:text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              {user?.name || "Học viên"}
+            </div>
+            <div className="text-[10px] text-muted-foreground truncate capitalize">
+              {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
+            </div>
+          </div>
+        </div>
+
+        {/* Nút Đăng Xuất ở Trên Cùng */}
+        <button 
+          onClick={() => setShowLogoutModal(true)}
+          aria-label="Đăng xuất tài khoản"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-500 hover:text-rose-600 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 active:scale-90 transition-all shrink-0 shadow-xs"
+          title="Đăng xuất tài khoản"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span className="text-[11px]">Đăng xuất</span>
+        </button>
       </div>
 
       {/* Navigation Menu */}
@@ -157,42 +200,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         })}
       </div>
 
-      {/* Non-profit & Educational Disclaimer */}
-      <div className="px-3 pb-2">
+      {/* Non-profit & Educational Disclaimer ở dưới cùng */}
+      <div className="p-3 mt-auto border-t border-border/40">
         <div className="bg-primary/5 border border-primary/15 rounded-xl p-2.5 text-[11px] text-muted-foreground leading-snug">
           <div className="font-semibold text-foreground flex items-center gap-1 mb-0.5">
             <span>🌱</span> OpenQuiz Phi lợi nhuận
           </div>
           Dự án cá nhân phục vụ học tập và nghiên cứu công nghệ, miễn phí 100%.
-        </div>
-      </div>
-
-      {/* Bottom User Card */}
-      <div className="p-4 mt-auto border-t border-border/50">
-        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-card border border-border/70 hover:border-border hover:bg-muted/40 transition-all group">
-          <div className="w-9 h-9 rounded-full overflow-hidden border border-border shrink-0 shadow-xs">
-            <img 
-              src={user?.avatar || "/images/avatar-student.jpg"} 
-              alt={user?.name || "Avatar"} 
-              className="w-full h-full object-cover" 
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-foreground truncate">
-              {user?.name || "Học viên"}
-            </div>
-            <div className="text-[11px] text-muted-foreground truncate">
-              {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
-            </div>
-          </div>
-          <button 
-            onClick={handleLogout}
-            aria-label="Đăng xuất tài khoản"
-            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors opacity-70 hover:opacity-100"
-            title="Đăng xuất"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>
@@ -230,6 +244,43 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {navContent}
         </aside>
       </div>
+
+      {/* Modal Xác nhận Đăng xuất */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200">
+          <div 
+            className="fixed inset-0"
+            onClick={() => setShowLogoutModal(false)}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl bg-card border border-border p-5 sm:p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center mx-auto shadow-xs">
+              <LogOut className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Bạn có muốn đăng xuất?</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                Bạn có chắc chắn muốn đăng xuất khỏi tài khoản OpenQuiz không? Phiên đăng nhập hiện tại sẽ kết thúc.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="w-full py-2.5 px-4 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-colors active:scale-95"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLogout}
+                className="w-full py-2.5 px-4 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-semibold shadow-xs transition-all active:scale-95"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
