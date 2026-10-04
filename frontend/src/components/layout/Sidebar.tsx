@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,18 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+
+  // Khóa cuộn trang khi menu trượt mở trên điện thoại
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
   
   const studentLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
@@ -193,18 +205,31 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {navContent}
       </aside>
 
-      {/* Mobile Drawer */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
-          <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
-            onClick={onClose}
-          />
-          <aside className="relative w-[285px] max-w-[82vw] bg-card border-r border-border z-10 flex flex-col h-full shadow-2xl animate-in slide-in-from-left duration-300 ease-out will-change-transform">
-            {navContent}
-          </aside>
-        </div>
-      )}
+      {/* Mobile Drawer: Trượt mượt mà 2 chiều từ bên PHẢI sang tương ứng với nút Thêm bên phải */}
+      <div 
+        className={cn(
+          "fixed inset-0 z-50 md:hidden transition-all duration-300",
+          isOpen ? "visible pointer-events-auto" : "invisible pointer-events-none"
+        )}
+      >
+        {/* Nền mờ kính mờ ảo (Backdrop Fade in/out) */}
+        <div 
+          className={cn(
+            "fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity duration-300 ease-out",
+            isOpen ? "opacity-100" : "opacity-0"
+          )}
+          onClick={onClose}
+        />
+        {/* Khung menu: Neo ở bên PHẢI, trượt vào và trượt ra êm ái */}
+        <aside 
+          className={cn(
+            "fixed top-0 right-0 bottom-0 w-[290px] max-w-[84vw] bg-card border-l border-border z-10 flex flex-col h-full shadow-2xl transition-transform duration-300 ease-out will-change-transform",
+            isOpen ? "translate-x-0" : "translate-x-full"
+          )}
+        >
+          {navContent}
+        </aside>
+      </div>
     </>
   );
 }
