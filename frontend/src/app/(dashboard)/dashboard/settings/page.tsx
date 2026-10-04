@@ -12,7 +12,7 @@ export default function SettingsPage() {
   const { user, updateUser } = useAuthStore();
   const { theme, setTheme } = useTheme();
   
-  const [activeTab, setActiveTab] = useState<"account" | "security" | "appearance">("account");
+  const [activeTab, setActiveTab] = useState<"account" | "security" | "appearance" | "sound">("account");
   const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
   
   // Account Form
@@ -160,6 +160,18 @@ export default function SettingsPage() {
             )}
           >
             <Monitor className="w-5 h-5" /> Giao diện hiển thị
+          </button>
+
+          <button
+            onClick={() => setActiveTab("sound")}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-left",
+              activeTab === "sound" 
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Volume2 className="w-5 h-5" /> Âm thanh & Hiệu ứng
           </button>
         </div>
 
@@ -482,6 +494,125 @@ export default function SettingsPage() {
                     )} />
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sound & Audio Tab */}
+          {activeTab === "sound" && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
+              <div className="pb-4 border-b border-border">
+                <h3 className="text-xl font-bold text-foreground">Âm thanh & Hiệu ứng làm bài</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Tùy chỉnh âm thanh phản hồi xúc giác khi luyện thi và làm bài trắc nghiệm trên OpenQuiz
+                </p>
+              </div>
+
+              {/* Master Switch Card */}
+              <div className="p-5 rounded-2xl bg-card border border-border flex items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-center gap-3.5">
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                    soundEnabled 
+                      ? "bg-primary/10 text-primary border-primary/20" 
+                      : "bg-muted text-muted-foreground border-border"
+                  )}>
+                    {soundEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-foreground">Bật âm thanh hiệu ứng</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {soundEnabled ? "Âm thanh đang BẬT trên trình duyệt này." : "Âm thanh đang TẮT. Bài thi sẽ chạy ở chế độ im lặng."}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = soundManager.toggle();
+                    setSoundEnabled(next);
+                  }}
+                  className={cn(
+                    "w-14 h-8 rounded-full transition-colors relative cursor-pointer shadow-inner",
+                    soundEnabled ? "bg-primary" : "bg-muted border border-border"
+                  )}
+                >
+                  <div className={cn(
+                    "w-6 h-6 rounded-full bg-white transition-transform shadow-md absolute top-1",
+                    soundEnabled ? "translate-x-7" : "translate-x-1"
+                  )} />
+                </button>
+              </div>
+
+              {/* Test Audio Section */}
+              <div className="p-5 rounded-2xl bg-card border border-border space-y-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <span>🎧 Nghe thử các âm thanh hiệu ứng</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">Web Audio API</span>
+                  </h4>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Bấm các nút dưới đây để nghe thử trực tiếp âm thanh phát ra khi làm bài thi:
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => soundManager.playCorrect()}
+                    className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold text-xs flex items-center justify-between gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <span>1. Trả lời ĐÚNG (Chime)</span>
+                    </div>
+                    <span className="text-[11px] underline font-bold">Nghe thử 🔊</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => soundManager.playWrong()}
+                    className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold text-xs flex items-center justify-between gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                      <span>2. Trả lời SAI (Buzz êm)</span>
+                    </div>
+                    <span className="text-[11px] underline font-bold">Nghe thử 🔊</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => soundManager.playClick()}
+                    className="p-3.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-semibold text-xs flex items-center justify-between gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                      <span>3. Chuyển câu (Click tick)</span>
+                    </div>
+                    <span className="text-[11px] underline font-bold">Nghe thử 🔊</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => soundManager.playFinish()}
+                    className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold text-xs flex items-center justify-between gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      <span>4. Nộp bài thi (Fanfare)</span>
+                    </div>
+                    <span className="text-[11px] underline font-bold">Nghe thử 🔊</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-muted-foreground space-y-1.5">
+                <strong className="text-foreground block font-semibold">💡 Vị trí bật/tắt nhanh:</strong>
+                <p>• Trong khi làm bài thi ở bất kỳ phòng thi nào, bạn cũng có thể bấm vào biểu tượng <strong>Loa (Volume)</strong> trên thanh tiêu đề góc trên cùng bên phải để bật/tắt nhanh.</p>
+                <p>• Âm thanh được tạo trực tiếp bằng Web Audio API, hoàn toàn không tốn dữ liệu mạng và không độ trễ.</p>
               </div>
             </div>
           )}
