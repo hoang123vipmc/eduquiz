@@ -130,9 +130,35 @@ export default function DashboardPage() {
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-1.5 sm:mb-2">
             Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm md:text-[15px] leading-relaxed mb-4 sm:mb-6">
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-[15px] leading-relaxed mb-4 sm:mb-5">
             Tiếp tục hành trình học tập, rèn luyện kỹ năng và chuẩn bị cho các kỳ thi học phần với ngân hàng đề thi thông minh.
           </p>
+
+          {/* Banner Thông báo Cá nhân hóa nếu chưa cài đặt MSV */}
+          {!userMsv && (
+            <div 
+              onClick={() => router.push('/dashboard/settings')}
+              className="mb-4 sm:mb-5 p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/25 transition-all cursor-pointer flex items-center justify-between gap-3 group shadow-xs"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <span>Cá nhân hóa theo lịch thi</span>
+                    <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-400">Chưa cài MSV</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-semibold text-blue-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
+                Cài đặt ngay <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button 
               onClick={() => router.push('/dashboard/quizzes')}
@@ -278,25 +304,44 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <CalendarCheck className="w-5 h-5" />
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-950/40 via-indigo-950/20 to-card border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
+              <GraduationCap className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">Tra cứu Lịch thi & Điểm thi trường HUBT</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Nhập mã sinh viên hoặc tên lớp để xem ngay ngày thi, phòng thi và điểm kiểm tra điều kiện.
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+                  Cá nhân hóa theo lịch thi
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                  Tự động ưu tiên đề thi
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-foreground">
+                Tự động ưu tiên đề thi theo lịch thi học kỳ của bạn
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
+                Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
               </p>
             </div>
           </div>
-          <button
-            onClick={() => router.push('/dashboard/schedule')}
-            className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all self-start sm:self-auto shrink-0"
-          >
-            <span>Tra cứu ngay</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+            <button
+              onClick={() => router.push('/dashboard/settings')}
+              className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Cài đặt MSV ngay</span>
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/schedule')}
+              className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
+            >
+              <span>Tra cứu nhanh</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -467,24 +512,6 @@ export default function DashboardPage() {
                 </div>
               );
             })}
-
-            {!userMsv && (
-              <div className="mt-2 p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-200 flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-300">
-                  <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <span>Cá nhân hóa theo lịch thi</span>
-                </div>
-                <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 leading-relaxed">
-                  Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
-                </p>
-                <button
-                  onClick={() => router.push('/dashboard/settings')}
-                  className="self-start text-[11px] font-bold text-blue-600 dark:text-blue-400 underline hover:no-underline pt-0.5"
-                >
-                  Cài đặt MSV ngay →
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
