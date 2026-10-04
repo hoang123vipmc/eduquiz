@@ -116,6 +116,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name'   => 'required|string|max:255',
+            'student_id' => 'nullable|string|max:20',
             'avatar' => ['nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
                 // Chỉ cho phép URL http/https hoặc data URI ảnh - ngăn JavaScript URI (XSS)
                 if ($value && !preg_match('#^(https?://|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
@@ -128,6 +129,9 @@ class UserController extends Controller
         $user->name = $request->name;
         if ($request->has('avatar')) {
             $user->avatar = $request->avatar;
+        }
+        if ($request->has('student_id')) {
+            $user->student_id = $request->student_id ?: null;
         }
         $user->save();
 
@@ -142,7 +146,10 @@ class UserController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:6|confirmed',
+            'new_password' => 'required|string|min:8|confirmed',
+        ], [
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
         ]);
 
         $user = $request->user();
@@ -164,6 +171,12 @@ class UserController extends Controller
 
         $user->password = Hash::make($request->new_password);
         $user->save();
+
+        // ── Security: Thu hồi các session/token ở các thiết bị khác khi đổi mật khẩu ──
+        $currentTokenId = $request->user()->currentAccessToken()?->id;
+        if ($currentTokenId) {
+            $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+        }
 
         return response()->json([
             'success' => true,

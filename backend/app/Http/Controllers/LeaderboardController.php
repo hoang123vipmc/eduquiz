@@ -16,6 +16,7 @@ class LeaderboardController extends Controller
         // Cache top 50 leaderboard trong 30 giây để chịu tải 100+ concurrent requests mà không làm sập DB
         $cachedLeaderboard = Cache::remember('global_leaderboard_top_50', 30, function () {
             return User::select('users.id', 'users.name', 'users.avatar')
+                ->where('users.is_banned', false)
                 ->join('quiz_attempts', 'users.id', '=', 'quiz_attempts.user_id')
                 ->join('results', 'quiz_attempts.id', '=', 'results.attempt_id')
                 ->selectRaw('SUM(results.correct_answers) as total_correct')

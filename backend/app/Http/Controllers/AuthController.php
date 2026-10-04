@@ -20,6 +20,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+            'student_id' => 'nullable|string|max:20',
         ], [
             'name.required' => 'Vui lòng nhập họ tên.',
             'email.required' => 'Vui lòng nhập email.',
@@ -38,6 +39,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => $request->password, // Laravel 11 tự động hash vì có cast 'hashed' trong User model
                 'role' => $role,
+                'student_id' => $request->student_id ?: null,
             ]);
         } catch (\Illuminate\Database\QueryException $e) {
             // Bắt lỗi Race Condition: Nếu 100 người cùng gửi đăng ký với cùng 1 email ở cùng 1 mili-giây,
@@ -63,6 +65,10 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email', ''))),
+        ]);
+
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',

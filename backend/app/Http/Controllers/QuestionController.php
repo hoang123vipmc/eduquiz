@@ -185,9 +185,10 @@ class QuestionController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('QuestionController update error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi khi cập nhật câu hỏi: ' . $e->getMessage(),
+                'message' => 'Lỗi máy chủ khi cập nhật câu hỏi. Vui lòng thử lại sau.',
             ], 500);
         }
     }

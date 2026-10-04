@@ -33,6 +33,12 @@ import { PrintQuizModal } from "@/components/quiz/PrintQuizModal";
 import { EditQuizModal } from "@/components/quiz/EditQuizModal";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
+import { 
+  rankQuizzesBySchedule, 
+  RecommendedQuiz, 
+  isQuizMatchingSubject, 
+  ScheduleItem 
+} from "@/lib/quizRecommendations";
 
 // Helper to determine subject theme and icons based on title/category
 function getQuizTheme(title: string, categoryName?: string) {
@@ -87,7 +93,27 @@ export default function QuizzesPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState<"newest" | "questions" | "duration">("newest");
+  const [sortBy, setSortBy] = useState<"recommended" | "newest" | "questions" | "duration">("newest");
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [studentMsv, setStudentMsv] = useState<string>("");
+  const [activeSubjectFilter, setActiveSubjectFilter] = useState<string | null>(null);
+
+  // Load schedule for personalized quiz recommendations
+  useEffect(() => {
+    const msv = user?.student_id || (typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '' : '');
+    setStudentMsv(msv);
+    if (msv) {
+      fetch(`/api/schedule?msv=${encodeURIComponent(msv)}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res.success && res.data?.schedules?.length > 0) {
+            setSchedules(res.data.schedules);
+            setSortBy("recommended");
+          }
+        })
+        .catch(err => console.warn("Lỗi tải lịch thi trong trang đề thi", err));
+    }
+  }, [user?.student_id]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -142,17 +168,24 @@ export default function QuizzesPage() {
       result = result.filter(q => q.category?.name === selectedCategory);
     }
 
-    if (sortBy === "questions") {
-      result.sort((a, b) => (b.total_questions || 0) - (a.total_questions || 0));
-    } else if (sortBy === "duration") {
-      result.sort((a, b) => (b.duration_minutes || 0) - (a.duration_minutes || 0));
-    } else {
-      // Default newest by id
-      result.sort((a, b) => b.id - a.id);
+    if (activeSubjectFilter) {
+      result = result.filter(q => isQuizMatchingSubject(q, activeSubjectFilter));
     }
 
-    return result;
-  }, [quizzes, selectedCategory, sortBy]);
+    // Annotate quizzes with recommendation priorities based on exam schedule
+    const annotated = rankQuizzesBySchedule(result, schedules);
+
+    if (sortBy === "recommended") {
+      return annotated; // Already sorted by recommendPriority desc, then id desc
+    } else if (sortBy === "questions") {
+      return [...annotated].sort((a, b) => (b.total_questions || 0) - (a.total_questions || 0));
+    } else if (sortBy === "duration") {
+      return [...annotated].sort((a, b) => (b.duration_minutes || 0) - (a.duration_minutes || 0));
+    } else {
+      // Default newest by id
+      return [...annotated].sort((a, b) => b.id - a.id);
+    }
+  }, [quizzes, selectedCategory, activeSubjectFilter, sortBy, schedules]);
 
   const handleStartQuiz = (config: any) => {
     if (!selectedQuiz) return;
@@ -284,6 +317,9 @@ export default function QuizzesPage() {
               className="bg-transparent text-foreground font-medium focus:outline-none cursor-pointer pr-1"
               aria-label="Sắp xếp danh sách đề thi"
             >
+              {schedules.length > 0 && (
+                <option value="recommended">🎯 Theo lịch thi</option>
+              )}
               <option value="newest">Mới nhất</option>
               <option value="questions">Nhiều câu nhất</option>
               <option value="duration">Thời lượng dài</option>
@@ -291,6 +327,75 @@ export default function QuizzesPage() {
           </div>
         </div>
       </div>
+
+      {/* Student Exam Subject Quick-Filter Chips */}
+      {schedules.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto py-1.5 scrollbar-none">
+          <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 shrink-0">
+            <GraduationCap className="w-4 h-4 text-blue-500" />
+            <span>Môn thi sắp tới:</span>
+          </span>
+          {schedules.map((s) => (
+            <button
+              key={s.subject}
+              onClick={() => {
+                if (activeSubjectFilter === s.subject) {
+                  setActiveSubjectFilter(null);
+                } else {
+                  setActiveSubjectFilter(s.subject);
+                }
+              }}
+              className={cn(
+                "px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5",
+                activeSubjectFilter === s.subject
+                  ? "bg-amber-500 text-white font-bold shadow-xs"
+                  : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+              )}
+              title={`Lọc đề thi môn ${s.subject}`}
+            >
+              <span>🎯 {s.subject}</span>
+              {s.status === 'today' ? (
+                <span className="text-[10px] bg-rose-500 text-white px-1 py-0.2 rounded font-bold">Hôm nay</span>
+              ) : s.countdownText ? (
+                <span className="text-[10px] opacity-75 font-normal">({s.countdownText})</span>
+              ) : null}
+            </button>
+          ))}
+          {activeSubjectFilter && (
+            <button
+              onClick={() => setActiveSubjectFilter(null)}
+              className="text-xs text-muted-foreground hover:text-foreground underline whitespace-nowrap px-1"
+            >
+              Bỏ lọc môn
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* MSV Prompt Banner if not provided */}
+      {!studentMsv && (
+        <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-semibold text-foreground">
+                Cá nhân hóa theo lịch thi của bạn
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Nhập Mã sinh viên HUBT để hệ thống tự động ưu tiên các đề thi đúng môn theo lịch thi học kỳ của bạn lên đầu.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard/settings')}
+            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 self-start sm:self-auto transition-colors"
+          >
+            Cài đặt MSV ngay
+          </button>
+        </div>
+      )}
 
       {/* Quizzes Grid / Loading / Empty States */}
       {loading ? (
@@ -379,6 +484,12 @@ export default function QuizzesPage() {
 
                   {/* Badges on Cover */}
                   <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
+                    {quiz.isRecommended && quiz.matchedSubject && (
+                      <span className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 backdrop-blur-md rounded-lg shadow-md border border-amber-300/40 flex items-center gap-1 animate-pulse">
+                        <Sparkles className="w-3 h-3 fill-current" />
+                        <span>Trùng môn: {quiz.matchedSubject.subject}</span>
+                      </span>
+                    )}
                     <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white bg-black/50 backdrop-blur-md rounded-lg border border-white/10 shadow-xs">
                       {quiz.category?.name || theme.defaultTag}
                     </span>
@@ -437,11 +548,24 @@ export default function QuizzesPage() {
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 
-                      className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight" 
+                      className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1 tracking-tight" 
                       title={quiz.title}
                     >
                       {quiz.title}
                     </h3>
+
+                    {/* Matched exam highlight note */}
+                    {quiz.isRecommended && quiz.matchedSubject && (
+                      <div className="mb-2 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        <span>📅 Lịch thi: {quiz.matchedSubject.date} ({quiz.matchedSubject.time})</span>
+                        {quiz.matchedSubject.countdownText && (
+                          <span className="px-1.5 py-0.2 bg-amber-500/15 rounded text-[10px] font-bold">
+                            {quiz.matchedSubject.countdownText}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mb-4">
                       {quiz.description || "Bộ đề thi trắc nghiệm phục vụ luyện tập và củng cố kiến thức học phần."}
                     </p>

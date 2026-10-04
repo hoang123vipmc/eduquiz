@@ -3,14 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 // Cache in-memory for 5 minutes to reduce load on the school portal
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 200;
+
+function pruneCache() {
+  const now = Date.now();
+  for (const [key, val] of cache.entries()) {
+    if (now - val.timestamp >= CACHE_TTL_MS || cache.size > MAX_CACHE_ENTRIES) {
+      cache.delete(key);
+    }
+  }
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const msv = searchParams.get("msv")?.trim();
 
-  if (!msv) {
+  // Validate length and pattern to prevent memory exhaustion or unexpected input
+  if (!msv || msv.length > 30 || !/^[a-zA-Z0-9\s._-]+$/.test(msv)) {
     return NextResponse.json(
-      { success: false, message: "Vui lòng cung cấp mã sinh viên hoặc tên lớp (msv)." },
+      { success: false, message: "Mã sinh viên hoặc tên lớp không hợp lệ (tối đa 30 ký tự)." },
       { status: 400 }
     );
   }
@@ -20,6 +31,10 @@ export async function GET(request: NextRequest) {
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return NextResponse.json(cached.data);
+  }
+
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    pruneCache();
   }
 
   try {

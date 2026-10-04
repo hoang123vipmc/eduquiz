@@ -63,6 +63,17 @@ class QuizController extends Controller
                 }
             })
             ->firstOrFail();
+
+        // ── Security: Private quiz only accessible by owner or admin ──────────
+        if ($quiz->visibility === 'private') {
+            $user = request()->user('sanctum');
+            if (!$user || ($user->id !== $quiz->user_id && $user->role !== 'admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền truy cập đề thi riêng tư này.',
+                ], 403);
+            }
+        }
         
         return response()->json([
             'success' => true,

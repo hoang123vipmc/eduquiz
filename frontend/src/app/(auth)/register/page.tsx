@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/axios";
+import { GraduationCap, Info } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [studentId, setStudentId] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,6 +39,7 @@ export default function RegisterPage() {
         email,
         password,
         password_confirmation: passwordConfirmation,
+        student_id: studentId.trim() || null,
       });
       if (data.success) {
         login(data.data.token, data.data.user);
@@ -51,7 +54,7 @@ export default function RegisterPage() {
       } else if (err.message) {
         setError(`Lỗi kết nối: ${err.message}. Vui lòng kiểm tra lại cấu hình API.`);
       } else {
-        setError("Đăng kí thất bại. Vui lòng kiểm tra lại.");
+        setError("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       }
     } finally {
       setLoading(false);
@@ -111,7 +114,7 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Ít nhất 8 ký tự"
               required
               minLength={8}
               className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
@@ -123,11 +126,33 @@ export default function RegisterPage() {
               type="password"
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Nhập lại mật khẩu"
               required
               minLength={8}
               className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
             />
+          </div>
+
+          {/* Optional Student ID field */}
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/10 p-3.5 space-y-2.5">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <label className="block text-sm font-medium text-blue-900 dark:text-blue-200">
+                Mã sinh viên HUBT <span className="text-xs font-normal text-blue-500 dark:text-blue-400">(Không bắt buộc)</span>
+              </label>
+            </div>
+            <Input
+              type="text"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              placeholder="Ví dụ: 2823231208"
+              maxLength={20}
+              className="h-10 bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800/50 focus-visible:ring-blue-500"
+            />
+            <p className="flex items-start gap-1.5 text-xs text-blue-600/80 dark:text-blue-400/80">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              Nhập MSV để website tự động tra cứu lịch thi và ưu tiên đề xuất các bộ đề ôn tập phù hợp với các môn thi sắp tới của bạn.
+            </p>
           </div>
         </div>
 

@@ -23,6 +23,17 @@ class AttemptController extends Controller
 
         $quiz = Quiz::findOrFail($request->quiz_id);
 
+        // ── Security: Private quiz only accessible by owner or admin ──────────
+        if ($quiz->visibility === 'private') {
+            $user = $request->user();
+            if ($user->id !== $quiz->user_id && $user->role !== 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền làm đề thi riêng tư này.',
+                ], 403);
+            }
+        }
+
         return DB::transaction(function () use ($request, $quiz) {
             $isFresh = $request->boolean('fresh') || $request->mode === 'practice';
 
@@ -445,7 +456,7 @@ class AttemptController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('retryWrong error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return response()->json(['success' => false, 'message' => 'Lỗi tạo bài thi mới: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Lỗi máy chủ khi tạo bài thi mới. Vui lòng thử lại sau.'], 500);
         }
     }
 

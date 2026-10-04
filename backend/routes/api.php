@@ -80,10 +80,16 @@ Route::prefix('v1')->group(function () {
         });
     });
     
-    // API Public (Không cần đăng nhập)
-    Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
-    Route::get('/quizzes', [\App\Http\Controllers\QuizController::class, 'index']);
-    Route::get('/quizzes/{slug}', [\App\Http\Controllers\QuizController::class, 'show']);
-    Route::get('/quizzes/{quiz}/questions', [\App\Http\Controllers\QuestionController::class, 'index']);
-    Route::get('/exam-schedule/lookup', [\App\Http\Controllers\ExamScheduleController::class, 'lookup']);
+    // API Public (Không cần đăng nhập - Giới hạn 60 req/phút chống cào dữ liệu và DoS)
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
+        Route::get('/quizzes', [\App\Http\Controllers\QuizController::class, 'index']);
+        Route::get('/quizzes/{slug}', [\App\Http\Controllers\QuizController::class, 'show']);
+        Route::get('/quizzes/{quiz}/questions', [\App\Http\Controllers\QuestionController::class, 'index']);
+    });
+
+    // Tra cứu lịch thi tới cổng trường HUBT - Giới hạn 20 req/phút chống DoS và chống bị trường chặn IP
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::get('/exam-schedule/lookup', [\App\Http\Controllers\ExamScheduleController::class, 'lookup']);
+    });
 });

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios";
+import { useAuthStore } from "@/store/authStore";
 
 interface ScheduleItem {
   index: string;
@@ -61,6 +62,7 @@ export default function ExamSchedulePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryMsv = searchParams.get("msv") || "";
+  const { user } = useAuthStore();
 
   const [msvInput, setMsvInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,10 +82,10 @@ export default function ExamSchedulePage() {
   const [newCustom, setNewCustom] = useState({ subject: "", date: "", time: "", room: "", note: "" });
   const [copied, setCopied] = useState(false);
 
-  // Load saved MSV and custom schedules from localStorage
+  // Load saved MSV and custom schedules from user profile or localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedMsv = localStorage.getItem("openquiz_saved_msv") || "2823231208";
+      const storedMsv = user?.student_id || localStorage.getItem("openquiz_saved_msv") || "2823231208";
       setSavedMsv(storedMsv);
 
       const targetMsv = queryMsv || storedMsv;
@@ -101,7 +103,7 @@ export default function ExamSchedulePage() {
         console.error(e);
       }
     }
-  }, [queryMsv]);
+  }, [queryMsv, user?.student_id]);
 
   const fetchSchedule = async (searchCode: string) => {
     const code = searchCode.trim();

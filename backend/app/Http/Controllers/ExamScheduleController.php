@@ -13,12 +13,12 @@ class ExamScheduleController extends Controller
      */
     public function lookup(Request $request)
     {
-        $msv = trim($request->input('msv', ''));
+        $msv = trim((string) $request->input('msv', ''));
 
-        if (empty($msv)) {
+        if (empty($msv) || mb_strlen($msv) > 30 || !preg_match('/^[a-zA-Z0-9\s._-]+$/u', $msv)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vui lòng cung cấp mã sinh viên hoặc tên lớp.'
+                'message' => 'Mã sinh viên hoặc tên lớp không hợp lệ (tối đa 30 ký tự).'
             ], 400);
         }
 

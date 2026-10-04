@@ -87,11 +87,11 @@ class SocialiteController extends Controller
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Đăng nhập thất bại: ' . $e->getMessage()
+                    'message' => 'Đăng nhập dịch vụ ngoài thất bại. Vui lòng thử lại.'
                 ], 400);
             }
 
-            return redirect()->away($frontendUrl . '/login?error=' . urlencode($e->getMessage()));
+            return redirect()->away($frontendUrl . '/login?error=oauth_failed');
         }
     }
 }

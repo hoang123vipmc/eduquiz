@@ -19,10 +19,12 @@ import {
   CheckCircle2,
   CalendarCheck,
   ArrowRight,
-  MapPin
+  MapPin,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
+import { rankQuizzesBySchedule, RecommendedQuiz } from "@/lib/quizRecommendations";
 
 function getQuizThumbnail(title: string, categoryName?: string, coverImage?: string | null) {
   if (coverImage) return coverImage;
@@ -47,13 +49,39 @@ export default function DashboardPage() {
     streak_days: 0
   });
   const [history, setHistory] = useState<any[]>([]);
-  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizzes, setQuizzes] = useState<RecommendedQuiz[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [nextExam, setNextExam] = useState<any>(null);
+  const [userMsv, setUserMsv] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const targetMsv = user?.student_id || (typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '' : '');
+        setUserMsv(targetMsv);
+
+        let schedulesList: any[] = [];
+
+        // 1. Tải lịch thi HUBT nếu có MSV
+        if (targetMsv) {
+          try {
+            const schedRes = await fetch(`/api/schedule?msv=${encodeURIComponent(targetMsv)}`);
+            const schedJson = await schedRes.json();
+            if (schedJson.success && schedJson.data?.schedules?.length > 0) {
+              schedulesList = schedJson.data.schedules;
+              const upcoming = schedulesList.find((s: any) => s.status === 'today' || s.status === 'upcoming') || schedulesList[0];
+              setNextExam({
+                ...upcoming,
+                studentName: schedJson.data.student?.fullName || '',
+                total: schedulesList.length
+              });
+            }
+          } catch (schedErr) {
+            console.warn("Lỗi tải lịch thi HUBT", schedErr);
+          }
+        }
+
+        // 2. Tải thống kê, lịch sử và đề thi
         const [statsRes, historyRes, quizzesRes] = await Promise.all([
           api.get('/user/stats'),
           api.get('/user/history'),
@@ -64,32 +92,16 @@ export default function DashboardPage() {
         if (historyRes.data.success) setHistory(historyRes.data.data.slice(0, 4));
         if (quizzesRes.data.success) {
           const quizzesList = Array.isArray(quizzesRes.data.data) ? quizzesRes.data.data : quizzesRes.data.data.data;
-          setQuizzes(quizzesList.slice(0, 3));
-        }
-
-        // Tải lịch thi HUBT nhanh
-        const savedMsv = typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '2823231208' : '2823231208';
-        if (savedMsv) {
-          fetch(`/api/schedule?msv=${encodeURIComponent(savedMsv)}`)
-            .then(r => r.json())
-            .then(res => {
-              if (res.success && res.data?.schedules?.length > 0) {
-                const upcoming = res.data.schedules.find((s: any) => s.status === 'today' || s.status === 'upcoming') || res.data.schedules[0];
-                setNextExam({
-                  ...upcoming,
-                  studentName: res.data.student?.fullName || '',
-                  total: res.data.schedules.length
-                });
-              }
-            })
-            .catch(() => {});
+          // Tự động phân tích và ưu tiên đề thi theo lịch thi học kỳ của sinh viên
+          const ranked = rankQuizzesBySchedule(quizzesList || [], schedulesList);
+          setQuizzes(ranked.slice(0, 4));
         }
       } catch (error) {
         console.error("Lỗi tải dữ liệu dashboard", error);
       }
     };
     fetchData();
-  }, []);
+  }, [user?.student_id]);
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -397,7 +409,12 @@ export default function DashboardPage() {
                   key={q.id} 
                   role="button"
                   tabIndex={0}
-                  className="group flex items-center gap-3.5 p-3 rounded-xl border border-border/70 bg-card hover:border-primary/40 hover:bg-accent/40 transition-all cursor-pointer overflow-hidden"
+                  className={cn(
+                    "group flex items-center gap-3.5 p-3 rounded-xl border transition-all cursor-pointer overflow-hidden",
+                    q.isRecommended
+                      ? "border-amber-500/40 bg-gradient-to-r from-amber-500/[0.04] to-orange-500/[0.02] hover:border-amber-500 hover:shadow-md hover:shadow-amber-500/5"
+                      : "border-border/70 bg-card hover:border-primary/40 hover:bg-accent/40"
+                  )}
                   onClick={() => setSelectedQuiz(q)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}
                 >
@@ -408,14 +425,33 @@ export default function DashboardPage() {
                       alt={q.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
+                    {q.isRecommended && (
+                      <div className="absolute top-1 left-1 bg-amber-500 text-white p-1 rounded-md shadow-xs" title="Gợi ý theo lịch thi">
+                        <Sparkles className="w-2.5 h-2.5 fill-current" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
-                        {q.category?.name || 'Tự do'}
-                      </span>
-                    </div>
+                    {q.isRecommended && q.matchedSubject ? (
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        <span className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                          <Sparkles className="w-2.5 h-2.5 text-amber-500 fill-amber-500 shrink-0" />
+                          <span className="truncate max-w-[140px]">Thi: {q.matchedSubject.subject}</span>
+                        </span>
+                        {q.matchedSubject.countdownText && (
+                          <span className="text-[10px] font-medium text-amber-600/80 dark:text-amber-400/80 hidden sm:inline">
+                            {q.matchedSubject.countdownText}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                          {q.category?.name || 'Tự do'}
+                        </span>
+                      </div>
+                    )}
                     <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors" title={q.title}>
                       {q.title}
                     </h4>
@@ -431,6 +467,24 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+
+            {!userMsv && (
+              <div className="mt-2 p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-200 flex flex-col gap-1.5">
+                <div className="flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-300">
+                  <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>Cá nhân hóa theo lịch thi</span>
+                </div>
+                <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 leading-relaxed">
+                  Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
+                </p>
+                <button
+                  onClick={() => router.push('/dashboard/settings')}
+                  className="self-start text-[11px] font-bold text-blue-600 dark:text-blue-400 underline hover:no-underline pt-0.5"
+                >
+                  Cài đặt MSV ngay →
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle, Upload, Image as ImageIcon } from "lucide-react";
+import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle, Upload, Image as ImageIcon, GraduationCap, ExternalLink } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useTheme } from "next-themes";
 import api from "@/lib/axios";
@@ -16,6 +16,7 @@ export default function SettingsPage() {
   // Account Form
   const [name, setName] = useState(user?.name || "");
   const [avatar, setAvatar] = useState(user?.avatar || "");
+  const [studentId, setStudentId] = useState(user?.student_id || "");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
@@ -66,9 +67,9 @@ export default function SettingsPage() {
     setIsUpdatingProfile(true);
     setProfileMessage({ type: "", text: "" });
     try {
-      const { data } = await api.put("/user/profile", { name, avatar });
+      const { data } = await api.put("/user/profile", { name, avatar, student_id: studentId.trim() || null });
       if (data.success) {
-        updateUser({ name, avatar });
+        updateUser({ name, avatar, student_id: studentId.trim() || null });
         setProfileMessage({ type: "success", text: "Cập nhật thông tin và ảnh đại diện thành công." });
       }
     } catch (error: any) {
@@ -268,6 +269,37 @@ export default function SettingsPage() {
                     required
                     className="w-full bg-background border border-border focus:border-primary text-foreground rounded-xl px-4 py-3 outline-none transition-colors"
                   />
+                </div>
+
+                {/* Student ID Section */}
+                <div className="rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-900/10 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <label className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+                        Mã sinh viên (MSV)
+                      </label>
+                    </div>
+                    {studentId && (
+                      <a
+                        href={`/dashboard/schedule?msv=${encodeURIComponent(studentId)}`}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                      >
+                        Xem lịch thi <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
+                    placeholder="VD: 2823231208 (không bắt buộc)"
+                    maxLength={20}
+                    className="w-full bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800/50 focus:border-blue-500 text-foreground rounded-xl px-4 py-2.5 outline-none transition-colors text-sm"
+                  />
+                  <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                    Website sẽ dùng MSV này để tự động gợi ý các đề thi phù hợp với lịch thi của bạn.
+                  </p>
                 </div>
 
                 {profileMessage.text && (
