@@ -53,12 +53,15 @@ export default function DashboardPage() {
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [nextExam, setNextExam] = useState<any>(null);
   const [userMsv, setUserMsv] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
+      setLoading(true);
       try {
         const targetMsv = user?.student_id || (typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '' : '');
-        setUserMsv(targetMsv);
+        if (isMounted) setUserMsv(targetMsv);
 
         let schedulesList: any[] = [];
 
@@ -70,11 +73,13 @@ export default function DashboardPage() {
             if (schedJson.success && schedJson.data?.schedules?.length > 0) {
               schedulesList = schedJson.data.schedules;
               const upcoming = schedulesList.find((s: any) => s.status === 'today' || s.status === 'upcoming') || schedulesList[0];
-              setNextExam({
-                ...upcoming,
-                studentName: schedJson.data.student?.fullName || '',
-                total: schedulesList.length
-              });
+              if (isMounted) {
+                setNextExam({
+                  ...upcoming,
+                  studentName: schedJson.data.student?.fullName || '',
+                  total: schedulesList.length
+                });
+              }
             }
           } catch (schedErr) {
             console.warn("Lỗi tải lịch thi HUBT", schedErr);
@@ -88,19 +93,24 @@ export default function DashboardPage() {
           api.get('/quizzes')
         ]);
         
-        if (statsRes.data.success) setStats(statsRes.data.data);
-        if (historyRes.data.success) setHistory(historyRes.data.data.slice(0, 4));
-        if (quizzesRes.data.success) {
-          const quizzesList = Array.isArray(quizzesRes.data.data) ? quizzesRes.data.data : quizzesRes.data.data.data;
-          // Tự động phân tích và ưu tiên đề thi theo lịch thi học kỳ của sinh viên
-          const ranked = rankQuizzesBySchedule(quizzesList || [], schedulesList);
-          setQuizzes(ranked.slice(0, 4));
+        if (isMounted) {
+          if (statsRes.data?.success) setStats(statsRes.data.data);
+          if (historyRes.data?.success) setHistory(historyRes.data.data.slice(0, 4));
+          if (quizzesRes.data?.success) {
+            const quizzesList = Array.isArray(quizzesRes.data.data) ? quizzesRes.data.data : quizzesRes.data.data.data;
+            // Tự động phân tích và ưu tiên đề thi theo lịch thi học kỳ của sinh viên
+            const ranked = rankQuizzesBySchedule(quizzesList || [], schedulesList);
+            setQuizzes(ranked.slice(0, 4));
+          }
         }
       } catch (error) {
         console.error("Lỗi tải dữ liệu dashboard", error);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
     fetchData();
+    return () => { isMounted = false; };
   }, [user?.student_id]);
 
   const formatTime = (seconds: number) => {
@@ -135,7 +145,7 @@ export default function DashboardPage() {
           </p>
 
           {/* Banner Thông báo Cá nhân hóa nếu chưa cài đặt MSV */}
-          {!userMsv && (
+          {!loading && !userMsv && (
             <div 
               onClick={() => router.push('/dashboard/settings')}
               className="mb-4 sm:mb-5 p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/25 transition-all cursor-pointer flex items-center justify-between gap-3 group shadow-xs"
@@ -192,63 +202,101 @@ export default function DashboardPage() {
 
       {/* Statistics Cards - 2 cols on mobile, 4 on desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+        {loading ? (
+          [1, 2, 3, 4].map((i) => (
+            <div 
+              key={i} 
+              className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 animate-pulse flex flex-col justify-between h-[96px] sm:h-[116px]"
+            >
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-muted/80 dark:bg-muted/40 shrink-0" />
+                <div className="h-3.5 w-16 bg-muted/80 dark:bg-muted/40 rounded" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <div className="h-7 sm:h-8 w-16 bg-muted/80 dark:bg-muted/40 rounded-md" />
+                <div className="h-3 w-10 bg-muted/80 dark:bg-muted/40 rounded" />
+              </div>
             </div>
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Đã làm</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
-            <span className="text-[11px] sm:text-xs text-muted-foreground">bộ đề</span>
-          </div>
-        </div>
-        
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+          ))
+        ) : (
+          <>
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Đã làm</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
+                <span className="text-[11px] sm:text-xs text-muted-foreground">bộ đề</span>
+              </div>
             </div>
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chính xác</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.accuracy}%</div>
-            <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Chuẩn
-            </span>
-          </div>
-        </div>
+            
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chính xác</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.accuracy}%</div>
+                <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                  <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Chuẩn
+                </span>
+              </div>
+            </div>
 
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Thời gian</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
+                <span className="text-[11px] sm:text-xs text-muted-foreground hidden sm:inline">tổng cộng</span>
+              </div>
             </div>
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Thời gian</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
-            <span className="text-[11px] sm:text-xs text-muted-foreground hidden sm:inline">tổng cộng</span>
-          </div>
-        </div>
 
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                  <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chuỗi ngày</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.streak_days}d</div>
+                <span className="text-[10px] sm:text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
+              </div>
             </div>
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chuỗi ngày</span>
-          </div>
-          <div className="flex items-baseline gap-1.5 sm:gap-2">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.streak_days}d</div>
-            <span className="text-[10px] sm:text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Upcoming Exam Banner Widget */}
-      {nextExam ? (
+      {loading ? (
+        <div className="relative overflow-hidden bg-card/70 border border-border/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pulse">
+          <div className="flex items-center gap-3.5 flex-1 min-w-0">
+            <div className="w-12 h-12 rounded-xl bg-muted/80 dark:bg-muted/40 shrink-0" />
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <div className="h-3.5 w-40 bg-muted/80 dark:bg-muted/40 rounded" />
+                <div className="h-4 w-16 bg-muted/80 dark:bg-muted/40 rounded-full" />
+              </div>
+              <div className="h-5 sm:h-6 w-3/4 max-w-sm bg-muted/80 dark:bg-muted/40 rounded" />
+              <div className="h-3.5 w-1/2 max-w-xs bg-muted/80 dark:bg-muted/40 rounded" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <div className="h-9 w-28 bg-muted/80 dark:bg-muted/40 rounded-xl" />
+            <div className="h-9 w-24 bg-muted/80 dark:bg-muted/40 rounded-xl" />
+          </div>
+        </div>
+      ) : nextExam ? (
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-card border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
@@ -365,7 +413,28 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex-1">
-            {history.length === 0 ? (
+            {loading ? (
+              <div className="space-y-3.5">
+                {[1, 2, 3, 4].map((i) => (
+                  <div 
+                    key={i}
+                    className="animate-pulse flex items-center justify-between p-3.5 rounded-xl border border-border/70 bg-card/60"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-muted/80 dark:bg-muted/40 shrink-0" />
+                      <div className="space-y-2 flex-1 min-w-0 pr-3">
+                        <div className="h-4 bg-muted/80 dark:bg-muted/40 rounded w-3/5 max-w-[220px]" />
+                        <div className="h-3 bg-muted/80 dark:bg-muted/40 rounded w-2/5 max-w-[150px]" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 ml-3">
+                      <div className="w-16 h-6 bg-muted/80 dark:bg-muted/40 rounded-lg" />
+                      <div className="w-4 h-4 bg-muted/80 dark:bg-muted/40 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : history.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-12 text-center">
                 <Clock className="w-10 h-10 mb-3 opacity-30 text-primary" />
                 <p className="font-semibold text-foreground">Chưa có bài thi nào</p>
@@ -441,7 +510,24 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex-1 flex flex-col gap-3.5">
-            {quizzes.length === 0 ? (
+            {loading ? (
+              [1, 2, 3, 4].map((i) => (
+                <div 
+                  key={i}
+                  className="animate-pulse flex items-center gap-3.5 p-3 rounded-xl border border-border/70 bg-card/60 overflow-hidden"
+                >
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-xl bg-muted/80 dark:bg-muted/40 shrink-0" />
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="h-3.5 bg-muted/80 dark:bg-muted/40 rounded w-16" />
+                    <div className="h-4 bg-muted/80 dark:bg-muted/40 rounded w-4/5 max-w-[180px]" />
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <div className="h-3 bg-muted/80 dark:bg-muted/40 rounded w-12" />
+                      <div className="h-3 bg-muted/80 dark:bg-muted/40 rounded w-12" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : quizzes.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-10 text-center">
                 <BookOpen className="w-8 h-8 mb-2 opacity-30" />
                 <p className="text-sm">Chưa có đề thi gợi ý</p>
