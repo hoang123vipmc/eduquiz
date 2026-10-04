@@ -21,12 +21,31 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Khôi phục tức thì từ bộ nhớ đệm (0ms Perceived Load)
+    try {
+      const cached = sessionStorage.getItem('openquiz_cached_leaderboard');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.leaderboard) {
+          setLeaderboard(parsed.leaderboard);
+          if (parsed.currentUser) setCurrentUser(parsed.currentUser);
+          setLoading(false);
+        }
+      }
+    } catch {}
+
     const fetchLeaderboard = async () => {
       try {
         const { data } = await api.get('/leaderboard');
         if (data.success) {
           setLeaderboard(data.data.leaderboard);
           setCurrentUser(data.data.current_user);
+          try {
+            sessionStorage.setItem('openquiz_cached_leaderboard', JSON.stringify({
+              leaderboard: data.data.leaderboard,
+              currentUser: data.data.current_user
+            }));
+          } catch {}
         }
       } catch (error) {
         console.error("Error fetching leaderboard:", error);

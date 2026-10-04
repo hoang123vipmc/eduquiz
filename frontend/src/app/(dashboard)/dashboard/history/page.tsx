@@ -32,8 +32,28 @@ export default function HistoryPage() {
   const [totalCount, setTotalCount] = useState(0);
   const router = useRouter();
 
+  // 1. Khôi phục tức thì từ bộ nhớ đệm (0ms Perceived Load)
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem('openquiz_cached_history');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed.history) && parsed.history.length > 0) {
+          setHistory(parsed.history);
+          setTotalPages(parsed.totalPages || 1);
+          setTotalCount(parsed.totalCount || parsed.history.length);
+          setLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
+
   const fetchHistory = async () => {
-    setLoading(true);
+    const isDefault = page === 1 && !search && statusFilter === 'all';
+    const hasCached = !!sessionStorage.getItem('openquiz_cached_history');
+    if (!hasCached || !isDefault) {
+      setLoading(true);
+    }
     try {
       const params = new URLSearchParams({
         page: String(page),
@@ -43,12 +63,20 @@ export default function HistoryPage() {
       });
       const { data } = await api.get(`/user/history?${params.toString()}`);
       if (data.success) {
-        setHistory(data.data || []);
-        if (data.pagination) {
-          setTotalPages(data.pagination.last_page);
-          setTotalCount(data.pagination.total);
-        } else {
-          setTotalCount(data.data?.length || 0);
+        const historyItems = data.data || [];
+        setHistory(historyItems);
+        const lastPage = data.pagination?.last_page || 1;
+        const total = data.pagination?.total || historyItems.length;
+        setTotalPages(lastPage);
+        setTotalCount(total);
+        if (isDefault) {
+          try {
+            sessionStorage.setItem('openquiz_cached_history', JSON.stringify({
+              history: historyItems,
+              totalPages: lastPage,
+              totalCount: total
+            }));
+          } catch {}
         }
       }
     } catch (error) {

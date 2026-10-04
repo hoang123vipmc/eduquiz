@@ -7,6 +7,7 @@ use App\Http\Requests\StoreQuizRequest;
 use App\Http\Resources\QuizResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class QuizController extends Controller
@@ -22,13 +23,35 @@ class QuizController extends Controller
                     'message' => 'Vui lòng đăng nhập để xem danh sách đề thi của bạn.',
                 ], 401);
             }
-            $query = Quiz::with(['user', 'category'])->where('user_id', $user->id);
+            $query = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])->where('user_id', $user->id);
         } elseif ($user && $user->role === 'admin' && $request->boolean('admin_all')) {
             // Admin có quyền kiểm soát toàn bộ đề thi trong hệ thống
-            $query = Quiz::with(['user', 'category']);
+            $query = Quiz::with(['user:id,name,avatar', 'category:id,name,icon']);
         } else {
-            // Danh sách đề thi công khai chung cho mọi học viên
-            $query = Quiz::with(['user', 'category'])->where('status', 'published')->where('visibility', 'public');
+            // Danh sách đề thi công khai chung cho mọi học viên - Cache 60s để tăng tốc tối đa
+            $isDefaultPublic = !$request->filled('search') 
+                && (!$request->has('category_id') || $request->category_id === 'all') 
+                && (int)$request->get('page', 1) === 1 
+                && (int)$request->get('per_page', 50) === 50;
+
+            if ($isDefaultPublic) {
+                $cachedData = Cache::remember('public_quizzes_default_v1', 60, function () {
+                    $quizzes = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])
+                        ->where('status', 'published')
+                        ->where('visibility', 'public')
+                        ->latest('id')
+                        ->paginate(50);
+                    return QuizResource::collection($quizzes)->response()->getData(true);
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lấy danh sách đề thi thành công.',
+                    'data' => $cachedData
+                ]);
+            }
+
+            $query = Quiz::with(['user:id,name,avatar', 'category:id,name,icon'])->where('status', 'published')->where('visibility', 'public');
         }
         
         if ($request->has('category_id') && $request->category_id !== 'all') {
@@ -99,6 +122,7 @@ class QuizController extends Controller
         $data['slug'] = $slug;
 
         $quiz = Quiz::create($data);
+        Cache::forget('public_quizzes_default_v1');
 
         return response()->json([
             'success' => true,
@@ -138,6 +162,7 @@ class QuizController extends Controller
         ]);
 
         $quiz->update($validated);
+        Cache::forget('public_quizzes_default_v1');
 
         return response()->json([
             'success' => true,
@@ -159,6 +184,7 @@ class QuizController extends Controller
         }
 
         $quiz->delete();
+        Cache::forget('public_quizzes_default_v1');
 
         return response()->json([
             'success' => true,

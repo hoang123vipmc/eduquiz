@@ -98,6 +98,20 @@ export default function QuizzesPage() {
   const [studentMsv, setStudentMsv] = useState<string>("");
   const [activeSubjectFilter, setActiveSubjectFilter] = useState<string | null>(null);
 
+  // 1. Khôi phục tức thì từ bộ nhớ đệm (0ms Perceived Load)
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem('openquiz_cached_quizzes');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setQuizzes(parsed);
+          setLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
+
   // Load schedule for personalized quiz recommendations
   useEffect(() => {
     const msv = user?.student_id || (typeof window !== 'undefined' ? localStorage.getItem('openquiz_saved_msv') || '' : '');
@@ -132,13 +146,22 @@ export default function QuizzesPage() {
   }, [search]);
 
   const fetchQuizzes = async (query = debouncedSearch) => {
-    setLoading(true);
+    // Chỉ bật skeleton nếu chưa có cache hoặc đang tìm kiếm
+    const hasCached = !!sessionStorage.getItem('openquiz_cached_quizzes');
+    if (!hasCached || query) {
+      setLoading(true);
+    }
     try {
       const url = query ? `/quizzes?search=${encodeURIComponent(query)}` : '/quizzes';
       const { data } = await api.get(url);
       if (data.success) {
         const quizzesList = Array.isArray(data.data) ? data.data : data.data.data;
         setQuizzes(quizzesList || []);
+        if (!query) {
+          try {
+            sessionStorage.setItem('openquiz_cached_quizzes', JSON.stringify(quizzesList || []));
+          } catch {}
+        }
       }
     } catch (error) {
       console.error("Lỗi tải danh sách đề thi", error);

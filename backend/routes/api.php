@@ -4,7 +4,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
+// ── Health Check / Keep-Alive ping endpoint (đáp ứng trong <5ms, không tốn tài nguyên DB) ──
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'service' => 'OpenQuiz Engine',
+        'time' => now()->toIso8601String()
+    ]);
+});
+
 Route::prefix('v1')->group(function () {
+    Route::get('/health', function () {
+        return response()->json(['status' => 'healthy', 'service' => 'OpenQuiz API v1']);
+    });
+
     // ── Rate limit: 120 attempts per minute per IP on auth (chịu tải tốt cho phòng thi / mạng dùng chung IP) ──
     Route::middleware('throttle:120,1')->group(function () {
         Route::post('/auth/register', [AuthController::class, 'register']);
