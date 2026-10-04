@@ -19,11 +19,15 @@ import {
   Sparkles, 
   LayoutGrid,
   Maximize2,
-  User
+  User,
+  Volume2,
+  VolumeX,
+  ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
 import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
+import { soundManager } from "@/lib/soundEffects";
 
 const QuizTimer = () => {
   const remainingTime = useQuizStore(s => s.remainingTime);
@@ -122,6 +126,37 @@ export default function QuizPlayerPage() {
   const [clearing, setClearing] = useState(false);
   const [autoNextDelay, setAutoNextDelay] = useState(0);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
+
+  const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchBookmarkIds = async () => {
+      try {
+        const res = await api.get('/bookmarks/ids');
+        if (res.data?.success) {
+          setBookmarkedIds(res.data.bookmarked_ids || []);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchBookmarkIds();
+  }, []);
+
+  const handleToggleBookmark = async (questionId: number) => {
+    try {
+      const res = await api.post('/bookmarks/toggle', { question_id: questionId });
+      if (res.data?.success) {
+        if (res.data.is_bookmarked) {
+          setBookmarkedIds(prev => [...prev, questionId]);
+        } else {
+          setBookmarkedIds(prev => prev.filter(qId => qId !== questionId));
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi lưu bookmark", err);
+    }
+  };
 
   const toggleFlagCurrent = () => {
     const q = questions[currentQuestionIndex];
@@ -230,9 +265,49 @@ export default function QuizPlayerPage() {
     initQuiz();
   }, [id]);
 
+  const [soundOn, setSoundOn] = useState(soundManager.isEnabled());
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+
+  const handleToggleSound = () => {
+    const newState = soundManager.toggle();
+    setSoundOn(newState);
+  };
+
+  useEffect(() => {
+    if (status !== 'doing' || isPractice) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount(prev => {
+          const next = prev + 1;
+          setShowWarningModal(true);
+          return next;
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [status, isPractice]);
+
   const handleSelectOption = (optionId: number) => {
-    if (!questions[currentQuestionIndex]) return;
-    selectAnswer(questions[currentQuestionIndex].id, optionId);
+    const currentQ = questions[currentQuestionIndex];
+    if (!currentQ) return;
+    selectAnswer(currentQ.id, optionId);
+
+    // Phát âm thanh phản hồi xúc giác
+    if (isPractice) {
+      const opt = currentQ.options?.find(o => o.id === optionId);
+      const isCorrect = opt && (opt.is_correct === 1 || opt.is_correct === true || String(opt.is_correct) === '1' || String(opt.is_correct) === 'true');
+      if (isCorrect) {
+        soundManager.playCorrect();
+      } else {
+        soundManager.playWrong();
+      }
+    } else {
+      soundManager.playClick();
+    }
     
     // Tự động chuyển câu nếu được cấu hình
     if (autoNextDelay > 0) {
@@ -299,6 +374,7 @@ export default function QuizPlayerPage() {
     try {
       const result = await submitQuiz();
       if (result) {
+        soundManager.playFinish();
         setFlaggedQuestions({});
         router.push(`/result/${result.id}`);
       }
@@ -1009,6 +1085,20 @@ export default function QuizPlayerPage() {
           </div>
           
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* Nút bật/tắt âm thanh hiệu ứng */}
+            <button
+              onClick={handleToggleSound}
+              type="button"
+              title={soundOn ? "Tắt âm thanh hiệu ứng" : "Bật âm thanh hiệu ứng"}
+              className="p-1.5 sm:p-2 rounded-full border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-xs"
+            >
+              {soundOn ? (
+                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              ) : (
+                <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+              )}
+            </button>
+
             {/* Nút chuyển đổi nhanh sang iTest Theme */}
             <button
               onClick={() => setTheme('itest')}
@@ -1067,10 +1157,24 @@ export default function QuizPlayerPage() {
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-amber-500/10"
                       : "bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80"
                   )}
-                  title="Đánh dấu câu hỏi này để xem lại"
+                  title="Đánh dấu xem lại trong phiên thi hiện tại"
                 >
                   <Flag className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", flaggedQuestions[currentQuestion.id] && "fill-amber-500 text-amber-500")} />
                   <span>{flaggedQuestions[currentQuestion.id] ? "Đã lưu" : "Lưu sau"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleToggleBookmark(currentQuestion.id)}
+                  className={cn(
+                    "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                    bookmarkedIds.includes(currentQuestion.id)
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-amber-500/10"
+                      : "bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80"
+                  )}
+                  title="Lưu câu hỏi này vào Sổ tay câu khó vĩnh viễn"
+                >
+                  <Bookmark className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", bookmarkedIds.includes(currentQuestion.id) && "fill-amber-500 text-amber-500")} />
+                  <span>{bookmarkedIds.includes(currentQuestion.id) ? "Sổ tay ✓" : "+ Sổ tay"}</span>
                 </button>
               </div>
               <span className="bg-muted px-2.5 sm:px-3 py-1 rounded-full border border-border text-primary font-bold text-xs">1 Điểm</span>
@@ -1204,6 +1308,37 @@ export default function QuizPlayerPage() {
           </div>
         )}
       </div>
+
+      {/* Cảnh báo chuyển tab (Chế độ thi trực tuyến) */}
+      {showWarningModal && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-card border-2 border-rose-500 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 rounded-full bg-rose-500/15 text-rose-500 flex items-center justify-center mx-auto border border-rose-500/30">
+              <ShieldAlert className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-rose-600 dark:text-rose-400">
+                Cảnh báo rời màn hình thi!
+              </h3>
+              <p className="text-sm text-foreground mt-1.5 leading-relaxed">
+                Hệ thống phát hiện bạn vừa chuyển tab hoặc thu nhỏ cửa sổ làm bài.
+              </p>
+              <div className="mt-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-700 dark:text-rose-300">
+                Số lần phát hiện: <span className="text-base font-black text-rose-600 dark:text-rose-400">{tabSwitchCount}</span> lần
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Vui lòng tập trung trên trang thi để kết quả được công nhận trung thực.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowWarningModal(false)}
+              className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              Tôi đã hiểu & Tiếp tục làm bài
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -23,6 +23,11 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\QuizAttempt::class);
     }
 
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(\App\Models\QuestionBookmark::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

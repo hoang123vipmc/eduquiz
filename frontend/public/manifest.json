@@ -1,0 +1,17 @@
+{
+  "name": "OpenQuiz - Nền tảng ôn thi trắc nghiệm",
+  "short_name": "OpenQuiz",
+  "description": "Luyện thi trắc nghiệm thông minh, mô phỏng phòng thi iTest chuẩn HUBT",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

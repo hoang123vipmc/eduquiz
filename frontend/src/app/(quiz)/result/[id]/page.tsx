@@ -20,15 +20,22 @@ import {
   Printer,
   Share2,
   Check,
-  Settings
+  Settings,
+  Bookmark,
+  Trophy,
+  Award,
+  Sparkles,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormattedText, cleanOptionPrefix } from "@/components/quiz/FormattedText";
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
+import { useAuthStore } from "@/store/authStore";
 
 export default function QuizResultPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useAuthStore();
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +43,37 @@ export default function QuizResultPage() {
   const [filterMode, setFilterMode] = useState<"all" | "wrong" | "correct">("all");
   const [copied, setCopied] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showScorecardModal, setShowScorecardModal] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchBookmarkIds = async () => {
+      try {
+        const res = await api.get('/bookmarks/ids');
+        if (res.data?.success) {
+          setBookmarkedIds(res.data.bookmarked_ids || []);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchBookmarkIds();
+  }, []);
+
+  const handleToggleBookmark = async (questionId: number) => {
+    try {
+      const res = await api.post('/bookmarks/toggle', { question_id: questionId });
+      if (res.data?.success) {
+        if (res.data.is_bookmarked) {
+          setBookmarkedIds(prev => [...prev, questionId]);
+        } else {
+          setBookmarkedIds(prev => prev.filter(qId => qId !== questionId));
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi lưu bookmark", err);
+    }
+  };
 
   const handleStartWithConfig = (config: any) => {
     const quizId = result?.attempt?.quiz_id || result?.quiz_id;
@@ -58,20 +96,8 @@ export default function QuizResultPage() {
     window.print();
   };
 
-  const handleShare = async () => {
+  const handleCopyLink = async () => {
     const url = window.location.href;
-    const title = result?.attempt?.quiz?.title || "Kết quả thi";
-    const text = `Tôi vừa hoàn thành bài thi "${title}" với điểm số ${result?.score}/100 trên OpenQuiz!`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text, url });
-        return;
-      } catch (err) {
-        // Fallback to clipboard if share was cancelled or failed
-      }
-    }
-
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -79,6 +105,10 @@ export default function QuizResultPage() {
     } catch (err) {
       alert("Liên kết: " + url);
     }
+  };
+
+  const handleShare = () => {
+    setShowScorecardModal(true);
   };
 
   useEffect(() => {
@@ -389,7 +419,23 @@ export default function QuizResultPage() {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-muted-foreground">{q.points || 1} Điểm</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBookmark(q.id)}
+                          className={cn(
+                            "flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                            bookmarkedIds.includes(q.id)
+                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40"
+                              : "bg-muted/60 text-muted-foreground border-border hover:text-foreground hover:bg-muted"
+                          )}
+                          title={bookmarkedIds.includes(q.id) ? "Đã lưu vào Sổ tay câu khó" : "Lưu vào Sổ tay câu khó"}
+                        >
+                          <Bookmark className={cn("w-3.5 h-3.5", bookmarkedIds.includes(q.id) && "fill-amber-500 text-amber-500")} />
+                          <span>{bookmarkedIds.includes(q.id) ? "Đã lưu" : "Lưu câu khó"}</span>
+                        </button>
+                        <span className="text-xs text-muted-foreground">{q.points || 1} Điểm</span>
+                      </div>
                     </div>
 
                     {/* Question text */}
@@ -464,6 +510,108 @@ export default function QuizResultPage() {
           quizTitle={result?.attempt?.quiz?.title}
           totalQuestions={result?.attempt?.quiz?.total_questions || result?.attempt?.quiz?.questions_count}
         />
+      )}
+
+      {/* Modal Thẻ Điểm / Chứng Nhận Kết Quả (Shareable Scorecard) */}
+      {showScorecardModal && result && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="fixed inset-0" onClick={() => setShowScorecardModal(false)} />
+          <div className="relative w-full max-w-lg bg-card border-2 border-border/80 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 space-y-6 animate-in zoom-in-95 duration-200">
+            {/* Close */}
+            <button 
+              onClick={() => setShowScorecardModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Scorecard Visual Box */}
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 shadow-md text-center space-y-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>CHỨNG NHẬN KẾT QUẢ ÔN THI</span>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Học viên</p>
+                <h3 className="text-xl font-black text-foreground mt-0.5">
+                  {user?.name || "Học viên OpenQuiz"}
+                </h3>
+              </div>
+
+              <div className="py-2">
+                <span className="text-xs text-muted-foreground block mb-1">Môn thi / Bộ đề:</span>
+                <h4 className="text-base font-bold text-primary px-3 py-1 rounded-xl bg-primary/5 border border-primary/10 inline-block max-w-full truncate">
+                  {result.attempt?.quiz?.title || "Bài thi trắc nghiệm"}
+                </h4>
+              </div>
+
+              {/* Giant Score Badge */}
+              <div className="flex flex-col items-center justify-center my-3">
+                <div className={cn(
+                  "w-28 h-28 rounded-full border-4 flex flex-col items-center justify-center shadow-lg transition-transform",
+                  result.score >= 80 
+                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-500 shadow-emerald-500/20"
+                    : result.score >= 50
+                    ? "border-blue-500 bg-blue-500/10 text-blue-500 shadow-blue-500/20"
+                    : "border-rose-500 bg-rose-500/10 text-rose-500 shadow-rose-500/20"
+                )}>
+                  <span className="text-3xl font-black tracking-tight">{result.score}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">Điểm số</span>
+                </div>
+                <div className="mt-2 text-xs font-bold text-foreground">
+                  {result.score >= 90 
+                    ? "🏆 XUẤT SẮC - Sẵn sàng cho kỳ thi chính thức!"
+                    : result.score >= 70
+                    ? "⭐ KHÁ GIỎI - Nắm vững kiến thức trọng tâm"
+                    : result.score >= 50
+                    ? "👍 ĐẠT YÊU CẦU - Rèn luyện thêm để bứt phá điểm số"
+                    : "💪 CẦN CỐ GẮNG - Hãy xem lại các câu sai trong Sổ tay"}
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/60 text-xs">
+                <div className="p-2 rounded-xl bg-card border border-border/60">
+                  <span className="text-muted-foreground block text-[10px] uppercase">Chính xác</span>
+                  <strong className="text-foreground text-sm font-bold">{Math.round((result.correct_answers / (result.total_questions || 1)) * 100)}%</strong>
+                </div>
+                <div className="p-2 rounded-xl bg-card border border-border/60">
+                  <span className="text-muted-foreground block text-[10px] uppercase">Số câu đúng</span>
+                  <strong className="text-emerald-500 text-sm font-bold">{result.correct_answers}/{result.total_questions}</strong>
+                </div>
+                <div className="p-2 rounded-xl bg-card border border-border/60">
+                  <span className="text-muted-foreground block text-[10px] uppercase">Thời gian</span>
+                  <strong className="text-foreground text-sm font-bold">{formatTime(result.time_taken_seconds)}</strong>
+                </div>
+              </div>
+
+              <div className="text-[10px] text-muted-foreground tracking-wider uppercase pt-1">
+                Xác thực bởi OpenQuiz Platform • {new Date().toLocaleDateString('vi-VN')}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={handleCopyLink}
+                className="flex-1 py-3 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                {copied ? (
+                  <><Check className="w-4 h-4 text-white" /> Đã sao chép liên kết!</>
+                ) : (
+                  <><Share2 className="w-4 h-4" /> Sao chép link chia sẻ</>
+                )}
+              </button>
+              <button
+                onClick={handlePrint}
+                className="py-3 px-4 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Printer className="w-4 h-4" /> In thẻ
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

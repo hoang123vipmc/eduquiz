@@ -16,7 +16,8 @@ import {
   LogOut,
   User,
   X,
-  CalendarCheck
+  CalendarCheck,
+  Bookmark
 } from "lucide-react";
 
 interface SidebarProps {
@@ -35,6 +36,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
+    { name: "Sổ tay câu hỏi", href: "/dashboard/bookmarks", icon: Bookmark, badge: "Hot" },
     { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
     { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },
     { name: "Lịch sử", href: "/dashboard/history", icon: History },
@@ -47,6 +49,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
+    { name: "Sổ tay câu hỏi", href: "/dashboard/bookmarks", icon: Bookmark, badge: "Hot" },
     { name: "Thống kê", href: "/dashboard/statistics", icon: BarChart2 },
     { name: "Bảng xếp hạng", href: "/dashboard/leaderboard", icon: Trophy },
     { name: "Lịch sử", href: "/dashboard/history", icon: History },

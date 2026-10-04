@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle, Upload, Image as ImageIcon, GraduationCap, ExternalLink } from "lucide-react";
+import { Settings, User, Lock, Monitor, Moon, Sun, Loader2, CheckCircle2, AlertCircle, Upload, Image as ImageIcon, GraduationCap, ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useTheme } from "next-themes";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { soundManager } from "@/lib/soundEffects";
 
 export default function SettingsPage() {
   const { user, updateUser } = useAuthStore();
   const { theme, setTheme } = useTheme();
   
   const [activeTab, setActiveTab] = useState<"account" | "security" | "appearance">("account");
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
   
   // Account Form
   const [name, setName] = useState(user?.name || "");
@@ -442,6 +444,44 @@ export default function SettingsPage() {
                   </div>
                   <span className="font-semibold text-foreground">Theo hệ thống</span>
                 </button>
+              </div>
+
+              {/* Sound Effects Preference */}
+              <div className="mt-8 pt-6 border-t border-border">
+                <h4 className="text-base font-bold text-foreground mb-1 flex items-center gap-2">
+                  <Volume2 className="w-5 h-5 text-primary" />
+                  Âm thanh hiệu ứng làm bài thi
+                </h4>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Phát âm thanh vui tươi khi trả lời đúng, tiếng êm khi trả lời sai và âm thanh chúc mừng khi nộp bài thi.
+                </p>
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-card border border-border max-w-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-muted-foreground" />}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-foreground block">Âm thanh phản hồi xúc giác</span>
+                      <span className="text-xs text-muted-foreground">{soundEnabled ? "Đang bật" : "Đang tắt"}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = soundManager.toggle();
+                      setSoundEnabled(next);
+                    }}
+                    className={cn(
+                      "w-12 h-6 rounded-full transition-colors relative cursor-pointer",
+                      soundEnabled ? "bg-primary" : "bg-muted border border-border"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-5 h-5 rounded-full bg-white transition-transform shadow-xs absolute top-0.5",
+                      soundEnabled ? "translate-x-6" : "translate-x-0.5"
+                    )} />
+                  </button>
+                </div>
               </div>
             </div>
           )}

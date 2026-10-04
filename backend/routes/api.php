@@ -37,6 +37,13 @@ Route::prefix('v1')->group(function () {
         Route::get('/bank/questions', [\App\Http\Controllers\QuestionController::class, 'bank']);
         Route::get('/leaderboard', [\App\Http\Controllers\LeaderboardController::class, 'index']);
         
+        // Sổ tay câu hỏi khó & Đánh dấu (Bookmarks)
+        Route::get('/bookmarks', [\App\Http\Controllers\BookmarkController::class, 'index']);
+        Route::get('/bookmarks/ids', [\App\Http\Controllers\BookmarkController::class, 'getBookmarkedIds']);
+        Route::post('/bookmarks/toggle', [\App\Http\Controllers\BookmarkController::class, 'toggle']);
+        Route::put('/bookmarks/{id}/note', [\App\Http\Controllers\BookmarkController::class, 'updateNote']);
+        Route::delete('/bookmarks/{id}', [\App\Http\Controllers\BookmarkController::class, 'destroy']);
+        
         // Quản lý danh mục (Admin)
         Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->middleware('role:admin');
         
