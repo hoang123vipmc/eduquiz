@@ -80,7 +80,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const aiMode = mode === "debate" ? "debate" : "explain";
+    const aiMode =
+      mode === "mnemonic" || mode === "tips"
+        ? "mnemonic"
+        : mode === "debate"
+        ? "debate"
+        : "explain";
 
     // 4. Build Prompt
     const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -108,7 +113,27 @@ export async function POST(request: NextRequest) {
       .join("\n");
 
     let prompt = "";
-    if (aiMode === "explain") {
+    if (aiMode === "mnemonic") {
+      prompt = `${ctx}
+
+Bạn là Chuyên gia Siêu Trí Nhớ & Mẹo Thi Trắc Nghiệm (Mnemonics & Study Hacks Expert).
+Nhiệm vụ: Cung cấp các MẸO NHỚ ĐỈNH CAO để học sinh NHẬN DIỆN ĐÁP ÁN TRONG 3 GIÂY và KHÔNG BAO GIỜ BỊ QUÊN KHI VÀO PHÒNG THI!
+
+Hãy trình bày sinh động bằng Markdown theo cấu trúc sau:
+⚡ **1. Mẹo nhận diện 3 giây (Trigger Keyword):**
+- Thấy từ khóa then chốt nào trong câu hỏi -> Chốt ngay đáp án nào trong tích tắc?
+
+🧠 **2. Thần chú ghi nhớ / Câu vần dễ thuộc:**
+- Câu thơ vần, từ viết tắt (acronym), hoặc cách chơi chữ vui nhộn để khắc sâu vào trí nhớ.
+
+🚫 **3. Cảnh báo bẫy thi & Cách loại trừ:**
+- Giảng viên hay gài bẫy ở điểm nào? Vì sao các đáp án nhiễu dễ khiến học sinh mất điểm?
+
+💡 **4. Liên tưởng đời thực (Siêu dễ nhớ):**
+- Ví von khái niệm này giống một sự vật/tình huống đời thường nào để liên tưởng ngay lập tức?
+
+Yêu cầu: Viết súc tích, trực diện, kích thích trí nhớ, dùng tiếng Việt tự nhiên và icon trực quan.`;
+    } else if (aiMode === "explain") {
       prompt = `${ctx}
 
 Hãy giải thích CHI TIẾT bằng tiếng Việt:
@@ -116,7 +141,7 @@ Hãy giải thích CHI TIẾT bằng tiếng Việt:
 2. **Tại sao** các đáp án khác sai?
 3. **Kiến thức cần nhớ** liên quan?
 
-Trả lời ngắn gọn, dùng markdown.`;
+Trọng tâm ngắn gọn, dùng markdown.`;
     } else {
       prompt = `${ctx}
 

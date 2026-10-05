@@ -22,7 +22,8 @@ import {
   User,
   Volume2,
   VolumeX,
-  ShieldAlert
+  ShieldAlert,
+  Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
@@ -128,6 +129,7 @@ export default function QuizPlayerPage() {
   const [autoNextDelay, setAutoNextDelay] = useState(0);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [showAskAI, setShowAskAI] = useState(false);
+  const [aiModalMode, setAiModalMode] = useState<"explain" | "debate" | "mnemonic">("explain");
 
   const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
 
@@ -1179,11 +1181,28 @@ export default function QuizPlayerPage() {
                   <span>{bookmarkedIds.includes(currentQuestion.id) ? "Sổ tay ✓" : "+ Sổ tay"}</span>
                 </button>
 
+                {/* Nút Mẹo nhớ 3s */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAiModalMode("mnemonic");
+                    setShowAskAI(true);
+                  }}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-emerald-500/15 to-teal-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 hover:from-emerald-500/25 hover:to-teal-500/25 active:scale-95"
+                  title="Xem mẹo nhớ nhanh 3 giây & thần chú ghi nhớ"
+                >
+                  <Lightbulb className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500" />
+                  <span>Mẹo nhớ</span>
+                </button>
+
                 {/* Nút Hỏi AI */}
                 <button
                   type="button"
-                  onClick={() => setShowAskAI(true)}
-                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-600 dark:text-violet-400 border-violet-500/40 hover:from-violet-500/25 hover:to-indigo-500/25"
+                  onClick={() => {
+                    setAiModalMode("explain");
+                    setShowAskAI(true);
+                  }}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-600 dark:text-violet-400 border-violet-500/40 hover:from-violet-500/25 hover:to-indigo-500/25 active:scale-95"
                   title="Hỏi AI giải thích hoặc tranh luận đáp án"
                 >
                   <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -1359,6 +1378,7 @@ export default function QuizPlayerPage() {
         onClose={() => setShowAskAI(false)}
         questionText={currentQuestion.question_text}
         options={currentQuestion.options}
+        initialMode={aiModalMode}
         correctOptionText={
           currentQuestion.options.find(
             (o: any) => o.is_correct === 1 || o.is_correct === true || String(o.is_correct) === '1' || String(o.is_correct) === 'true'
