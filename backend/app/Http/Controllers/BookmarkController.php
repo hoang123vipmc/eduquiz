@@ -20,6 +20,15 @@ class BookmarkController extends Controller
         $search = $request->query('search');
 
         $query = QuestionBookmark::where('user_id', $user->id)
+            ->whereHas('quiz', function ($q) use ($user) {
+                // ── Security: Chỉ hiển thị bookmark của đề public hoặc đề của chính user (hoặc admin) ──
+                if ($user->role !== 'admin') {
+                    $q->where(function ($sub) use ($user) {
+                        $sub->where('visibility', 'public')
+                            ->orWhere('user_id', $user->id);
+                    });
+                }
+            })
             ->with([
                 'question' => function ($q) {
                     $q->with('options');
@@ -72,7 +81,18 @@ class BookmarkController extends Controller
             ]);
         }
 
-        $question = Question::findOrFail($questionId);
+        $question = Question::with('quiz')->findOrFail($questionId);
+
+        // ── Security: Ngăn IDOR đánh dấu trái phép câu hỏi từ đề thi riêng tư ────────
+        if ($question->quiz && $question->quiz->visibility === 'private') {
+            $user = $request->user();
+            if ($user->id !== $question->quiz->user_id && $user->role !== 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền đánh dấu câu hỏi từ đề thi riêng tư này.'
+                ], 403);
+            }
+        }
 
         $bookmark = QuestionBookmark::create([
             'user_id' => $userId,

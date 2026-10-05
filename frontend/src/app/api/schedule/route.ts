@@ -398,11 +398,11 @@ export async function GET(request: NextRequest) {
 
   } catch (error: any) {
     console.error("Lỗi khi tra cứu lịch thi:", error);
+    console.error("Lỗi tra cứu lịch thi:", error?.message ?? error);
     return NextResponse.json(
       {
         success: false,
         message: "Lỗi kết nối khi tra cứu lịch thi HUBT. Vui lòng thử lại sau.",
-        error: error.message,
       },
       { status: 500 }
     );

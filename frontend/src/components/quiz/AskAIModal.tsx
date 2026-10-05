@@ -22,62 +22,20 @@ interface AskAIModalProps {
 
 type AIMode = "explain" | "debate";
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
-
-function buildPrompt(
-  mode: AIMode,
-  questionText: string,
-  options: Option[],
-  correctOptionText?: string,
-  selectedOptionText?: string,
-  quizTitle?: string
-): string {
-  const letters = ["A", "B", "C", "D", "E", "F"];
-  const optsList = options
-    .map((opt, i) => {
-      const isCorrect =
-        opt.is_correct === 1 ||
-        opt.is_correct === true ||
-        String(opt.is_correct) === "1" ||
-        String(opt.is_correct) === "true";
-      return `${letters[i]}. ${opt.option_text}${isCorrect ? " ✓ (đáp án theo đề)" : ""}`;
-    })
-    .join("\n");
-
-  const ctx = [
-    `Đề thi: ${quizTitle || "Câu hỏi trắc nghiệm"}`,
-    `Câu hỏi: ${questionText}`,
-    `Các lựa chọn:\n${optsList}`,
-    correctOptionText ? `Đáp án theo đề: ${correctOptionText}` : "",
-    selectedOptionText ? `Học sinh chọn: ${selectedOptionText}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  if (mode === "explain") {
-    return `${ctx}
-
-Hãy giải thích CHI TIẾT bằng tiếng Việt:
-1. **Đáp án đúng** là gì và tại sao?
-2. **Tại sao** các đáp án khác sai?
-3. **Kiến thức cần nhớ** liên quan?
-
-Trả lời ngắn gọn, dùng markdown.`;
-  }
-  return `${ctx}
-
-Hãy PHÂN TÍCH KHÁCH QUAN với vai trò chuyên gia:
-1. **Đáp án theo đề** có chính xác không? Tại sao?
-2. **Nếu đáp án có thể sai**, chỉ ra điểm bất hợp lý và đề xuất đáp án đúng hơn.
-3. **Kết luận** đáp án nào chính xác nhất theo kiến thức thực tế?
-
-Trả lời khách quan, có dẫn chứng, bằng tiếng Việt, dùng markdown.`;
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function renderMd(text: string) {
   return text.split("\n").map((line, i) => {
-    let html = line
+    // ── Security: HTML-escape before formatting to completely prevent XSS ──
+    const escaped = escapeHtml(line);
+    const html = escaped
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
       .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:4px;font-size:0.85em">$1</code>');
@@ -129,29 +87,28 @@ export function AskAIModal({
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
 
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-      setError("Chưa cấu hình Gemini API key.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      // ── Security: Call server-side API proxy to hide secret API key & apply rate limiting ──
+      const res = await fetch("/api/ai/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: abortRef.current.signal,
         body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(m, questionText, options, correctOptionText, selectedOptionText, quizTitle) }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+          mode: m,
+          questionText,
+          options,
+          correctOptionText,
+          selectedOptionText,
+          quizTitle,
         }),
       });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e?.error?.message || `Lỗi ${res.status}`);
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || `Lỗi máy chủ (${res.status})`);
       }
-      const data = await res.json();
-      const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      const txt = json.data?.text || "";
       if (!txt) throw new Error("AI không trả về kết quả.");
       setResponse(txt);
     } catch (err: any) {

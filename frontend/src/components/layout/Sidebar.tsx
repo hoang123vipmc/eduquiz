@@ -83,18 +83,21 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const navContent = (
     <div className="flex flex-col h-full text-foreground">
-      {/* Brand & Slogan */}
+      {/* Brand Header */}
       <div className="pt-5 sm:pt-6 pb-4 sm:pb-5 px-4 sm:px-5 border-b border-border/40 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-primary-foreground font-bold text-sm shadow-xs shadow-primary/25">
-            <span>OQ</span>
+          <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary via-violet-500 to-purple-600" />
+            <div className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">
+              OQ
+            </div>
           </div>
           <div>
-            <div className="text-foreground font-bold text-lg tracking-tight leading-tight">
+            <div className="font-black text-lg tracking-tight leading-tight gradient-text">
               OpenQuiz
             </div>
-            <div className="text-[11px] text-muted-foreground font-medium">
-              Học tập phi lợi nhuận
+            <div className="text-[10px] text-muted-foreground font-medium tracking-wide">
+              Học tập phi lợi nhuận ✦
             </div>
           </div>
         </div>
@@ -103,15 +106,15 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <button
             onClick={onClose}
             aria-label="Đóng menu"
-            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted active:scale-90 active:rotate-90 transition-all duration-200"
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted active:scale-90 active:rotate-90 transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      {/* User Info & Nút Đăng Xuất ở TRÊN CÙNG */}
-      <div className="p-2.5 mx-3 mt-3 mb-1 rounded-xl bg-card border border-border/80 flex items-center justify-between gap-2 shadow-xs">
+      {/* User Info Card */}
+      <div className="p-2.5 mx-3 mt-3 mb-1 rounded-xl bg-secondary/80 border border-border/60 flex items-center justify-between gap-2 hover:border-primary/30 transition-colors">
         <div 
           onClick={() => {
             onClose?.();
@@ -120,32 +123,36 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group"
           title="Xem thông tin tài khoản"
         >
-          <div className="w-9 h-9 rounded-full overflow-hidden border border-border shrink-0 group-hover:border-primary/50 transition-colors shadow-xs">
+          <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-primary/20 shrink-0 group-hover:border-primary/50 transition-colors">
             <img 
               src={user?.avatar || "/images/avatar-student.jpg"} 
               alt={user?.name || "Avatar"} 
               className="w-full h-full object-cover" 
             />
+            <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-full" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xs sm:text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+            <div className="text-xs sm:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
               {user?.name || "Học viên"}
             </div>
-            <div className="text-[10px] text-muted-foreground truncate capitalize">
-              {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
+            <div className="text-[10px] text-muted-foreground truncate capitalize flex items-center gap-1">
+              {user?.role === 'admin' ? (
+                <><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />Quản trị viên</>
+              ) : (
+                <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />Học viên</>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Nút Đăng Xuất ở Trên Cùng */}
         <button 
           onClick={() => setShowLogoutModal(true)}
           aria-label="Đăng xuất tài khoản"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-500 hover:text-rose-600 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 active:scale-90 transition-all shrink-0 shadow-xs"
+          className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-rose-500 hover:text-rose-600 bg-rose-500/8 hover:bg-rose-500/15 border border-rose-500/15 active:scale-90 transition-all shrink-0"
           title="Đăng xuất tài khoản"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span className="text-[11px]">Đăng xuất</span>
+          <span>Out</span>
         </button>
       </div>
 
@@ -175,23 +182,27 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               href={link.href}
               onClick={() => onClose?.()}
               className={cn(
-                "group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all active:scale-[0.98]",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.97]",
                 reallyActive 
                   ? "bg-primary/10 text-primary font-semibold" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               )}
             >
               {reallyActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-md"></div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-primary to-violet-500 rounded-r-full" />
               )}
               
-              <Icon className={cn(
-                "w-5 h-5 transition-colors", 
-                reallyActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-              )} />
-              <span className="flex-1">{link.name}</span>
+              <div className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0",
+                reallyActive 
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground group-hover:text-foreground"
+              )}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <span className="flex-1 truncate">{link.name}</span>
               {(link as any).badge && (
-                <span className="px-1.5 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-bold border border-blue-500/25">
+                <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
                   {(link as any).badge}
                 </span>
               )}
@@ -200,13 +211,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         })}
       </div>
 
-      {/* Non-profit & Educational Disclaimer ở dưới cùng */}
-      <div className="p-3 mt-auto border-t border-border/40">
-        <div className="bg-primary/5 border border-primary/15 rounded-xl p-2.5 text-[11px] text-muted-foreground leading-snug">
-          <div className="font-semibold text-foreground flex items-center gap-1 mb-0.5">
-            <span>🌱</span> OpenQuiz Phi lợi nhuận
+      {/* Bottom badge */}
+      <div className="p-3 mt-auto border-t border-border/30">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/8 via-primary/5 to-transparent border border-primary/10 p-3">
+          <div className="font-bold text-xs text-foreground flex items-center gap-1.5 mb-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            OpenQuiz Phi lợi nhuận
           </div>
-          Dự án cá nhân phục vụ học tập và nghiên cứu công nghệ, miễn phí 100%.
+          <p className="text-[11px] text-muted-foreground leading-snug">
+            Dự án cá nhân phục vụ học tập và nghiên cứu, miễn phí 100%.
+          </p>
+          <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-primary/5 rounded-full blur-xl" />
         </div>
       </div>
     </div>
