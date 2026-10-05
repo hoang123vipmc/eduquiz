@@ -32,7 +32,15 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
+// Danh sách các model theo thứ tự ưu tiên tốc độ & độ ổn định cao nhất
+// Dùng fallback tuần tự để triệt tiêu hoàn toàn lỗi 503 High Demand hoặc 429 Rate Limit
+const CANDIDATE_MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-latest",
+  "gemini-3.5-flash",
+  "gemini-3.8-flash",
+];
 
 export async function POST(request: NextRequest) {
   // 1. Rate Limiting Check
@@ -120,32 +128,52 @@ Hãy PHÂN TÍCH KHÁCH QUAN với vai trò chuyên gia:
 Trả lời khách quan, có dẫn chứng, bằng tiếng Việt, dùng markdown.`;
     }
 
-    // 5. Call Gemini API securely from server
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(15000),
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1200,
-        },
-      }),
-    });
+    // 5. Call Gemini API with Multi-Model Fallback
+    let answerText = "";
+    let lastErrorMsg = "";
 
-    if (!geminiRes.ok) {
-      const errJson = await geminiRes.json().catch(() => ({}));
-      const errMsg = errJson?.error?.message || `Lỗi từ Gemini API (mã ${geminiRes.status})`;
-      return NextResponse.json({ success: false, message: errMsg }, { status: 502 });
+    for (const model of CANDIDATE_MODELS) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const geminiRes = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(12000),
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1200,
+            },
+          }),
+        });
+
+        if (geminiRes.ok) {
+          const data = await geminiRes.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            answerText = text;
+            break; // Thành công! Thoát vòng lặp ngay lập tức
+          }
+        } else {
+          const errJson = await geminiRes.json().catch(() => ({}));
+          lastErrorMsg = errJson?.error?.message || `Lỗi từ Gemini (${geminiRes.status})`;
+          console.warn(`[AskAI] Model ${model} failed (${geminiRes.status}): ${lastErrorMsg}. Trying fallback...`);
+        }
+      } catch (callErr: any) {
+        lastErrorMsg = callErr?.message || "Lỗi kết nối Gemini API";
+        console.warn(`[AskAI] Model ${model} network exception: ${lastErrorMsg}. Trying fallback...`);
+      }
     }
-
-    const data = await geminiRes.json();
-    const answerText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     if (!answerText) {
       return NextResponse.json(
-        { success: false, message: "AI không trả về nội dung phản hồi." },
+        {
+          success: false,
+          message:
+            lastErrorMsg ||
+            "Máy chủ AI hiện đang bận do lưu lượng truy cập cao. Vui lòng bấm 'Thử lại' sau giây lát.",
+        },
         { status: 502 }
       );
     }
@@ -164,3 +192,4 @@ Trả lời khách quan, có dẫn chứng, bằng tiếng Việt, dùng markdow
     );
   }
 }
+
