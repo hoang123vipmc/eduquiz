@@ -47,6 +47,7 @@ interface QuizMeta {
   title: string;
   description?: string;
   category_id?: number | null;
+  category?: { id: number; name: string } | null;
   cover_image?: string;
   duration_minutes: number;
   passing_score: number;
@@ -385,6 +386,23 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
   const [addError, setAddError] = useState("");
   const [qSearch, setQSearch] = useState("");
 
+  const handleQuickUpdateCategory = async (catId: number | null) => {
+    setMetaDraft((d) => (d ? { ...d, category_id: catId } : d));
+    if (!quiz?.id) return;
+    try {
+      const { data } = await api.put(`/quizzes/${quiz.id}`, {
+        category_id: catId,
+      });
+      if (data.success) {
+        setMetaSaved(true);
+        setTimeout(() => setMetaSaved(false), 2500);
+        triggerNotifyUpdated();
+      }
+    } catch (err: any) {
+      console.error("Lỗi cập nhật danh mục:", err);
+    }
+  };
+
   const handleCreateCategory = async (nameToUse?: string) => {
     const name = (nameToUse || newCategoryName).trim();
     if (!name) return;
@@ -400,6 +418,8 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
         setMetaDraft((d) => (d ? { ...d, category_id: created.id } : d));
         setNewCategoryName("");
         setShowCreateCategory(false);
+        // Lưu ngay lập tức danh mục vào đề thi
+        await handleQuickUpdateCategory(created.id);
       }
     } catch (err: any) {
       alert(err?.response?.data?.message || "Không thể tạo danh mục mới.");
@@ -455,7 +475,10 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
 
   useEffect(() => {
     if (!isOpen || !quiz) return;
-    setMetaDraft({ ...quiz });
+    setMetaDraft({
+      ...quiz,
+      category_id: quiz.category_id ?? quiz.category?.id ?? null,
+    });
     setActiveTab("questions");
     setQSearch("");
     setShowAddQuestion(false);
@@ -608,6 +631,44 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
             className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Quick Category Bar - Always accessible across all tabs */}
+        <div className="bg-primary/5 border-b border-primary/15 px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0">
+          <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+            <Folder className="w-4 h-4 text-primary shrink-0" />
+            <span className="font-semibold text-foreground shrink-0">Danh mục:</span>
+            <select
+              value={metaDraft?.category_id ?? ""}
+              onChange={(e) => {
+                const newId = e.target.value ? Number(e.target.value) : null;
+                handleQuickUpdateCategory(newId);
+              }}
+              className="bg-card border border-border text-foreground rounded-lg px-2.5 py-1 text-xs font-semibold focus:ring-1 focus:ring-primary cursor-pointer flex-1 max-w-[280px] truncate shadow-xs"
+            >
+              <option value="">-- Chưa phân loại --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  📂 {cat.name}
+                </option>
+              ))}
+            </select>
+            {metaSaved && (
+              <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Đã lưu danh mục!
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("info");
+              setShowCreateCategory(true);
+            }}
+            className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1"
+          >
+            <Plus className="w-3 h-3" /> Tạo danh mục mới
           </button>
         </div>
 
@@ -919,13 +980,10 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
                   {/* Dropdown chọn danh mục */}
                   <select
                     value={metaDraft.category_id ?? ""}
-                    onChange={(e) =>
-                      setMetaDraft((d) =>
-                        d
-                          ? { ...d, category_id: e.target.value ? Number(e.target.value) : null }
-                          : d
-                      )
-                    }
+                    onChange={(e) => {
+                      const newId = e.target.value ? Number(e.target.value) : null;
+                      handleQuickUpdateCategory(newId);
+                    }}
                     className="w-full bg-card border border-border/80 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer font-medium"
                   >
                     <option value="">-- Chưa phân loại / Không chọn --</option>
@@ -997,7 +1055,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
                           type="button"
                           onClick={() => {
                             if (matchedCat) {
-                              setMetaDraft((d) => (d ? { ...d, category_id: matchedCat.id } : d));
+                              handleQuickUpdateCategory(matchedCat.id);
                             } else {
                               handleCreateCategory(sug);
                             }

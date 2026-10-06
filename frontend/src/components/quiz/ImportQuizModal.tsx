@@ -189,6 +189,7 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
         text: rawText,
         cover_image: coverImage,
         category_id: categoryId,
+        category_name: !categoryId && newCatName.trim() ? newCatName.trim() : undefined,
       });
       
       if (data.success) {
@@ -514,6 +515,38 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
           </div>
         ) : (
           <div className="flex-1 flex flex-col min-h-0">
+            {/* Step 2 Toolbar: Title & Category Selector */}
+            <div className="px-3 sm:px-5 py-2.5 bg-muted/40 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shrink-0">
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground shrink-0">Tên đề:</span>
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Nhập tên đề thi..."
+                  className="bg-card border border-border rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold text-foreground flex-1 min-w-0 outline-none focus:ring-1 focus:ring-primary shadow-xs"
+                />
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 shrink-0">
+                  <Folder className="w-3.5 h-3.5 text-primary" />
+                  <span>Danh mục:</span>
+                </span>
+                <select
+                  value={categoryId ?? ""}
+                  onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
+                  className="bg-card border border-border text-foreground rounded-lg px-2.5 py-1 text-xs font-medium outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[220px] truncate shadow-xs"
+                >
+                  <option value="">-- Chưa phân loại --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      📂 {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="p-3 sm:p-4 bg-[#4F7CFF]/10 border-b border-[#4F7CFF]/20 text-xs sm:text-[13px] text-blue-100 shrink-0">
               <strong>Guide:</strong> Review your text format. Each question must be separated by <strong>1 blank line</strong>. Correct answer must have a <strong>*</strong> prefix (e.g. <i>*A. Answer</i>).
             </div>

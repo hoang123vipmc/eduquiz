@@ -655,27 +655,42 @@ export default function MyQuizzesPage() {
                   <div>
                     {/* Category pill in body */}
                     <div className="flex items-center gap-2 mb-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (quiz.category?.name) {
-                            setSelectedCategory(quiz.category.name);
-                          } else {
-                            setSelectedCategory("unclassified");
-                          }
-                        }}
-                        className={cn(
-                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all hover:scale-105",
-                          quiz.category?.name 
-                            ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/20" 
-                            : "bg-muted text-muted-foreground border-border/80 hover:bg-muted/80"
-                        )}
-                        title={`Lọc danh mục: ${quiz.category?.name || "Chưa phân loại"}`}
-                      >
-                        <Folder className="w-3 h-3" />
-                        <span>{quiz.category?.name || "Chưa phân loại"}</span>
-                      </button>
+                      {canManage && !quiz.category?.name ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingQuiz(quiz);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 transition-all cursor-pointer shadow-xs"
+                          title="Bộ đề này chưa có danh mục. Bấm vào đây để chọn danh mục ngay!"
+                        >
+                          <Folder className="w-3 h-3 text-amber-500 animate-pulse" />
+                          <span>+ Chọn danh mục</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (quiz.category?.name) {
+                              setSelectedCategory(quiz.category.name);
+                            } else {
+                              setSelectedCategory("unclassified");
+                            }
+                          }}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all hover:scale-105",
+                            quiz.category?.name 
+                              ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/20" 
+                              : "bg-muted text-muted-foreground border-border/80 hover:bg-muted/80"
+                          )}
+                          title={`Lọc danh mục: ${quiz.category?.name || "Chưa phân loại"}`}
+                        >
+                          <Folder className="w-3 h-3" />
+                          <span>{quiz.category?.name || "Chưa phân loại"}</span>
+                        </button>
+                      )}
                     </div>
 
                     <h3
