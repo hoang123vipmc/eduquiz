@@ -110,10 +110,41 @@ export default function DashboardPage() {
 
         if (schedJson?.success && schedJson.data?.schedules?.length > 0) {
           schedulesList = schedJson.data.schedules;
-          const upcoming = schedulesList.find((s: any) => s.status === 'today' || s.status === 'upcoming') || schedulesList[0];
+
+          // Helper tính timestamp chính xác từ chuỗi 'DD/MM/YYYY' và 'HHhMM'
+          const parseExamTimestamp = (dateStr?: string, timeStr?: string) => {
+            if (!dateStr) return Infinity;
+            const parts = dateStr.split("/");
+            if (parts.length !== 3) return Infinity;
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            let hours = 8, minutes = 0;
+            if (timeStr) {
+              const timeParts = timeStr.toLowerCase().replace("h", ":").split(":");
+              hours = parseInt(timeParts[0], 10) || 8;
+              minutes = parseInt(timeParts[1], 10) || 0;
+            }
+            return new Date(year, month, day, hours, minutes).getTime();
+          };
+
+          // 1. Ưu tiên số 1: Môn thi HÔM NAY (status === 'today')
+          const todayExams = schedulesList
+            .filter((s: any) => s.status === 'today')
+            .sort((a: any, b: any) => parseExamTimestamp(a.date, a.time) - parseExamTimestamp(b.date, b.time));
+
+          // 2. Ưu tiên số 2: Môn SẮP THI (status === 'upcoming') xếp theo ngày thi gần nhất đến xa nhất
+          const upcomingExams = schedulesList
+            .filter((s: any) => s.status === 'upcoming')
+            .sort((a: any, b: any) => parseExamTimestamp(a.date, a.time) - parseExamTimestamp(b.date, b.time));
+
+          // 3. Fallback: Môn đầu tiên nếu đã thi hết
+          const topExam = todayExams[0] || upcomingExams[0] || schedulesList[0];
+
           nextExamData = {
-            ...upcoming,
+            ...topExam,
             studentName: schedJson.data.student?.fullName || '',
+            source: schedJson.data.source || 'HUBT ITC',
             total: schedulesList.length
           };
           setNextExam(nextExamData);
@@ -344,19 +375,33 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : nextExam ? (
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-card border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className={cn(
+          "relative overflow-hidden rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 border transition-all",
+          nextExam.status === 'today'
+            ? "bg-gradient-to-r from-rose-950/40 via-amber-950/20 to-card border-rose-500/50 shadow-rose-950/20"
+            : "bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-card border-blue-500/30"
+        )}>
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
-              <CalendarCheck className="w-6 h-6" />
+            <div className={cn(
+              "w-12 h-12 rounded-xl text-white flex items-center justify-center shrink-0 shadow-md",
+              nextExam.status === 'today'
+                ? "bg-gradient-to-br from-rose-500 to-amber-600 shadow-rose-500/30 animate-pulse"
+                : "bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/25"
+            )}>
+              {nextExam.status === 'today' ? <Flame className="w-6 h-6 text-white" /> : <CalendarCheck className="w-6 h-6" />}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
-                  Lịch thi học kỳ sắp tới • HUBT ITC
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider",
+                  nextExam.status === 'today' ? "text-rose-400" : "text-blue-400"
+                )}>
+                  {nextExam.status === 'today' ? "Lịch thi hôm nay • " : "Lịch thi học kỳ sắp tới • "}
+                  {nextExam.source?.includes("Khoa CNTT") ? "Khoa CNTT - HUBT" : "HUBT ITC"}
                 </span>
                 {nextExam.status === 'today' ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">
-                    Hôm nay thi!
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/40 animate-pulse flex items-center gap-1">
+                    🔥 HÔM NAY THI!
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
