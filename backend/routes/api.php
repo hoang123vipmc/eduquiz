@@ -57,6 +57,10 @@ Route::prefix('v1')->group(function () {
         Route::put('/bookmarks/{id}/note', [\App\Http\Controllers\BookmarkController::class, 'updateNote']);
         Route::delete('/bookmarks/{id}', [\App\Http\Controllers\BookmarkController::class, 'destroy']);
         
+        // Thông báo (Notifications)
+        Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+        Route::post('/notifications/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+        
         // Quản lý danh mục (Admin)
         Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->middleware('role:admin');
         
@@ -97,6 +101,10 @@ Route::prefix('v1')->group(function () {
             Route::patch('/users/{id}/role',              [\App\Http\Controllers\AdminController::class, 'changeRole']);
             Route::post('/users/{id}/reset-password',     [\App\Http\Controllers\AdminController::class, 'resetPassword']);
             Route::delete('/users/{id}',                  [\App\Http\Controllers\AdminController::class, 'deleteUser']);
+
+            // Quản lý thông báo
+            Route::get('/notifications',                  [\App\Http\Controllers\NotificationController::class, 'adminIndex']);
+            Route::post('/notifications',                 [\App\Http\Controllers\NotificationController::class, 'storeGlobal']);
         });
     });
     

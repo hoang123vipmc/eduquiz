@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Bell, Search } from "lucide-react";
+import { NotificationDropdown } from "./NotificationDropdown";
 
 interface TopbarProps {
   onOpenMobile?: () => void;
@@ -58,13 +59,7 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
           <Search className="w-5 h-5" />
         </button>
 
-        <button 
-          aria-label="Thông báo hệ thống" 
-          className="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-secondary"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
-        </button>
+        <NotificationDropdown />
 
         <div className="h-5 sm:h-6 w-px bg-border" />
 

@@ -17,7 +17,8 @@ import {
   User,
   X,
   CalendarCheck,
-  Bookmark
+  Bookmark,
+  Megaphone
 } from "lucide-react";
 
 interface SidebarProps {
@@ -67,6 +68,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     { name: "Lịch sử", href: "/dashboard/history", icon: History },
     { name: "───────────", href: "#", icon: Settings, isDivider: true },
     { name: "Quản lý người dùng", href: "/dashboard/admin", icon: Users },
+    { name: "Quản lý thông báo", href: "/dashboard/admin/notifications", icon: Megaphone, badge: "Mới" },
     { name: "Cài đặt", href: "/dashboard/settings", icon: Settings },
   ];
 
