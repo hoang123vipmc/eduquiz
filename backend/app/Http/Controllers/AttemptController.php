@@ -72,7 +72,7 @@ class AttemptController extends Controller
                 $questionsCollection = $quiz->questions()->with('options')->inRandomOrder()->limit($limit)->get();
                 $questionIds = $questionsCollection->pluck('id')->values()->all();
             } else {
-                $questionsCollection = $quiz->questions()->with('options')->get();
+                $questionsCollection = $quiz->questions()->with('options')->orderBy('order')->orderBy('id')->get();
                 $questionIds = null;
             }
 
@@ -140,7 +140,7 @@ class AttemptController extends Controller
 
         // Cũng trả về luôn danh sách câu hỏi để giao diện lấy (bởi vì resume không có payload từ trước)
         $quiz = $attempt->quiz;
-        $qQuery = $quiz->questions()->with('options');
+        $qQuery = $quiz->questions()->with('options')->orderBy('order')->orderBy('id');
         if (!empty($attempt->question_ids)) {
             $qQuery->whereIn('id', $attempt->question_ids);
         }

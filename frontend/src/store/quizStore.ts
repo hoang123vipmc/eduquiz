@@ -69,14 +69,25 @@ export const useQuizStore = create<QuizState>()(
                 if (data.success) {
                     let questions = [...data.data.questions];
                     
-                    // Frontend shuffling
+                    // Sắp xếp thứ tự câu hỏi
                     if (shuffleQuestions) {
                         for (let i = questions.length - 1; i > 0; i--) {
                             const j = Math.floor(Math.random() * (i + 1));
                             [questions[i], questions[j]] = [questions[j], questions[i]];
                         }
+                    } else {
+                        // Đảm bảo tuyệt đối: Nếu không bật đảo câu, giữ nguyên 100% thứ tự gốc theo order và id
+                        questions.sort((a, b) => {
+                            const orderA = a.order !== undefined && a.order !== null ? Number(a.order) : null;
+                            const orderB = b.order !== undefined && b.order !== null ? Number(b.order) : null;
+                            if (orderA !== null && orderB !== null && orderA !== orderB) {
+                                return orderA - orderB;
+                            }
+                            return (Number(a.id) || 0) - (Number(b.id) || 0);
+                        });
                     }
                     
+                    // Sắp xếp thứ tự đáp án
                     if (shuffleOptions) {
                         questions = questions.map(q => {
                             const options = [...(q.options || [])];
@@ -84,6 +95,20 @@ export const useQuizStore = create<QuizState>()(
                                 const j = Math.floor(Math.random() * (i + 1));
                                 [options[i], options[j]] = [options[j], options[i]];
                             }
+                            return { ...q, options };
+                        });
+                    } else {
+                        // Giữ nguyên thứ tự đáp án gốc A, B, C, D khi không bật đảo đáp án
+                        questions = questions.map(q => {
+                            const options = [...(q.options || [])];
+                            options.sort((a, b) => {
+                                const orderA = a.order !== undefined && a.order !== null ? Number(a.order) : null;
+                                const orderB = b.order !== undefined && b.order !== null ? Number(b.order) : null;
+                                if (orderA !== null && orderB !== null && orderA !== orderB) {
+                                    return orderA - orderB;
+                                }
+                                return (Number(a.id) || 0) - (Number(b.id) || 0);
+                            });
                             return { ...q, options };
                         });
                     }
