@@ -17,6 +17,7 @@ import {
   FileQuestion,
   TrendingUp,
   CheckCircle2,
+  Check,
   CalendarCheck,
   ArrowRight,
   MapPin,
@@ -263,17 +264,66 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 3D Learning Graphic Banner */}
-        <div className="relative w-full md:w-72 lg:w-96 h-36 sm:h-48 md:h-52 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border border-border/80 shadow-md group">
-          <img 
-            src="/images/hero-learning.jpg" 
-            alt="Học tập thông minh OpenQuiz" 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-          <div className="absolute bottom-2.5 left-2.5 text-white text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 drop-shadow">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Luyện tập thông minh mỗi ngày
+        {/* Weekly Activity Matrix & Focus Widget */}
+        <div className="w-full md:w-80 rounded-2xl bg-card border border-border/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between shrink-0 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-primary" />
+              Tiến độ tuần này
+            </span>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
+              <Flame className="w-3 h-3 text-amber-500 fill-amber-500" />
+              {stats.streak_days || 1}d Streak
+            </span>
+          </div>
+
+          {/* 7-Day Activity Matrix */}
+          <div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1.5 px-0.5">
+              <span>T2</span>
+              <span>T3</span>
+              <span>T4</span>
+              <span>T5</span>
+              <span>T6</span>
+              <span>T7</span>
+              <span>CN</span>
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, idx) => {
+                const isToday = idx === ((new Date().getDay() + 6) % 7);
+                const isPassed = idx <= ((new Date().getDay() + 6) % 7);
+                return (
+                  <div
+                    key={day}
+                    className={cn(
+                      "h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all select-none",
+                      isToday
+                        ? "bg-primary text-primary-foreground shadow-xs ring-2 ring-primary/30"
+                        : isPassed && stats.total_quizzes > 0
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                        : "bg-muted text-muted-foreground/40 border border-border/50"
+                    )}
+                    title={isToday ? "Hôm nay" : `Thứ ${idx + 2}`}
+                  >
+                    {isToday ? (
+                      <Flame className="w-3.5 h-3.5 fill-current" />
+                    ) : isPassed && stats.total_quizzes > 0 ? (
+                      <Check className="w-3 h-3" />
+                    ) : (
+                      "·"
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Metric footer */}
+          <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Tỷ lệ chính xác:</span>
+            <span className="font-extrabold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+              {stats.accuracy || 0}%
+            </span>
           </div>
         </div>
       </div>
@@ -298,57 +348,65 @@ export default function DashboardPage() {
           ))
         ) : (
           <>
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-blue-500/40 hover:shadow-xs transition-all group">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Đã làm</span>
+                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">ĐÃ LÀM</span>
               </div>
               <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.total_quizzes}</div>
-                <span className="text-[11px] sm:text-xs text-muted-foreground">bộ đề</span>
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">{stats.total_quizzes}</div>
+                <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">bộ đề</span>
               </div>
             </div>
             
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-emerald-500/40 hover:shadow-xs transition-all group">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Target className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chính xác</span>
+                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">CHÍNH XÁC</span>
               </div>
               <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.accuracy}%</div>
-                <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">{stats.accuracy}%</div>
+                <span className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5">
                   <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Chuẩn
                 </span>
               </div>
+              <div className="w-full bg-muted rounded-full h-1 mt-2 overflow-hidden">
+                <div 
+                  className="bg-emerald-500 h-1 rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min(100, Math.max(0, stats.accuracy))}%` }} 
+                />
+              </div>
             </div>
 
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 hover:shadow-xs transition-all group">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Thời gian</span>
+                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">THỜI GIAN</span>
               </div>
               <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <div className="text-2xl sm:text-3xl font-bold text-foreground">{formatTime(stats.total_time_seconds)}</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono tabular-nums tracking-tight">
+                  {formatTime(stats.total_time_seconds)}
+                </div>
                 <span className="text-[11px] sm:text-xs text-muted-foreground hidden sm:inline">tổng cộng</span>
               </div>
             </div>
 
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-card border border-border/80 hover:border-orange-500/40 hover:shadow-xs transition-all group">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">Chuỗi ngày</span>
+                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">CHUỖI NGÀY</span>
               </div>
               <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <div className="text-2xl sm:text-3xl font-bold text-foreground">{stats.streak_days}d</div>
-                <span className="text-[10px] sm:text-xs text-orange-600 font-semibold">Liên tục 🔥</span>
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">{stats.streak_days}d</div>
+                <span className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 font-bold">Liên tục 🔥</span>
               </div>
             </div>
           </>
@@ -376,67 +434,78 @@ export default function DashboardPage() {
         </div>
       ) : nextExam ? (
         <div className={cn(
-          "relative overflow-hidden rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 border transition-all",
+          "relative overflow-hidden rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 border transition-all",
           nextExam.status === 'today'
-            ? "bg-gradient-to-r from-rose-950/40 via-amber-950/20 to-card border-rose-500/50 shadow-rose-950/20"
-            : "bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-card border-blue-500/30"
+            ? "bg-gradient-to-r from-rose-950/30 via-amber-950/15 to-card border-rose-500/40"
+            : "bg-gradient-to-r from-blue-950/30 via-indigo-950/20 to-card border-blue-500/30"
         )}>
-          <div className="flex items-center gap-3.5">
-            <div className={cn(
-              "w-12 h-12 rounded-xl text-white flex items-center justify-center shrink-0 shadow-md",
-              nextExam.status === 'today'
-                ? "bg-gradient-to-br from-rose-500 to-amber-600 shadow-rose-500/30 animate-pulse"
-                : "bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/25"
-            )}>
-              {nextExam.status === 'today' ? <Flame className="w-6 h-6 text-white" /> : <CalendarCheck className="w-6 h-6" />}
+          <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
+            {/* Calendar Date Block */}
+            <div className="flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-card border border-border shadow-xs shrink-0 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                {nextExam.date ? `Thg ${nextExam.date.split('/')[1] || '10'}` : 'THI'}
+              </span>
+              <span className="text-xl sm:text-2xl font-black text-foreground tabular-nums leading-none mt-0.5">
+                {nextExam.date ? nextExam.date.split('/')[0] : '09'}
+              </span>
+              <span className="text-[9px] text-muted-foreground font-semibold mt-0.5 font-mono">
+                {nextExam.time || '10h30'}
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
+
+            {/* Exam Details */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className={cn(
-                  "text-xs font-bold uppercase tracking-wider",
-                  nextExam.status === 'today' ? "text-rose-400" : "text-blue-400"
+                  "text-[11px] font-extrabold uppercase tracking-wider",
+                  nextExam.status === 'today' ? "text-rose-500" : "text-blue-500 dark:text-blue-400"
                 )}>
-                  {nextExam.status === 'today' ? "Lịch thi hôm nay • " : "Lịch thi học kỳ sắp tới • "}
+                  {nextExam.status === 'today' ? "Lịch thi hôm nay • " : "Lịch thi học kỳ • "}
                   {nextExam.source?.includes("Khoa CNTT") ? "Khoa CNTT - HUBT" : "HUBT ITC"}
                 </span>
                 {nextExam.status === 'today' ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/25 text-rose-300 border border-rose-500/40 animate-pulse flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse flex items-center gap-1">
                     🔥 HÔM NAY THI!
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    {nextExam.countdownText || "Sắp thi"}
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                    ⏱️ {nextExam.countdownText || "Sắp thi"}
                   </span>
                 )}
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-foreground mt-0.5">
+
+              <h3 className="text-base sm:text-xl font-extrabold text-foreground tracking-tight truncate">
                 {nextExam.subject}
               </h3>
-              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-3 flex-wrap">
-                <span>Phòng: <strong className="text-foreground">{nextExam.room}</strong></span>
-                <span>•</span>
-                <span>Ngày: <strong className="text-foreground">{nextExam.date}</strong> lúc <strong className="text-foreground">{nextExam.time}</strong></span>
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md border border-border/60 text-foreground font-medium">
+                  <MapPin className="w-3 h-3 text-primary" /> Phòng {nextExam.room}
+                </span>
+                <span className="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md border border-border/60 text-foreground font-medium">
+                  <Clock className="w-3 h-3 text-amber-500" /> {nextExam.time} ({nextExam.date})
+                </span>
                 {nextExam.testScore !== null && (
-                  <>
-                    <span>•</span>
-                    <span>Điểm KT: <strong className="text-emerald-400">{nextExam.testScore}/10</strong></span>
-                  </>
+                  <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20 font-semibold">
+                    <CheckCircle2 className="w-3 h-3" /> Điểm KT: {nextExam.testScore}/10
+                  </span>
                 )}
-              </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          {/* Quick Action buttons */}
+          <div className="flex items-center gap-2 self-start md:self-center shrink-0">
             <button
               onClick={() => router.push(`/dashboard/quizzes?search=${encodeURIComponent(nextExam.searchKeyword || nextExam.subject)}`)}
-              className="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
+              className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
             >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Ôn thi môn này</span>
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>Ôn thi môn này ngay</span>
             </button>
             <button
               onClick={() => router.push('/dashboard/schedule')}
-              className="px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
+              className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
             >
               <span>Xem tất cả ({nextExam.total})</span>
               <ArrowRight className="w-3.5 h-3.5" />

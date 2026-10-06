@@ -153,11 +153,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <button 
           onClick={() => setShowLogoutModal(true)}
           aria-label="Đăng xuất tài khoản"
-          className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-semibold text-rose-500 hover:text-rose-600 bg-rose-500/8 hover:bg-rose-500/15 border border-rose-500/15 active:scale-90 transition-all shrink-0"
+          className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all shrink-0 border border-transparent hover:border-rose-500/20"
           title="Đăng xuất tài khoản"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Out</span>
+          <LogOut className="w-4 h-4" />
         </button>
       </div>
 
