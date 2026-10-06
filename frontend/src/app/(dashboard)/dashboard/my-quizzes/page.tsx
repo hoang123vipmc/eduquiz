@@ -29,7 +29,8 @@ import {
   UserCheck,
   Pencil,
   Tag,
-  X as XIcon
+  X as XIcon,
+  Share2
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
@@ -90,6 +91,17 @@ export default function MyQuizzesPage() {
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
   const [printingQuiz, setPrintingQuiz] = useState<any>(null);
   const [editingQuiz, setEditingQuiz] = useState<any>(null);
+  const [copiedQuizId, setCopiedQuizId] = useState<number | null>(null);
+
+  const handleShareQuiz = (quiz: any) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://openquiz-free.vercel.app';
+    const url = `${origin}/play/${quiz.id}?mode=practice`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedQuizId(quiz.id);
+      setTimeout(() => setCopiedQuizId(null), 2500);
+    }
+  };
   const [showImportModal, setShowImportModal] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -609,6 +621,18 @@ export default function MyQuizzesPage() {
                       </button>
 
                       <button
+                        title="Sao chép link làm bài gửi bạn bè"
+                        className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleShareQuiz(quiz); }}
+                      >
+                        {copiedQuizId === quiz.id ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        ) : (
+                          <Share2 className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      <button
                         onClick={(e) => { e.stopPropagation(); setSelectedQuiz(quiz); }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs transition-all shadow-xs hover:shadow active:scale-[0.98]"
                       >
@@ -628,6 +652,7 @@ export default function MyQuizzesPage() {
       <QuizSettingsModal
         isOpen={!!selectedQuiz}
         onClose={() => setSelectedQuiz(null)}
+        quizId={selectedQuiz?.id}
         quizTitle={selectedQuiz?.title}
         totalQuestions={selectedQuiz?.total_questions || selectedQuiz?.questions_count}
         onConfirm={handleStartQuiz}
@@ -665,6 +690,13 @@ export default function MyQuizzesPage() {
         onClose={() => setEditingQuiz(null)}
         onSuccess={() => fetchQuizzes(debouncedSearch, adminViewAll)}
       />
+
+      {copiedQuizId && (
+        <div className="fixed bottom-6 right-6 z-50 bg-card border border-border shadow-2xl rounded-2xl px-4 py-3 flex items-center gap-2.5 text-xs sm:text-sm font-semibold animate-in slide-in-from-bottom-3 text-foreground">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>Đã copy link bài thi! Bạn bè bấm vào link sẽ vào thẳng bài này.</span>
+        </div>
+      )}
     </div>
   );
 }

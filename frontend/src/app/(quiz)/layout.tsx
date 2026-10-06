@@ -20,7 +20,12 @@ export default function QuizLayout({
 
   useEffect(() => {
     if (mounted && !isAuthenticated && !localStorage.getItem('auth_token')) {
-      router.push("/login");
+      const currentUrl = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
+      if (typeof window !== 'undefined' && currentUrl) {
+        sessionStorage.setItem('auth_redirect', currentUrl);
+      }
+      const redirectParam = currentUrl ? `?redirect=${encodeURIComponent(currentUrl)}` : '';
+      router.push(`/login${redirectParam}`);
     }
   }, [isAuthenticated, router, mounted]);
 

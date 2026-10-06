@@ -36,7 +36,11 @@ function AuthCallbackContent() {
         const { data } = await api.get("/user");
         if (data.success && data.data) {
           login(token, data.data);
-          router.replace("/dashboard");
+          const redirectTarget = typeof window !== 'undefined' ? (sessionStorage.getItem("auth_redirect") || "/dashboard") : "/dashboard";
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem("auth_redirect");
+          }
+          router.replace(redirectTarget);
         } else {
           setError("Không thể lấy thông tin tài khoản người dùng.");
         }

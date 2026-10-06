@@ -24,7 +24,8 @@ import {
   VolumeX,
   ShieldAlert,
   Lightbulb,
-  Zap
+  Zap,
+  Share2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
@@ -132,6 +133,16 @@ export default function QuizPlayerPage() {
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [showAskAI, setShowAskAI] = useState(false);
   const [aiModalMode, setAiModalMode] = useState<"explain" | "debate" | "mnemonic">("explain");
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const handleShareQuiz = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (url && typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2500);
+    }
+  };
 
   const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
 
@@ -1199,6 +1210,25 @@ export default function QuizPlayerPage() {
             >
               <Monitor className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Chuẩn iTest</span>
+            </button>
+
+            {/* Nút chia sẻ link làm bài */}
+            <button
+              onClick={handleShareQuiz}
+              title="Sao chép link làm bài gửi bạn bè"
+              className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-all shadow-xs active:scale-95 cursor-pointer"
+            >
+              {copiedShare ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-500 font-bold hidden sm:inline">Đã copy link!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-primary" />
+                  <span className="hidden sm:inline">Chia sẻ</span>
+                </>
+              )}
             </button>
 
             <QuizTimer />

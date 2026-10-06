@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/axios";
+import { Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,10 +16,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect") || sessionStorage.getItem("auth_redirect");
+      if (redirect) {
+        setRedirectUrl(redirect);
+        sessionStorage.setItem("auth_redirect", redirect);
+      }
       const err = params.get("error");
       if (err) {
         if (err === "banned") {
@@ -39,7 +46,9 @@ export default function LoginPage() {
       const { data } = await api.post("/auth/login", { email, password });
       if (data.success) {
         login(data.data.token, data.data.user);
-        router.push("/dashboard");
+        const target = redirectUrl || sessionStorage.getItem("auth_redirect") || "/dashboard";
+        sessionStorage.removeItem("auth_redirect");
+        router.push(target);
       }
     } catch (err: any) {
       if (err.response?.data?.errors) {
@@ -59,6 +68,9 @@ export default function LoginPage() {
 
   const loginWithGoogle = async () => {
     try {
+      if (redirectUrl) {
+        sessionStorage.setItem("auth_redirect", redirectUrl);
+      }
       setLoading(true);
       const { data } = await api.get('/auth/redirect/google');
       if (data && data.url) {
@@ -87,6 +99,20 @@ export default function LoginPage() {
           Please enter your details to sign in.
         </p>
       </div>
+
+      {redirectUrl && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-primary/15 via-primary/10 to-transparent border border-primary/20 flex items-start gap-3 text-left animate-in fade-in slide-in-from-top-2">
+          <div className="p-2 rounded-xl bg-primary/20 text-primary shrink-0 mt-0.5">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="space-y-0.5">
+            <h4 className="text-xs sm:text-sm font-bold text-foreground">Bạn nhận được lời mời làm bài thi!</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Vui lòng đăng nhập (hoặc đăng nhập nhanh bằng Google) để hệ thống đưa bạn vào thẳng bài thi ngay.
+            </p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-6 sm:mt-8">
         {error && (
@@ -165,7 +191,7 @@ export default function LoginPage() {
 
       <p className="text-center text-sm text-muted-foreground mt-8">
         Don't have an account?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"} className="font-medium text-primary hover:underline">
           Sign up
         </Link>
       </p>

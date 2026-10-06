@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, Clock, Settings, HelpCircle, EyeOff, Monitor, Sparkles, Sliders } from 'lucide-react';
+import { X, CheckCircle2, Clock, Settings, HelpCircle, EyeOff, Monitor, Sparkles, Sliders, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface QuizConfig {
@@ -16,11 +16,12 @@ interface QuizSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (config: QuizConfig) => void;
+  quizId?: number;
   quizTitle?: string;
   totalQuestions?: number;
 }
 
-export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle, totalQuestions }: QuizSettingsModalProps) {
+export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizId, quizTitle, totalQuestions }: QuizSettingsModalProps) {
   const [examMode, setExamMode] = useState<'practice' | 'exam'>('practice');
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [shuffleOptions, setShuffleOptions] = useState(false);
@@ -29,6 +30,25 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle, total
   const [questionCountType, setQuestionCountType] = useState<'all' | '40' | '60' | '120' | 'custom'>('all');
   const [customCount, setCustomCount] = useState<number>(60);
   const [theme, setTheme] = useState<'modern' | 'itest'>('modern');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyShareLink = () => {
+    if (!quizId) return;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://openquiz-free.vercel.app';
+    let finalLimit = 0;
+    if (questionCountType === '40') finalLimit = 40;
+    else if (questionCountType === '60') finalLimit = 60;
+    else if (questionCountType === '120') finalLimit = 120;
+    else if (questionCountType === 'custom') finalLimit = Math.max(1, customCount || 10);
+
+    const shareUrl = `${origin}/play/${quizId}?mode=${examMode}&shuffleQ=${shuffleQuestions ? '1' : '0'}&shuffleO=${shuffleOptions ? '1' : '0'}&delay=${autoNextDelay}&unlimited=${unlimitedTime ? '1' : '0'}&theme=${theme}${finalLimit > 0 ? `&limit=${finalLimit}` : ''}`;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    }
+  };
 
   // Tự động bật không giới hạn thời gian nếu là ôn thi
   React.useEffect(() => {
@@ -402,13 +422,33 @@ export function QuizSettingsModal({ isOpen, onClose, onConfirm, quizTitle, total
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border bg-secondary/20 shrink-0">
+        <div className="p-4 border-t border-border bg-secondary/20 shrink-0 space-y-2.5">
           <button 
             onClick={handleConfirm}
-            className="w-full bg-[#4F7CFF] hover:bg-[#6D91FF] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98] text-sm"
+            className="w-full bg-[#4F7CFF] hover:bg-[#6D91FF] text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98] text-sm flex items-center justify-center gap-2"
           >
             {theme === 'itest' ? '🏫 Vào phòng thi iTest' : '🚀 Bắt đầu làm bài'}
           </button>
+
+          {quizId && (
+            <button
+              type="button"
+              onClick={handleCopyShareLink}
+              className="w-full py-2.5 px-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-all flex items-center justify-center gap-2 active:scale-95 shadow-xs"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Đã sao chép link ôn tập! Bạn bè mở link là vào thẳng bài</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-primary" />
+                  <span>Sao chép link gửi cho bạn bè</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
 
       </div>

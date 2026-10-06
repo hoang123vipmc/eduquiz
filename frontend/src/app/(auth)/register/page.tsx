@@ -41,10 +41,14 @@ export default function RegisterPage() {
         password_confirmation: passwordConfirmation,
         student_id: studentId.trim() || null,
       });
-      if (data.success) {
-        login(data.data.token, data.data.user);
-        router.push("/dashboard");
-      }
+        if (data.success) {
+          login(data.data.token, data.data.user);
+          const redirectTarget = typeof window !== 'undefined' ? (sessionStorage.getItem("auth_redirect") || "/dashboard") : "/dashboard";
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem("auth_redirect");
+          }
+          router.push(redirectTarget);
+        }
     } catch (err: any) {
       if (err.response?.data?.errors) {
         const firstErrorKey = Object.keys(err.response.data.errors)[0];
