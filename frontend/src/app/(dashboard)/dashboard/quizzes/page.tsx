@@ -27,7 +27,8 @@ import {
   Pencil,
   Share2,
   Folder,
-  Tag
+  Tag,
+  Flag
 } from "lucide-react";
 
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
@@ -792,6 +793,15 @@ export default function QuizzesPage() {
                           <Share2 className="w-3.5 h-3.5" />
                         )}
                       </button>
+
+                      <a 
+                        href={`mailto:contact.openquiz@gmail.com?subject=${encodeURIComponent(`[Báo cáo vi phạm] Đề thi #${quiz.id} - ${quiz.title}`)}&body=${encodeURIComponent(`Kính gửi BQT OpenQuiz,\n\nTôi muốn báo cáo đề thi sau vì lý do vi phạm bản quyền / nội dung:\n- Tên đề: ${quiz.title}\n- ID: ${quiz.id}\n- Lý do chi tiết: \n\nXin cảm ơn!`)}`}
+                        title="Báo cáo vi phạm bản quyền hoặc nội dung không phù hợp"
+                        className="p-1.5 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Flag className="w-3.5 h-3.5" />
+                      </a>
 
                       <button 
                         className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:shadow-md transition-all active:scale-95 group/btn"

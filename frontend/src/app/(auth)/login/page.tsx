@@ -195,6 +195,18 @@ export default function LoginPage() {
           Sign up
         </Link>
       </p>
+
+      <p className="text-center text-xs text-muted-foreground/75 mt-4 leading-relaxed">
+        Bằng việc đăng nhập, bạn đồng ý với{" "}
+        <Link href="/terms" target="_blank" className="underline hover:text-primary transition-colors">
+          Điều khoản dịch vụ
+        </Link>{" "}
+        và{" "}
+        <Link href="/privacy" target="_blank" className="underline hover:text-primary transition-colors">
+          Chính sách bảo mật
+        </Link>{" "}
+        của OpenQuiz.
+      </p>
     </div>
   );
 }

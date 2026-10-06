@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [studentId, setStudentId] = useState("");
+  const [agreedTerms, setAgreedTerms] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,6 +26,10 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    if (!agreedTerms) {
+      setError("Vui lòng đọc và tích chọn đồng ý với Điều khoản sử dụng và Chính sách bảo mật.");
+      return;
+    }
     if (password !== passwordConfirmation) {
       setError("Mật khẩu xác nhận không khớp.");
       return;
@@ -158,9 +163,32 @@ export default function RegisterPage() {
               Nhập MSV để website tự động tra cứu lịch thi và ưu tiên đề xuất các bộ đề ôn tập phù hợp với các môn thi sắp tới của bạn.
             </p>
           </div>
+
+          {/* Legal agreement checkbox */}
+          <div className="flex items-start gap-2.5 pt-1">
+            <input
+              id="agree-terms"
+              type="checkbox"
+              checked={agreedTerms}
+              onChange={(e) => setAgreedTerms(e.target.checked)}
+              required
+              className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
+            />
+            <label htmlFor="agree-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+              Tôi xác nhận đã đọc, hiểu và đồng ý với{" "}
+              <Link href="/terms" target="_blank" className="text-primary font-semibold hover:underline">
+                Điều khoản sử dụng
+              </Link>{" "}
+              và{" "}
+              <Link href="/privacy" target="_blank" className="text-primary font-semibold hover:underline">
+                Chính sách bảo mật
+              </Link>{" "}
+              của OpenQuiz.
+            </label>
+          </div>
         </div>
 
-        <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+        <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || !agreedTerms}>
           {loading ? "Đang xử lý..." : "Đăng ký"}
         </Button>
       </form>

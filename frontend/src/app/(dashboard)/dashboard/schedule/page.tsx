@@ -24,7 +24,8 @@ import {
   Star,
   FileCheck2,
   Share2,
-  Check
+  Check,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios";
@@ -353,6 +354,22 @@ export default function ExamSchedulePage() {
           >
             Lớp: PM28.04
           </button>
+        </div>
+      </div>
+
+      {/* Disclaimer / Nguồn dữ liệu & Bảo vệ thông tin */}
+      <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 flex items-start gap-3 text-xs text-muted-foreground leading-relaxed">
+        <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+        <div>
+          <span className="font-semibold text-foreground">Lưu ý & Nguồn dữ liệu: </span>
+          Dữ liệu lịch thi và điểm điều kiện được trích xuất từ các cổng tra cứu công khai của Nhà trường nhằm hỗ trợ sinh viên quản lý thời gian ôn thi cá nhân. OpenQuiz không đại diện cho bất kỳ cơ sở giáo dục nào. Sinh viên vui lòng đối chiếu lại với lịch thi niêm yết chính thức từ phòng Đào tạo / Khoa. Xem thêm{" "}
+          <Link href="/terms" target="_blank" className="text-primary underline hover:text-primary/80 font-medium">
+            Điều khoản sử dụng
+          </Link>{" "}
+          và{" "}
+          <Link href="/privacy" target="_blank" className="text-primary underline hover:text-primary/80 font-medium">
+            Chính sách bảo mật
+          </Link>.
         </div>
       </div>
 

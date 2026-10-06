@@ -226,7 +226,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <p className="text-[11px] text-muted-foreground leading-snug">
             Dự án cá nhân phục vụ học tập và nghiên cứu, miễn phí 100%.
           </p>
-          <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-primary/5 rounded-full blur-xl" />
+          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/80">
+            <Link href="/terms" className="hover:text-primary transition-colors underline underline-offset-2">
+              Điều khoản
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-primary transition-colors underline underline-offset-2">
+              Bảo mật
+            </Link>
+          </div>
+          <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-primary/5 rounded-full blur-xl pointer-events-none" />
         </div>
       </div>
     </div>
