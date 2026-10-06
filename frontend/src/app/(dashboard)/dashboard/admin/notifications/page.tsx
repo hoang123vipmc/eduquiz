@@ -20,9 +20,7 @@ export default function AdminNotificationsPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const isSuperAdmin = authUser?.role === "admin" 
-    || authUser?.email === "hoangdeptraivodich12@gmail.com" 
-    || authUser?.email?.startsWith("admin@") 
-    || authUser?.name?.toLowerCase() === "hoang";
+    || authUser?.email === "hoangdeptraivodich12@gmail.com";
 
   useEffect(() => {
     if (isSuperAdmin) {

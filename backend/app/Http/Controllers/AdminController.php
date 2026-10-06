@@ -130,12 +130,19 @@ class AdminController extends Controller
             ], 400);
         }
 
-        // ── Security: Ngăn admin khóa tài khoản của admin khác (privilege confusion) ──
-        // Chỉ cho phép khóa account có role thấp hơn hoặc bằng
-        if ($user->role === 'admin' && $admin->role === 'admin') {
+        // ── Security: Bảo vệ Super Admin / Owner ──
+        if ($this->isOwnerOrSuperAdmin($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể khóa tài khoản Quản trị viên khác. Hãy hạ quyền trước.',
+                'message' => 'Không thể khóa tài khoản Quản trị viên tối cao/Chủ sở hữu hệ thống.',
+            ], 403);
+        }
+
+        // ── Security: Ngăn admin khóa tài khoản của admin khác (privilege confusion) ──
+        if ($user->role === 'admin' && !$this->isOwnerOrSuperAdmin($admin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ Quản trị viên tối cao mới có thể khóa tài khoản Quản trị viên khác.',
             ], 403);
         }
 
@@ -174,9 +181,23 @@ class AdminController extends Controller
             ], 400);
         }
 
+        // ── Security: Bảo vệ Super Admin / Owner không bị hạ quyền ──
+        if ($this->isOwnerOrSuperAdmin($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể thay đổi quyền hạn của Quản trị viên tối cao/Chủ sở hữu hệ thống.',
+            ], 403);
+        }
+
+        // ── Security: Chỉ Super Admin mới có quyền đổi role của Quản trị viên khác ──
+        if ($user->role === 'admin' && !$this->isOwnerOrSuperAdmin($admin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ Quản trị viên tối cao mới có thể thay đổi quyền hạn của Quản trị viên khác.',
+            ], 403);
+        }
+
         // ── Security: Ngăn admin nâng quyền admin cho người khác nếu không phải super admin ──
-        // Chỉ admin mới có thể cấp quyền admin, nhưng không thể cấp cho người đã là admin
-        // (Privilege escalation prevention)
         if ($request->role === 'admin' && $user->role === 'admin') {
             return response()->json([
                 'success' => false,
@@ -216,6 +237,14 @@ class AdminController extends Controller
                 'success' => false,
                 'message' => 'Hãy dùng tính năng đổi mật khẩu trong cài đặt tài khoản.',
             ], 400);
+        }
+
+        // ── Security: Bảo vệ Super Admin ──
+        if ($this->isOwnerOrSuperAdmin($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đặt lại mật khẩu của Quản trị viên tối cao qua trang quản trị.',
+            ], 403);
         }
 
         // ── Security: Admin không thể reset password của admin khác ──
@@ -261,6 +290,22 @@ class AdminController extends Controller
             ], 400);
         }
 
+        // ── Security: Bảo vệ Super Admin không bị xóa ──
+        if ($this->isOwnerOrSuperAdmin($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa tài khoản Quản trị viên tối cao/Chủ sở hữu hệ thống.',
+            ], 403);
+        }
+
+        // ── Security: Ngăn admin thường xóa tài khoản của Admin khác ──
+        if ($user->role === 'admin' && !$this->isOwnerOrSuperAdmin($admin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ Quản trị viên tối cao mới có thể xóa tài khoản Quản trị viên khác.',
+            ], 403);
+        }
+
         $user->tokens()->delete();
         $user->delete();
 
@@ -268,5 +313,16 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Đã xóa tài khoản thành công.',
         ]);
+    }
+
+    /**
+     * Kiểm tra xem user có phải là Quản trị viên tối cao / Chủ sở hữu hay không
+     */
+    private function isOwnerOrSuperAdmin(User $user): bool
+    {
+        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
+        $email = strtolower($user->email ?? '');
+        return ($adminEmail && $email === strtolower($adminEmail))
+            || $email === 'hoangdeptraivodich12@gmail.com';
     }
 }

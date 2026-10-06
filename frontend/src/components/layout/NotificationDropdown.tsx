@@ -78,9 +78,7 @@ export function NotificationDropdown() {
   const isOwnerOrAdmin = useMemo(() => {
     return (
       user?.role === "admin" ||
-      user?.email === "hoangdeptraivodich12@gmail.com" ||
-      user?.email?.startsWith("admin@") ||
-      user?.name?.toLowerCase() === "hoang"
+      user?.email === "hoangdeptraivodich12@gmail.com"
     );
   }, [user]);
 

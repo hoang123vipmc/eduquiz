@@ -73,9 +73,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   ];
 
   const isSuperAdmin = user?.role === "admin" 
-    || user?.email === "hoangdeptraivodich12@gmail.com" 
-    || user?.email?.startsWith("admin@") 
-    || user?.name?.toLowerCase() === "hoang";
+    || user?.email === "hoangdeptraivodich12@gmail.com";
 
   const links = isSuperAdmin ? adminLinks : studentLinks;
 

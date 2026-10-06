@@ -37,8 +37,7 @@ class SocialiteController extends Controller
             if (!$user) {
                 $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
                 $isOwner = ($adminEmail && strtolower($socialUser->getEmail()) === strtolower($adminEmail))
-                    || strtolower($socialUser->getEmail()) === 'hoangdeptraivodich12@gmail.com'
-                    || str_starts_with(strtolower($socialUser->getEmail()), 'admin@');
+                    || strtolower($socialUser->getEmail()) === 'hoangdeptraivodich12@gmail.com';
                 $role = $isOwner ? 'admin' : 'student';
 
                 $userName = $socialUser->getName() ?: $socialUser->getNickname();
@@ -74,8 +73,7 @@ class SocialiteController extends Controller
             // ── Sync ADMIN_EMAIL on login ────────────────────────────────────
             $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
             $isOwner = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
-                || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com'
-                || str_starts_with(strtolower($user->email), 'admin@');
+                || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
             if ($isOwner && $user->role !== 'admin') {
                 $user->role = 'admin';
                 $user->save();

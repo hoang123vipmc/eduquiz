@@ -25,8 +25,7 @@ class RoleMiddleware
 
         $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
         $isOwnerOrAdmin = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
-            || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com'
-            || str_starts_with(strtolower($user->email), 'admin@');
+            || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
 
         if ($isOwnerOrAdmin && $role === 'admin') {
             return $next($request);
