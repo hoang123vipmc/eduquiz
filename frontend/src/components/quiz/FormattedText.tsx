@@ -65,7 +65,8 @@ export function cleanOptionPrefix(text?: string | null): string {
   // Strip leading prefixes while protecting decimal/version numbers (e.g. 3.0, 1.0)
   const cleaned = str
     // Remove leading bullet/asterisk/dash if present before prefix (e.g. "* A. ", "- B. ")
-    .replace(/^[\*\•\-\–]\s*/, "")
+    // NOTE: Hyphen (-) MUST be at the end of the character class to prevent minification SyntaxError!
+    .replace(/^[\*\•\–\-]\s*/, "")
     // Parenthesized label like (A) or (1)
     .replace(/^\([A-Za-z0-9]\)\s*/, "")
     // Letter prefix with delimiter and trailing whitespace (e.g. "A. ", "B) ", "C: ", "D - ")
