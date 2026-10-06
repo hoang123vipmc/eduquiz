@@ -385,18 +385,22 @@ export default function QuizPlayerPage() {
 
       const q = questions[currentQuestionIndex];
 
-      if (e.key === 'ArrowLeft') {
+      if (e.key === 'ArrowLeft' || e.key === 'h' || e.key === 'H') {
         setCurrentQuestionIndex(prev => Math.max(0, prev - 1));
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
         setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
-      } else if (['a', 'A'].includes(e.key) && q && q.options[0]) {
+      } else if (['a', 'A', '1'].includes(e.key) && q && q.options[0]) {
         handleSelectOption(q.options[0].id);
-      } else if (['b', 'B'].includes(e.key) && q && q.options[1]) {
+      } else if (['b', 'B', '2'].includes(e.key) && q && q.options[1]) {
         handleSelectOption(q.options[1].id);
-      } else if (['c', 'C'].includes(e.key) && q && q.options[2]) {
+      } else if (['c', 'C', '3'].includes(e.key) && q && q.options[2]) {
         handleSelectOption(q.options[2].id);
-      } else if (['d', 'D'].includes(e.key) && q && q.options[3]) {
+      } else if (['d', 'D', '4'].includes(e.key) && q && q.options[3]) {
         handleSelectOption(q.options[3].id);
+      } else if (['e', 'E', '5'].includes(e.key) && q && q.options[4]) {
+        handleSelectOption(q.options[4].id);
+      } else if (['f', 'F'].includes(e.key) && q) {
+        toggleFlagCurrent();
       }
     };
 
@@ -1431,6 +1435,9 @@ export default function QuizPlayerPage() {
                     <span className={cn("text-[14px] sm:text-[15px] md:text-[16px] leading-relaxed break-words flex-1", textClass)}>
                       <FormattedText text={cleanOptionPrefix(option.option_text)} />
                     </span>
+                    <kbd className="hidden md:inline-flex items-center text-[10px] font-mono font-semibold text-muted-foreground/60 group-hover:text-foreground px-1.5 py-0.5 rounded border border-border/60 bg-muted/30 shrink-0 transition-colors">
+                      {letters[idx]}
+                    </kbd>
                   </div>
                 );
               })}

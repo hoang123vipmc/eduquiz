@@ -16,7 +16,9 @@ import {
   HelpCircle,
   Sparkles,
   Layers,
-  Image as ImageIcon
+  Image as ImageIcon,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,7 @@ export default function QuestionBankPage() {
   const { user } = useAuthStore();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [selectedQuizId, setSelectedQuizId] = useState("");
@@ -161,9 +164,9 @@ export default function QuestionBankPage() {
         </div>
 
         {/* Filter toolbar */}
-        <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-wrap">
           {/* Search */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input 
               type="text" 
@@ -171,7 +174,7 @@ export default function QuestionBankPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Tìm kiếm câu hỏi"
-              className="pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-full sm:w-[220px]"
+              className="pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-full sm:w-[240px]"
             />
           </div>
 
@@ -185,7 +188,7 @@ export default function QuestionBankPage() {
                 aria-label="Lọc theo bộ đề"
                 className="pl-9 pr-8 py-2 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer max-w-[200px] truncate"
               >
-                <option value="">Tất cả bộ đề</option>
+                <option value="">Tất cả bộ đề ({userQuizzes.length})</option>
                 {userQuizzes.map((quiz) => (
                   <option key={quiz.id} value={quiz.id}>
                     {quiz.title}
@@ -195,138 +198,179 @@ export default function QuestionBankPage() {
             </div>
           )}
 
-          {/* Filter by Difficulty */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              aria-label="Lọc theo độ khó"
-              className="pl-9 pr-8 py-2 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
+          {/* Quick Difficulty Pills */}
+          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/60">
+            {[
+              { val: "", label: "Tất cả" },
+              { val: "easy", label: "Dễ" },
+              { val: "medium", label: "TB" },
+              { val: "hard", label: "Khó" },
+            ].map((d) => (
+              <button
+                key={d.val}
+                onClick={() => setDifficulty(d.val)}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                  difficulty === d.val
+                    ? "bg-card text-foreground shadow-xs font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+
+          {/* View Mode Switcher */}
+          <div className="hidden sm:flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/60 ml-auto">
+            <button
+              onClick={() => setViewMode("grid")}
+              title="Dạng thẻ Bento Flashcard"
+              className={cn(
+                "p-1.5 rounded-lg transition-all",
+                viewMode === "grid"
+                  ? "bg-card text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              <option value="">Tất cả độ khó</option>
-              <option value="easy">Dễ</option>
-              <option value="medium">Trung bình</option>
-              <option value="hard">Khó</option>
-            </select>
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("table")}
+              title="Dạng bảng chi tiết"
+              className={cn(
+                "p-1.5 rounded-lg transition-all",
+                viewMode === "table"
+                  ? "bg-card text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <List className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Table */}
-      {/* Table & Mobile Cards */}
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
-        {/* MOBILE CARDS VIEW (< md) */}
-        <div className="md:hidden divide-y divide-border">
-          {loading ? (
-            <div className="p-8 text-center">
-              <Loader2 className="w-7 h-7 animate-spin text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">Đang tải câu hỏi...</p>
-            </div>
-          ) : questions.length === 0 ? (
-            <div className="p-8 text-center">
-              <FileQuestion className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-foreground font-semibold text-sm">Không tìm thấy câu hỏi</p>
-              <p className="text-muted-foreground text-xs mt-1">Hãy thử xóa bộ lọc hoặc tìm kiếm bằng từ khóa khác</p>
-            </div>
-          ) : (
-            questions.map((q) => (
-              <div
-                key={q.id}
-                onClick={() => setActiveQuestion(q)}
-                className="p-4 hover:bg-muted/40 active:bg-muted/60 transition-colors cursor-pointer space-y-2.5"
-              >
-                <p className="text-sm font-medium text-foreground line-clamp-3 leading-relaxed">
-                  <FormattedText text={q.question_text} />
-                </p>
-
-                <div className="flex items-center gap-2 flex-wrap text-xs">
-                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md font-semibold text-[11px] border", getDifficultyColor(q.difficulty))}>
+      {/* Main Content: Bento Grid or Table */}
+      {loading ? (
+        <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-xs">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-2" />
+          <p className="text-sm font-semibold text-foreground">Đang tải ngân hàng câu hỏi...</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Trích xuất câu hỏi từ các bộ đề trắc nghiệm</p>
+        </div>
+      ) : questions.length === 0 ? (
+        <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-xs space-y-2">
+          <FileQuestion className="w-12 h-12 text-muted-foreground/30 mx-auto" />
+          <p className="text-foreground font-bold text-base">Không tìm thấy câu hỏi phù hợp</p>
+          <p className="text-muted-foreground text-xs max-w-sm mx-auto">
+            Hãy thử tìm kiếm với từ khóa khác hoặc chuyển bộ lọc sang &quot;Tất cả bộ đề&quot;.
+          </p>
+        </div>
+      ) : viewMode === "grid" ? (
+        /* BENTO GRID CARDS VIEW */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {questions.map((q) => (
+            <div
+              key={q.id}
+              onClick={() => setActiveQuestion(q)}
+              className="bg-card rounded-2xl border border-border/80 hover:border-primary/40 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3 group active:scale-[0.99]"
+            >
+              <div>
+                {/* Card Header: Quiz badge + Difficulty chip */}
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border", getDifficultyColor(q.difficulty))}>
                     {getDifficultyLabel(q.difficulty)}
                   </span>
-
-                  <span className="text-[11px] font-semibold text-foreground/80 bg-muted px-2 py-0.5 rounded-md border border-border/60">
-                    {q.points || 1} điểm
-                  </span>
-
-                  {q.question_image && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
-                      <ImageIcon className="w-3 h-3" /> Có ảnh
-                    </span>
-                  )}
 
                   {q.quiz && (
                     <span className="flex items-center gap-1 text-[11px] text-muted-foreground truncate max-w-[170px]" title={q.quiz.title}>
                       <BookOpen className="w-3 h-3 text-primary/70 shrink-0" />
-                      <span className="truncate">{q.quiz.title}</span>
+                      <span className="truncate font-medium">{q.quiz.title}</span>
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-1.5 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
-                  <span className="text-[11px] text-muted-foreground">
-                    {q.options?.length ? `${q.options.length} lựa chọn` : 'Câu hỏi'}
-                  </span>
+                {/* Question Body */}
+                <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-3 leading-relaxed">
+                  <FormattedText text={q.question_text} />
+                </p>
 
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setActiveQuestion(q)}
-                      className="px-2.5 py-1 rounded-lg bg-muted text-foreground hover:bg-muted/80 text-xs font-semibold flex items-center gap-1 transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-primary" />
-                      <span>Xem đáp án</span>
-                    </button>
-                    {(user?.role === 'admin' || (user?.id && (!q.quiz || (q.quiz as any).user_id === user.id))) && (
-                      <button
-                        onClick={(e) => handleDeleteQuestion(q.id, e)}
-                        disabled={deletingId === q.id}
-                        aria-label="Xóa câu hỏi"
-                        className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
-                      >
-                        {deletingId === q.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
-                        ) : (
-                          <Trash2 className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    )}
+                {/* Question Image Preview Thumbnail */}
+                {q.question_image && (
+                  <div className="mt-2.5 rounded-xl overflow-hidden border border-border/60 bg-muted/30 p-1.5 flex items-center gap-2">
+                    <img 
+                      src={q.question_image} 
+                      alt="Ảnh câu hỏi" 
+                      className="w-12 h-12 rounded-lg object-cover bg-background shrink-0" 
+                    />
+                    <div className="min-w-0 text-xs">
+                      <span className="font-semibold text-foreground flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3 text-primary" /> Có ảnh minh họa
+                      </span>
+                      <span className="text-[11px] text-muted-foreground block truncate">
+                        Click để xem phóng to
+                      </span>
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {/* Card Footer: Meta chips & Actions */}
+              <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-2 text-xs" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-muted px-2 py-0.5 rounded-md text-[11px] font-semibold text-foreground/80 border border-border/60">
+                    {q.options?.length || 4} đáp án
+                  </span>
+                  <span className="bg-muted px-2 py-0.5 rounded-md text-[11px] font-semibold text-foreground/80 border border-border/60">
+                    {q.points || 1} đ
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setActiveQuestion(q)}
+                    className="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Xem đáp án</span>
+                  </button>
+
+                  {(user?.role === 'admin' || (user?.id && (!q.quiz || (q.quiz as any).user_id === user.id))) && (
+                    <button
+                      onClick={(e) => handleDeleteQuestion(q.id, e)}
+                      disabled={deletingId === q.id}
+                      aria-label="Xóa câu hỏi"
+                      title="Xóa câu hỏi này"
+                      className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === q.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
-
-        {/* DESKTOP TABLE VIEW (>= md) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-muted/50 border-b border-border">
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[48%]">Nội dung câu hỏi</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[22%]">Thuộc bộ đề</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[12%]">Độ khó</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[8%] text-center">Điểm</th>
-                <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[10%] text-right">Chi tiết</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="p-12 text-center">
-                    <Loader2 className="w-7 h-7 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-xs text-muted-foreground">Đang tải câu hỏi...</p>
-                  </td>
+      ) : (
+        /* TABLE VIEW */
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-muted/50 border-b border-border">
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[48%]">Nội dung câu hỏi</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[22%]">Thuộc bộ đề</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[12%]">Độ khó</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[8%] text-center">Điểm</th>
+                  <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground w-[10%] text-right">Chi tiết</th>
                 </tr>
-              ) : questions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-12 text-center">
-                    <FileQuestion className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="text-foreground font-semibold text-sm">Không tìm thấy câu hỏi phù hợp</p>
-                    <p className="text-muted-foreground text-xs mt-1">Hãy thử xóa bộ lọc hoặc tìm kiếm bằng từ khóa khác</p>
-                  </td>
-                </tr>
-              ) : (
-                questions.map((q) => (
+              </thead>
+              <tbody>
+                {questions.map((q) => (
                   <tr 
                     key={q.id} 
                     onClick={() => setActiveQuestion(q)}
@@ -390,11 +434,12 @@ export default function QuestionBankPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+      )}
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -422,7 +467,6 @@ export default function QuestionBankPage() {
             </div>
           </div>
         )}
-      </div>
 
       {/* Question Detail Modal */}
       {activeQuestion && (
