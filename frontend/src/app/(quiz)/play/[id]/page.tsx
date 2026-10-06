@@ -23,7 +23,8 @@ import {
   Volume2,
   VolumeX,
   ShieldAlert,
-  Lightbulb
+  Lightbulb,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatQuizDuration } from "@/lib/utils/time";
@@ -127,6 +128,7 @@ export default function QuizPlayerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [autoNextDelay, setAutoNextDelay] = useState(0);
+  const autoNextTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<number, boolean>>({});
   const [showAskAI, setShowAskAI] = useState(false);
   const [aiModalMode, setAiModalMode] = useState<"explain" | "debate" | "mnemonic">("explain");
@@ -224,6 +226,24 @@ export default function QuizPlayerPage() {
       // Bỏ qua lỗi tải info nếu có
     }
 
+    // Đọc và phân tích cấu hình thời gian tự chuyển câu (xử lý an toàn '2s', '1.5s', 'off', v.v.)
+    const rawDelay = params.get('delay');
+    let parsedDelay = 0;
+    if (rawDelay && rawDelay !== 'off') {
+      const match = String(rawDelay).match(/(\d+(?:\.\d+)?)/);
+      if (match) {
+        parsedDelay = parseFloat(match[1]) || 0;
+      }
+    } else if (!rawDelay) {
+      try {
+        const savedDelay = localStorage.getItem('openquiz_auto_next_delay');
+        if (savedDelay) {
+          parsedDelay = parseFloat(savedDelay) || 0;
+        }
+      } catch {}
+    }
+    setAutoNextDelay(parsedDelay);
+
     try {
       if (retryAttemptId) {
         const retryData = await retryWrong(Number(retryAttemptId));
@@ -241,11 +261,10 @@ export default function QuizPlayerPage() {
           mode: modeParam || 'practice',
           shuffleQuestions: params.get('shuffleQ') === '1',
           shuffleOptions: params.get('shuffleO') === '1',
-          autoNextDelay: Number(params.get('delay')) || 0,
+          autoNextDelay: parsedDelay,
           unlimitedTime: params.get('unlimited') === '1' || modeParam === 'practice' || !modeParam,
           questionLimit: limitParam
         };
-        setAutoNextDelay(config.autoNextDelay);
         await startQuiz(
           Number(id), 
           config.mode, 
@@ -313,13 +332,39 @@ export default function QuizPlayerPage() {
       soundManager.playClick();
     }
     
-    // Tự động chuyển câu nếu được cấu hình
-    if (autoNextDelay > 0) {
-      setTimeout(() => {
-        setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1));
+    // Dọn dẹp timer cũ trước khi lên lịch chuyển câu mới
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+
+    // Tự động chuyển câu nếu được cấu hình và chưa phải câu cuối
+    if (autoNextDelay > 0 && currentQuestionIndex < questions.length - 1) {
+      autoNextTimerRef.current = setTimeout(() => {
+        setCurrentQuestionIndex(prev => {
+          if (prev < questions.length - 1) return prev + 1;
+          return prev;
+        });
+        autoNextTimerRef.current = null;
       }, autoNextDelay * 1000);
     }
   };
+
+  // Hủy timer chuyển câu khi unmount hoặc khi người dùng tự chuyển câu bằng tay
+  useEffect(() => {
+    return () => {
+      if (autoNextTimerRef.current) {
+        clearTimeout(autoNextTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }, [currentQuestionIndex]);
 
   // Keyboard navigation & Quick Answer shortcuts: A, B, C, D & Arrows
   useEffect(() => {
@@ -595,6 +640,26 @@ export default function QuizPlayerPage() {
             <span className="truncate">TRẮC NGHIỆM :: iTest v12.2025</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Nút điều chỉnh Tự chuyển câu nhanh trong iTest */}
+            <button
+              onClick={() => {
+                const nextDelay = autoNextDelay === 0 ? 1 : autoNextDelay === 1 ? 2 : autoNextDelay === 2 ? 3 : 0;
+                setAutoNextDelay(nextDelay);
+                try {
+                  localStorage.setItem('openquiz_auto_next_delay', String(nextDelay));
+                } catch {}
+              }}
+              title="Bấm để đổi tốc độ tự động chuyển sang câu tiếp theo"
+              className={cn(
+                "px-2 py-0.2 text-[10px] font-sans border rounded-xs shadow-xs transition-colors",
+                autoNextDelay > 0
+                  ? "bg-[#d4edda] text-[#155724] border-[#c3e6cb] font-bold"
+                  : "bg-[#ece9d8] hover:bg-white text-black border-[#707070]"
+              )}
+            >
+              ⚡ Tự chuyển: {autoNextDelay > 0 ? `${autoNextDelay}s` : "Tắt"}
+            </button>
+
             <button
               onClick={() => setTheme('modern')}
               title="Đổi sang giao diện OpenQuiz hiện đại"
@@ -740,7 +805,7 @@ export default function QuizPlayerPage() {
                   return (
                     <div
                       key={option.id}
-                      onClick={() => !hasAnswered && handleSelectOption(option.id)}
+                      onClick={() => (!isPractice || !hasAnswered) && handleSelectOption(option.id)}
                       className={cn(
                         "py-2 px-2 sm:px-2.5 rounded-xs transition-colors cursor-pointer flex items-baseline gap-2 sm:gap-2.5 leading-relaxed active:bg-[#ede7da]",
                         optHighlight
@@ -1103,6 +1168,29 @@ export default function QuizPlayerPage() {
               )}
             </button>
 
+            {/* Nút điều chỉnh tốc độ Tự động chuyển câu */}
+            <button
+              onClick={() => {
+                const nextDelay = autoNextDelay === 0 ? 1 : autoNextDelay === 1 ? 2 : autoNextDelay === 2 ? 3 : 0;
+                setAutoNextDelay(nextDelay);
+                try {
+                  localStorage.setItem('openquiz_auto_next_delay', String(nextDelay));
+                } catch {}
+              }}
+              type="button"
+              title="Bấm để bật hoặc thay đổi thời gian tự động chuyển sang câu tiếp theo"
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border text-xs font-semibold transition-all shadow-xs cursor-pointer select-none",
+                autoNextDelay > 0
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-emerald-500/10"
+                  : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              <Zap className={cn("w-3.5 h-3.5", autoNextDelay > 0 ? "fill-emerald-500 text-emerald-500" : "")} />
+              <span className="hidden sm:inline">Tự chuyển:</span>
+              <span>{autoNextDelay > 0 ? `${autoNextDelay}s` : "Tắt"}</span>
+            </button>
+
             {/* Nút chuyển đổi nhanh sang iTest Theme */}
             <button
               onClick={() => setTheme('itest')}
@@ -1254,7 +1342,7 @@ export default function QuizPlayerPage() {
                 return (
                   <div 
                     key={option.id}
-                    onClick={() => !hasAnswered && handleSelectOption(option.id)}
+                    onClick={() => (!isPractice || !hasAnswered) && handleSelectOption(option.id)}
                     className={cn(
                       "flex items-center p-3.5 sm:p-4 md:p-5 rounded-[14px] sm:rounded-[16px] border-2 transition-all duration-150 group cursor-pointer active:scale-[0.99]",
                       (!isPractice || !hasAnswered) ? "active:scale-[0.99]" : "cursor-default",
