@@ -226,6 +226,17 @@ export default function BookmarksPage() {
                   <FormattedText text={q?.question_text || ""} />
                 </div>
 
+                {/* Question Image */}
+                {q?.question_image && (
+                  <div className="rounded-xl overflow-hidden border border-border/80 bg-muted/20 p-2.5 max-w-lg mx-auto flex justify-center">
+                    <img
+                      src={q.question_image}
+                      alt="Ảnh câu hỏi"
+                      className="max-h-64 max-w-full rounded-lg object-contain shadow-xs"
+                    />
+                  </div>
+                )}
+
                 {/* Options List */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                   {options.map((opt: any, optIdx: number) => {

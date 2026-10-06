@@ -143,6 +143,7 @@ class QuestionController extends Controller
 
         $validated = $request->validate([
             'question_text' => 'sometimes|required|string',
+            'question_image' => 'sometimes|nullable|string',
             'type'          => 'sometimes|nullable|string',
             'question_type' => 'sometimes|nullable|string',
             'explanation'   => 'nullable|string',

@@ -42,30 +42,81 @@ class QuizImportController extends Controller
         $file = $request->file('file');
         
         $zip = new ZipArchive;
-        if ($zip->open($file->getRealPath()) === true) {
-            $index = $zip->locateName('word/document.xml');
-            if ($index !== false) {
-                $xml = $zip->getFromIndex($index);
-                $zip->close();
-            } else {
-                $zip->close();
-                return response()->json(['success' => false, 'message' => 'File không đúng định dạng Word.'], 400);
-            }
-        } else {
+        if ($zip->open($file->getRealPath()) !== true) {
             return response()->json(['success' => false, 'message' => 'Không thể mở file.'], 400);
         }
 
-        // Thay thẻ </w:p> bằng \n để giữ xuống dòng
-        $xml = str_replace('</w:p>', "\n", $xml);
+        $docIndex = $zip->locateName('word/document.xml');
+        if ($docIndex === false) {
+            $zip->close();
+            return response()->json(['success' => false, 'message' => 'File không đúng định dạng Word.'], 400);
+        }
+        $xml = $zip->getFromIndex($docIndex);
+
+        // ── 1. Đọc relationships để tìm ánh xạ hình ảnh (rId => path trong zip) ──
+        $rels = [];
+        $relsXml = $zip->getFromName('word/_rels/document.xml.rels');
+        if ($relsXml) {
+            if (preg_match_all('/<Relationship\s+[^>]*Id="([^"]+)"[^>]*Target="([^"]+)"/i', $relsXml, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $m) {
+                    $rels[$m[1]] = $m[2];
+                }
+            }
+        }
+
+        // ── 2. Trích xuất hình ảnh ra thư mục public/uploads ──
+        $destinationPath = public_path('uploads');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $baseUrl = rtrim(config('app.url'), '/');
+        if (str_contains($baseUrl, 'localhost') && $request->getSchemeAndHttpHost()) {
+            $baseUrl = $request->getSchemeAndHttpHost();
+        }
+
+        $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+        $extractedImages = []; // rId => public_url
+
+        foreach ($rels as $rId => $target) {
+            $zipTarget = ltrim($target, '/');
+            if (!str_starts_with($zipTarget, 'word/')) {
+                $zipTarget = 'word/' . ltrim($zipTarget, './');
+            }
+
+            $ext = strtolower(pathinfo($zipTarget, PATHINFO_EXTENSION));
+            if (in_array($ext, $allowedExtensions)) {
+                $imgContent = $zip->getFromName($zipTarget);
+                if ($imgContent !== false && strlen($imgContent) > 0 && strlen($imgContent) <= 10 * 1024 * 1024) {
+                    $uniqueName = 'docx_img_' . Str::random(20) . '_' . time() . '.' . $ext;
+                    file_put_contents($destinationPath . '/' . $uniqueName, $imgContent);
+                    $extractedImages[$rId] = $baseUrl . '/uploads/' . $uniqueName;
+                }
+            }
+        }
+
+        $zip->close();
+
+        // ── 3. Thay thế các thẻ hình ảnh trong document.xml bằng marker [IMAGE: url] ──
+        $xml = preg_replace_callback(
+            '/<(?:a:blip|v:imagedata)[^>]*(?:r:embed|r:id|o:relid)="([^"]+)"[^>]*\/?>/i',
+            function ($m) use ($extractedImages) {
+                $rId = $m[1];
+                if (isset($extractedImages[$rId])) {
+                    return "\n[IMAGE: " . $extractedImages[$rId] . "]\n";
+                }
+                return '';
+            },
+            $xml
+        );
+
+        // Thay thẻ </w:p> và </w:tr> bằng \n để giữ xuống dòng
+        $xml = str_replace(['</w:p>', '</w:tr>'], "\n", $xml);
         $text = strip_tags($xml);
-        
-        // Loại bỏ các khoảng trắng thừa ở mỗi dòng
-        $lines = explode("\n", $text);
-        $cleanText = collect($lines)->map(fn($l) => trim($l))->filter(fn($l) => $l !== '')->implode("\n\n");
         
         return response()->json([
             'success' => true,
-            'text' => $text // Trả về text gốc nhưng giữ dòng trống để chỉnh sửa
+            'text' => $text
         ]);
     }
 
@@ -103,6 +154,23 @@ class QuizImportController extends Controller
                 continue;
             }
 
+            // Nhận diện dòng độc lập chứa ảnh: [IMAGE: url] hoặc [Ảnh: url] hoặc ![...](url)
+            if (preg_match('/^\[(?:IMAGE|Ảnh|image)\s*[:：]\s*(https?:\/\/[^\]\s]+)\]/iu', $line, $imgMatch)
+                || preg_match('/^!\[.*?\]\((https?:\/\/[^\)\s]+)\)/iu', $line, $imgMatch)) {
+                if ($currentQuestion) {
+                    $currentQuestion['image'] = $imgMatch[1];
+                }
+                continue;
+            }
+
+            // Nhận diện ảnh inline trong dòng: Câu 1: Sơ đồ lớp [IMAGE: url]
+            if (preg_match('/\[(?:IMAGE|Ảnh|image)\s*[:：]\s*(https?:\/\/[^\]\s]+)\]/iu', $line, $inlineImgMatch)) {
+                if ($currentQuestion) {
+                    $currentQuestion['image'] = $inlineImgMatch[1];
+                }
+                $line = trim(preg_replace('/\[(?:IMAGE|Ảnh|image)\s*[:：]\s*https?:\/\/[^\]\s]+\]/iu', '', $line));
+            }
+
             // Nhận diện dòng chỉ định đáp án đúng (ví dụ: "=> Đáp án đúng: C", "Đáp án: A", "Answer: B")
             if (preg_match('/^(?:=>\s*)?(?:Đáp án(?:\s*đúng)?|Đ\/a|Answer|Key)\s*[:：]\s*([A-Fa-f1-6])/iu', $line, $ansMatch)) {
                 if ($currentQuestion && !empty($currentQuestion['options'])) {
@@ -128,7 +196,8 @@ class QuizImportController extends Controller
                 }
                 $currentQuestion = [
                     'q' => $line,
-                    'options' => []
+                    'options' => [],
+                    'image' => null
                 ];
                 $expectingNewQuestion = false;
                 continue;
@@ -230,6 +299,7 @@ class QuizImportController extends Controller
                 $question = Question::create([
                     'quiz_id' => $quiz->id,
                     'question_text' => $qData['q'],
+                    'question_image' => $qData['image'] ?? null,
                     'type' => 'single_choice',
                     'points' => 1,
                     'order' => $qIdx + 1

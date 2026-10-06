@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   X,
   Save,
@@ -23,6 +23,8 @@ import {
   FolderPlus,
   Tag,
   Sparkles,
+  Image as ImageIcon,
+  UploadCloud,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios";
@@ -36,6 +38,7 @@ interface Option {
 interface Question {
   id: number;
   question_text: string;
+  question_image?: string | null;
   explanation?: string;
   question_type: "single_choice" | "multiple_choice" | "true_false";
   options: Option[];
@@ -75,6 +78,7 @@ interface EditQuizModalProps {
 function blankQuestion(): Omit<Question, "id"> {
   return {
     question_text: "",
+    question_image: null,
     explanation: "",
     question_type: "single_choice",
     options: [
@@ -100,10 +104,46 @@ function QuestionRow({ question, index, onSave, onDelete }: QuestionRowProps) {
   const [deleting, setDeleting] = useState(false);
   const [draft, setDraft] = useState<Question>(question);
   const [error, setError] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setDraft(question);
   }, [question]);
+
+  const handleUploadImage = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await api.post("/upload/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data?.success && res.data?.data?.url) {
+        setDraft((d) => ({ ...d, question_image: res.data.data.url }));
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Lỗi tải ảnh lên. Vui lòng thử lại.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          handleUploadImage(file);
+          break;
+        }
+      }
+    }
+  };
 
   const startEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -184,9 +224,17 @@ function QuestionRow({ question, index, onSave, onDelete }: QuestionRowProps) {
         <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-muted text-muted-foreground text-xs font-bold shrink-0 mt-0.5">
           {index + 1}
         </div>
-        <p className="flex-1 text-sm leading-relaxed line-clamp-2 text-foreground/90 font-medium">
-          {question.question_text || <span className="italic text-muted-foreground">Câu hỏi trống</span>}
-        </p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm leading-relaxed line-clamp-2 text-foreground/90 font-medium">
+            {question.question_text || <span className="italic text-muted-foreground">Câu hỏi trống</span>}
+          </p>
+          {question.question_image && (
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-primary font-medium">
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>Có ảnh minh họa / sơ đồ</span>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
           {!editing && (
             <>
@@ -226,10 +274,82 @@ function QuestionRow({ question, index, onSave, onDelete }: QuestionRowProps) {
                 <textarea
                   value={draft.question_text}
                   onChange={(e) => setDraft((d) => ({ ...d, question_text: e.target.value }))}
+                  onPaste={handlePaste}
                   rows={3}
                   className="w-full bg-background border border-border/80 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
-                  placeholder="Nhập nội dung câu hỏi..."
+                  placeholder="Nhập nội dung câu hỏi... (Có thể bấm Ctrl+V để dán ảnh trực tiếp từ bộ nhớ tạm)"
                 />
+              </div>
+
+              {/* Ảnh minh họa câu hỏi */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-primary" />
+                    Ảnh minh họa / Sơ đồ (Tùy chọn)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadImage(file);
+                        e.target.value = "";
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={uploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-xs text-primary font-medium hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    >
+                      {uploadingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <UploadCloud className="w-3 h-3" />}
+                      {uploadingImage ? "Đang tải ảnh lên..." : "Tải ảnh từ máy"}
+                    </button>
+                    {draft.question_image && (
+                      <button
+                        type="button"
+                        onClick={() => setDraft((d) => ({ ...d, question_image: null }))}
+                        className="text-xs text-destructive hover:underline cursor-pointer"
+                      >
+                        Xóa ảnh
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {draft.question_image ? (
+                  <div className="p-2.5 rounded-xl border border-border bg-muted/20 flex items-center gap-3">
+                    <img
+                      src={draft.question_image}
+                      alt="Ảnh câu hỏi"
+                      className="h-16 w-24 object-contain rounded-lg border border-border bg-white shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <input
+                        type="text"
+                        value={draft.question_image}
+                        onChange={(e) => setDraft((d) => ({ ...d, question_image: e.target.value }))}
+                        placeholder="https://... URL hình ảnh"
+                        className="w-full text-xs bg-background border border-border/80 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary truncate font-mono"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        Mẹo: Bạn có thể chụp màn hình (Win+Shift+S) rồi bấm <strong>Ctrl+V</strong> vào ô câu hỏi để dán ảnh trực tiếp!
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value=""
+                    onChange={(e) => setDraft((d) => ({ ...d, question_image: e.target.value }))}
+                    placeholder="Dán link ảnh (https://...) hoặc bấm 'Tải ảnh từ máy' ở trên, hoặc Ctrl+V ảnh vào ô câu hỏi"
+                    className="w-full text-xs bg-background border border-dashed border-border/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-muted-foreground placeholder:text-muted-foreground/60"
+                  />
+                )}
               </div>
 
               <div>
@@ -336,6 +456,15 @@ function QuestionRow({ question, index, onSave, onDelete }: QuestionRowProps) {
             </>
           ) : (
             <div className="space-y-2">
+              {question.question_image && (
+                <div className="mb-3 rounded-xl overflow-hidden border border-border bg-muted/20 p-2 flex justify-center">
+                  <img
+                    src={question.question_image}
+                    alt="Ảnh minh họa câu hỏi"
+                    className="max-h-64 max-w-full rounded-lg object-contain shadow-xs"
+                  />
+                </div>
+              )}
               {question.options.map((opt, oi) => (
                 <div
                   key={oi}
@@ -384,7 +513,43 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
   const [newQuestion, setNewQuestion] = useState<ReturnType<typeof blankQuestion>>(blankQuestion());
   const [addingQuestion, setAddingQuestion] = useState(false);
   const [addError, setAddError] = useState("");
+  const [uploadingNewImage, setUploadingNewImage] = useState(false);
+  const newFileInputRef = useRef<HTMLInputElement | null>(null);
   const [qSearch, setQSearch] = useState("");
+
+  const handleUploadNewImage = async (file: File) => {
+    if (!file) return;
+    setUploadingNewImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await api.post("/upload/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data?.success && res.data?.data?.url) {
+        setNewQuestion((d) => ({ ...d, question_image: res.data.data.url }));
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Lỗi tải ảnh lên. Vui lòng thử lại.");
+    } finally {
+      setUploadingNewImage(false);
+    }
+  };
+
+  const handleNewQuestionPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          handleUploadNewImage(file);
+          break;
+        }
+      }
+    }
+  };
 
   const handleQuickUpdateCategory = async (catId: number | null) => {
     setMetaDraft((d) => (d ? { ...d, category_id: catId } : d));
@@ -444,6 +609,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
           rawList.map((q: any) => ({
             id: q.id,
             question_text: q.question_text || "",
+            question_image: q.question_image || null,
             explanation: q.explanation || "",
             question_type: q.type || q.question_type || "single_choice",
             options: (q.options || []).map((o: any) => ({
@@ -524,6 +690,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
     async (updated: Question) => {
       const { data } = await api.put(`/questions/${updated.id}`, {
         question_text: updated.question_text.trim(),
+        question_image: updated.question_image || null,
         type: updated.question_type,
         question_type: updated.question_type,
         explanation: updated.explanation || null,
@@ -572,6 +739,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
     try {
       const { data } = await api.post(`/quizzes/${quiz.id}/questions`, {
         question_text: newQuestion.question_text.trim(),
+        question_image: newQuestion.question_image || null,
         type: newQuestion.question_type,
         question_type: newQuestion.question_type,
         difficulty: "medium",
@@ -591,6 +759,7 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
           {
             id: created.id,
             question_text: created.question_text,
+            question_image: created.question_image || newQuestion.question_image || null,
             explanation: created.explanation || "",
             question_type: created.type || created.question_type || "single_choice",
             options: (created.options || []).map((o: any) => ({
@@ -748,11 +917,83 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
                       onChange={(e) =>
                         setNewQuestion((d) => ({ ...d, question_text: e.target.value }))
                       }
+                      onPaste={handleNewQuestionPaste}
                       rows={3}
                       className="w-full bg-background border border-border/80 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
-                      placeholder="Nhập nội dung câu hỏi..."
+                      placeholder="Nhập nội dung câu hỏi... (Có thể bấm Ctrl+V để dán ảnh trực tiếp từ bộ nhớ tạm)"
                       autoFocus
                     />
+                  </div>
+
+                  {/* Ảnh minh họa câu hỏi mới */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-primary" />
+                        Ảnh minh họa / Sơ đồ (Tùy chọn)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={newFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadNewImage(file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={uploadingNewImage}
+                          onClick={() => newFileInputRef.current?.click()}
+                          className="text-xs text-primary font-medium hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                        >
+                          {uploadingNewImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <UploadCloud className="w-3 h-3" />}
+                          {uploadingNewImage ? "Đang tải ảnh lên..." : "Tải ảnh từ máy"}
+                        </button>
+                        {newQuestion.question_image && (
+                          <button
+                            type="button"
+                            onClick={() => setNewQuestion((d) => ({ ...d, question_image: null }))}
+                            className="text-xs text-destructive hover:underline cursor-pointer"
+                          >
+                            Xóa ảnh
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {newQuestion.question_image ? (
+                      <div className="p-2.5 rounded-xl border border-border bg-muted/20 flex items-center gap-3">
+                        <img
+                          src={newQuestion.question_image}
+                          alt="Ảnh câu hỏi"
+                          className="h-16 w-24 object-contain rounded-lg border border-border bg-white shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <input
+                            type="text"
+                            value={newQuestion.question_image}
+                            onChange={(e) => setNewQuestion((d) => ({ ...d, question_image: e.target.value }))}
+                            placeholder="https://... URL hình ảnh"
+                            className="w-full text-xs bg-background border border-border/80 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary truncate font-mono"
+                          />
+                          <p className="text-[11px] text-muted-foreground mt-1">
+                            Mẹo: Bạn có thể chụp màn hình (Win+Shift+S) rồi bấm <strong>Ctrl+V</strong> vào ô câu hỏi để dán ảnh trực tiếp!
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value=""
+                        onChange={(e) => setNewQuestion((d) => ({ ...d, question_image: e.target.value }))}
+                        placeholder="Dán link ảnh (https://...) hoặc bấm 'Tải ảnh từ máy' ở trên, hoặc Ctrl+V ảnh vào ô câu hỏi"
+                        className="w-full text-xs bg-background border border-dashed border-border/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-muted-foreground placeholder:text-muted-foreground/60"
+                      />
+                    )}
                   </div>
 
                   <div>

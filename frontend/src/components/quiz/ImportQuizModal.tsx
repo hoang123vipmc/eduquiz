@@ -547,8 +547,13 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
               </div>
             </div>
 
-            <div className="p-3 sm:p-4 bg-[#4F7CFF]/10 border-b border-[#4F7CFF]/20 text-xs sm:text-[13px] text-blue-100 shrink-0">
-              <strong>Guide:</strong> Review your text format. Each question must be separated by <strong>1 blank line</strong>. Correct answer must have a <strong>*</strong> prefix (e.g. <i>*A. Answer</i>).
+            <div className="p-3 sm:p-4 bg-primary/10 border-b border-primary/20 text-xs sm:text-[13px] text-foreground/90 shrink-0 space-y-1">
+              <p>
+                <strong>Hướng dẫn:</strong> Mỗi câu hỏi cách nhau <strong>1 dòng trống</strong>. Đáp án đúng đánh dấu bằng dấu <strong>*</strong> (ví dụ: <i>*A. Đáp án đúng</i>).
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                ✨ <strong>Hỗ trợ hình ảnh:</strong> Hình ảnh / sơ đồ từ file Word (.docx) được tự động trích xuất! Bạn cũng có thể dán link ảnh dạng <code>[IMAGE: https://...]</code> vào nội dung câu hỏi.
+              </p>
             </div>
 
             {/* Mobile Tab Switcher */}
@@ -624,6 +629,15 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                           <span className="text-[#4F7CFF] mr-2">Câu {idx + 1}:</span>
                           <FormattedText text={q.questionText} />
                         </div>
+                        {q.questionImage && (
+                          <div className="mb-3 rounded-xl overflow-hidden border border-border bg-card/60 p-2 flex justify-center">
+                            <img
+                              src={q.questionImage}
+                              alt="Ảnh câu hỏi"
+                              className="max-h-52 max-w-full rounded-lg object-contain shadow-xs"
+                            />
+                          </div>
+                        )}
                         <div className="space-y-2">
                           {q.options.map((opt, oIdx) => (
                             <div 

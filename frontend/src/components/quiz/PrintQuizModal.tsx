@@ -154,6 +154,17 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
                       <FormattedText text={q.question_text} />
                     </div>
 
+                    {/* Question image if present */}
+                    {Boolean(q.question_image || q.image) && (
+                      <div className="py-2 flex justify-center">
+                        <img 
+                          src={q.question_image || q.image} 
+                          alt={`Hình minh họa câu ${qIdx + 1}`} 
+                          className="max-h-56 max-w-lg object-contain border border-border/60 rounded-md" 
+                        />
+                      </div>
+                    )}
+
                     {/* Options Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-2">
                       {q.options?.map((opt: any, optIdx: number) => {

@@ -14,6 +14,8 @@ interface Question {
     question_text: string;
     type: string;
     options: Option[];
+    question_image?: string | null;
+    explanation?: string;
 }
 
 interface QuizState {

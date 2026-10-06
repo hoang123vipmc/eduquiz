@@ -5,6 +5,7 @@ export interface ParsedOption {
 
 export interface ParsedQuestion {
   questionText: string;
+  questionImage?: string | null;
   options: ParsedOption[];
 }
 
@@ -16,7 +17,7 @@ export function parseQuizText(text: string): ParsedQuestion[] {
   let expectingNewQuestion = true;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    let line = lines[i].trim();
     
     if (!line) {
       if (currentQuestion && currentQuestion.options.length > 0) {
@@ -30,6 +31,24 @@ export function parseQuizText(text: string): ParsedQuestion[] {
     // Bỏ qua các đường kẻ phân cách dạng --- hoặc ===
     if (/^[-=_*]{3,}$/.test(line)) {
       continue;
+    }
+
+    // Nhận diện dòng độc lập chứa ảnh: [IMAGE: url] hoặc [Ảnh: url] hoặc ![...](url)
+    const standaloneImgMatch = line.match(/^\[(?:IMAGE|Ảnh|image)\s*[:：]\s*(https?:\/\/[^\]\s]+)\]/i) || line.match(/^!\[.*?\]\((https?:\/\/[^\)\s]+)\)/i);
+    if (standaloneImgMatch) {
+      if (currentQuestion) {
+        currentQuestion.questionImage = standaloneImgMatch[1];
+      }
+      continue;
+    }
+
+    // Nhận diện ảnh inline trong dòng: Câu 1: Sơ đồ lớp [IMAGE: url]
+    const inlineImgMatch = line.match(/\[(?:IMAGE|Ảnh|image)\s*[:：]\s*(https?:\/\/[^\]\s]+)\]/i);
+    if (inlineImgMatch) {
+      if (currentQuestion) {
+        currentQuestion.questionImage = inlineImgMatch[1];
+      }
+      line = line.replace(/\[(?:IMAGE|Ảnh|image)\s*[:：]\s*https?:\/\/[^\]\s]+\]/i, '').trim();
     }
 
     // Nhận diện dòng chỉ định đáp án đúng (ví dụ: "=> Đáp án đúng: C", "Đáp án: A", "Answer: B")
@@ -53,6 +72,7 @@ export function parseQuizText(text: string): ParsedQuestion[] {
       }
       currentQuestion = {
         questionText: line,
+        questionImage: null,
         options: []
       };
       expectingNewQuestion = false;

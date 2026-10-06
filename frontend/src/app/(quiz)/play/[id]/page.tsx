@@ -134,6 +134,7 @@ export default function QuizPlayerPage() {
   const [showAskAI, setShowAskAI] = useState(false);
   const [aiModalMode, setAiModalMode] = useState<"explain" | "debate" | "mnemonic">("explain");
   const [copiedShare, setCopiedShare] = useState(false);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const handleShareQuiz = () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -782,6 +783,27 @@ export default function QuizPlayerPage() {
                 <FormattedText text={currentQuestion.question_text} />
               </div>
 
+              {/* Ảnh minh họa câu hỏi nếu có trong iTest */}
+              {Boolean((currentQuestion as any).question_image || (currentQuestion as any).image) && (
+                <div className="my-3 sm:my-4 flex justify-center">
+                  <div className="relative group max-w-full sm:max-w-xl border-2 border-[#b8b09e] bg-white p-2 rounded-xs shadow-xs">
+                    <img 
+                      src={(currentQuestion as any).question_image || (currentQuestion as any).image} 
+                      alt="Hình minh họa câu hỏi" 
+                      className="max-h-72 sm:max-h-80 w-auto object-contain cursor-zoom-in mx-auto"
+                      onClick={() => setZoomedImage((currentQuestion as any).question_image || (currentQuestion as any).image)}
+                    />
+                    <div 
+                      className="text-[11px] text-[#555] text-center mt-1.5 font-sans flex items-center justify-center gap-1 cursor-pointer hover:text-[#2563eb]"
+                      onClick={() => setZoomedImage((currentQuestion as any).question_image || (currentQuestion as any).image)}
+                    >
+                      <Maximize2 className="w-3 h-3 text-[#2563eb]" />
+                      <span>Bấm vào hình để phóng to xem chi tiết</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Vạch kẻ phân đoạn :: Trả lời :: */}
               <div className="relative flex items-center justify-center my-4 sm:my-6 text-xs md:text-sm text-[#444444] font-mono">
                 <div className="border-t border-dashed border-[#8c8474] w-full"></div>
@@ -1334,6 +1356,27 @@ export default function QuizPlayerPage() {
               <h2 className="text-[17px] sm:text-[20px] md:text-[24px] font-semibold leading-[1.6] text-foreground break-words">
                 <FormattedText text={currentQuestion.question_text} />
               </h2>
+
+              {/* Ảnh minh họa câu hỏi nếu có trong Modern theme */}
+              {Boolean((currentQuestion as any).question_image || (currentQuestion as any).image) && (
+                <div className="mt-4 pt-4 border-t border-border/50 flex justify-center">
+                  <div className="relative group max-w-full sm:max-w-xl rounded-2xl overflow-hidden border border-border bg-muted/20 p-2 shadow-xs transition-all hover:border-primary/50">
+                    <img 
+                      src={(currentQuestion as any).question_image || (currentQuestion as any).image} 
+                      alt="Hình minh họa câu hỏi" 
+                      className="max-h-72 sm:max-h-80 w-auto rounded-xl object-contain cursor-zoom-in mx-auto transition-transform group-hover:scale-[1.01]"
+                      onClick={() => setZoomedImage((currentQuestion as any).question_image || (currentQuestion as any).image)}
+                    />
+                    <div 
+                      className="text-xs text-muted-foreground text-center mt-2 flex items-center justify-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => setZoomedImage((currentQuestion as any).question_image || (currentQuestion as any).image)}
+                    >
+                      <Maximize2 className="w-3.5 h-3.5 text-primary" />
+                      <span>Bấm vào hình để xem phóng to chi tiết</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2.5 sm:space-y-3.5">
@@ -1509,6 +1552,40 @@ export default function QuizPlayerPage() {
         }
         quizTitle={quizInfo?.title}
       />
+
+      {/* Lightbox Modal phóng to ảnh câu hỏi */}
+      {zoomedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200"
+          onClick={() => setZoomedImage(null)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] bg-card rounded-2xl border border-border overflow-hidden shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-border bg-muted/50">
+              <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Maximize2 className="w-3.5 h-3.5 text-primary" />
+                Hình ảnh minh họa câu hỏi
+              </span>
+              <button 
+                onClick={() => setZoomedImage(null)}
+                className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                title="Đóng (Esc)"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-2 sm:p-4 overflow-auto flex items-center justify-center bg-black/30 max-h-[82vh]">
+              <img 
+                src={zoomedImage} 
+                alt="Phóng to hình ảnh câu hỏi" 
+                className="max-w-full max-h-[78vh] object-contain rounded-lg shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

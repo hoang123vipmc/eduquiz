@@ -15,7 +15,8 @@ import {
   CheckCircle2, 
   HelpCircle,
   Sparkles,
-  Layers
+  Layers,
+  Image as ImageIcon
 } from "lucide-react";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
@@ -248,6 +249,12 @@ export default function QuestionBankPage() {
                     {q.points || 1} điểm
                   </span>
 
+                  {q.question_image && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                      <ImageIcon className="w-3 h-3" /> Có ảnh
+                    </span>
+                  )}
+
                   {q.quiz && (
                     <span className="flex items-center gap-1 text-[11px] text-muted-foreground truncate max-w-[170px]" title={q.quiz.title}>
                       <BookOpen className="w-3 h-3 text-primary/70 shrink-0" />
@@ -326,9 +333,16 @@ export default function QuestionBankPage() {
                     className="border-b border-border last:border-0 hover:bg-muted/40 transition-colors cursor-pointer group"
                   >
                     <td className="p-4">
-                      <p className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors" title={cleanInlineText(q.question_text)}>
-                        <FormattedText text={q.question_text} />
-                      </p>
+                      <div className="flex items-start gap-2">
+                        <p className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors flex-1" title={cleanInlineText(q.question_text)}>
+                          <FormattedText text={q.question_text} />
+                        </p>
+                        {q.question_image && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/20 shrink-0 mt-0.5" title="Câu hỏi có ảnh minh họa">
+                            <ImageIcon className="w-3 h-3" /> Ảnh
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">
                       {q.quiz ? (
@@ -447,6 +461,17 @@ export default function QuestionBankPage() {
                   <FormattedText text={activeQuestion.question_text} />
                 </div>
               </div>
+
+              {/* Question Image if present */}
+              {activeQuestion.question_image && (
+                <div className="rounded-xl overflow-hidden border border-border/80 bg-muted/20 p-2.5 max-w-lg mx-auto flex justify-center">
+                  <img
+                    src={activeQuestion.question_image}
+                    alt="Ảnh minh họa câu hỏi"
+                    className="max-h-72 max-w-full rounded-lg object-contain shadow-xs"
+                  />
+                </div>
+              )}
 
               {/* Options */}
               {activeQuestion.options && activeQuestion.options.length > 0 && (
