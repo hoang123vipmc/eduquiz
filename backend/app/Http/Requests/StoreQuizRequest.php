@@ -15,6 +15,7 @@ class StoreQuizRequest extends FormRequest
     {
         return [
             'category_id' => 'nullable|exists:categories,id',
+            'category_name' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',

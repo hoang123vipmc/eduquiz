@@ -19,6 +19,10 @@ import {
   BookOpen,
   Hash,
   Clock,
+  Folder,
+  FolderPlus,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios";
@@ -54,6 +58,9 @@ interface QuizMeta {
 interface Category {
   id: number;
   name: string;
+  slug?: string;
+  icon?: string;
+  quizzes_count?: number;
 }
 
 interface EditQuizModalProps {
@@ -365,6 +372,9 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const [metaDraft, setMetaDraft] = useState<QuizMeta | null>(null);
   const [savingMeta, setSavingMeta] = useState(false);
   const [metaError, setMetaError] = useState("");
@@ -374,6 +384,29 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
   const [addingQuestion, setAddingQuestion] = useState(false);
   const [addError, setAddError] = useState("");
   const [qSearch, setQSearch] = useState("");
+
+  const handleCreateCategory = async (nameToUse?: string) => {
+    const name = (nameToUse || newCategoryName).trim();
+    if (!name) return;
+    setCreatingCategory(true);
+    try {
+      const { data } = await api.post("/categories", { name });
+      if (data.success && data.data) {
+        const created = data.data;
+        setCategories((prev) => {
+          if (prev.some((c) => c.id === created.id)) return prev;
+          return [...prev, created].sort((a, b) => a.name.localeCompare(b.name));
+        });
+        setMetaDraft((d) => (d ? { ...d, category_id: created.id } : d));
+        setNewCategoryName("");
+        setShowCreateCategory(false);
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Không thể tạo danh mục mới.");
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
 
   const triggerNotifyUpdated = useCallback(() => {
     onSuccess?.();
@@ -867,10 +900,23 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
                   />
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block uppercase tracking-wide">
-                    Môn học / Danh mục
-                  </label>
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Folder className="w-3.5 h-3.5 text-primary" />
+                      <span>Môn học / Danh mục</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateCategory(!showCreateCategory)}
+                      className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>{showCreateCategory ? "Đóng tạo nhanh" : "+ Thêm danh mục mới"}</span>
+                    </button>
+                  </div>
+
+                  {/* Dropdown chọn danh mục */}
                   <select
                     value={metaDraft.category_id ?? ""}
                     onChange={(e) =>
@@ -880,15 +926,94 @@ export function EditQuizModal({ isOpen, quiz, onClose, onSuccess, onUpdated }: E
                           : d
                       )
                     }
-                    className="w-full bg-card border border-border/80 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+                    className="w-full bg-card border border-border/80 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer font-medium"
                   >
-                    <option value="">-- Chọn danh mục --</option>
+                    <option value="">-- Chưa phân loại / Không chọn --</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                        📂 {cat.name} {cat.quizzes_count !== undefined ? `(${cat.quizzes_count} đề)` : ""}
                       </option>
                     ))}
                   </select>
+
+                  {/* Form inline tạo danh mục mới */}
+                  {showCreateCategory && (
+                    <div className="mt-2.5 p-3 rounded-xl bg-primary/5 border border-primary/20 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                        <FolderPlus className="w-4 h-4 text-primary" />
+                        <span>Tạo danh mục môn học mới:</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleCreateCategory();
+                            }
+                          }}
+                          placeholder="Ví dụ: Triết học Mác-Lênin, Cơ sở dữ liệu..."
+                          className="flex-1 bg-card border border-border/80 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleCreateCategory()}
+                          disabled={creatingCategory || !newCategoryName.trim()}
+                          className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-colors shrink-0"
+                        >
+                          {creatingCategory ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Plus className="w-3 h-3" />
+                          )}
+                          <span>Tạo & Chọn</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gợi ý danh mục đại học phổ biến */}
+                  <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500" /> Gợi ý:
+                    </span>
+                    {[
+                      "Triết học & Khoa học chính trị",
+                      "Công nghệ thông tin",
+                      "Kinh tế & Quản trị kinh doanh",
+                      "Ngoại ngữ & Tiếng Anh",
+                      "Pháp luật đại cương",
+                      "Toán & Khoa học tự nhiên",
+                    ].map((sug) => {
+                      const matchedCat = categories.find(
+                        (c) => c.name.toLowerCase() === sug.toLowerCase()
+                      );
+                      const isSelected = matchedCat && metaDraft.category_id === matchedCat.id;
+                      return (
+                        <button
+                          key={sug}
+                          type="button"
+                          onClick={() => {
+                            if (matchedCat) {
+                              setMetaDraft((d) => (d ? { ...d, category_id: matchedCat.id } : d));
+                            } else {
+                              handleCreateCategory(sug);
+                            }
+                          }}
+                          className={cn(
+                            "text-[11px] px-2 py-0.5 rounded-md border transition-all",
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary font-semibold"
+                              : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-border/60"
+                          )}
+                        >
+                          {sug}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>

@@ -72,11 +72,12 @@ class QuizImportController extends Controller
     public function importText(Request $request)
     {
         $request->validate([
-            'title'       => 'required|string|max:255',
-            'text'        => 'required|string|max:200000', // max ~200KB text
-            'category_id' => 'nullable|integer|exists:categories,id',
-            'cover_image' => 'nullable|string',
-            'description' => 'nullable|string|max:1000',
+            'title'         => 'required|string|max:255',
+            'text'          => 'required|string|max:200000', // max ~200KB text
+            'category_id'   => 'nullable|integer|exists:categories,id',
+            'category_name' => 'nullable|string|max:255',
+            'cover_image'   => 'nullable|string',
+            'description'   => 'nullable|string|max:1000',
         ]);
 
         $text = $request->text;
@@ -185,11 +186,34 @@ class QuizImportController extends Controller
             $slug = $baseSlug . '-' . Str::lower(Str::random(8)) . '-' . (int)(microtime(true) * 1000);
         }
 
+        $categoryId = $request->category_id;
+        if (empty($categoryId) && $request->filled('category_name')) {
+            $catName = trim($request->category_name);
+            $category = \App\Models\Category::whereRaw('LOWER(name) = ?', [mb_strtolower($catName)])->first();
+            if (!$category) {
+                $slug = Str::slug($catName);
+                if (empty($slug)) $slug = 'danh-muc-' . time();
+                $originalSlug = $slug;
+                $count = 1;
+                while (\App\Models\Category::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $count++;
+                }
+                $category = \App\Models\Category::create([
+                    'name' => $catName,
+                    'slug' => $slug,
+                    'icon' => 'folder',
+                    'description' => "Danh mục đề thi {$catName}",
+                ]);
+                \Illuminate\Support\Facades\Cache::forget('all_categories_list');
+            }
+            $categoryId = $category->id;
+        }
+
         DB::beginTransaction();
         try {
             $quiz = Quiz::create([
                 'user_id' => $request->user()->id,
-                'category_id' => $request->category_id,
+                'category_id' => $categoryId,
                 'title' => $request->title,
                 'slug' => $slug,
                 'description' => $request->description ?: 'Được tạo từ văn bản nhập nhanh.',
@@ -229,10 +253,15 @@ class QuizImportController extends Controller
             }
             DB::commit();
 
+            \Illuminate\Support\Facades\Cache::forget('public_quizzes_default_v1');
+            \Illuminate\Support\Facades\Cache::forget("my_quizzes_user_{$request->user()->id}_v1");
+            \Illuminate\Support\Facades\Cache::forget('admin_all_quizzes_v1');
+            \Illuminate\Support\Facades\Cache::forget('all_categories_list');
+
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo đề thi thành công',
-                'data' => $quiz
+                'data' => $quiz->load(['user', 'category'])
             ]);
         } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {

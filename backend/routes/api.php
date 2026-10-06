@@ -61,8 +61,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
         Route::post('/notifications/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
         
-        // Quản lý danh mục (Admin)
-        Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->middleware('role:admin');
+        // Quản lý danh mục (Người dùng tạo đề hoặc Admin)
+        Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store']);
         
         // Quản lý đề thi
         Route::post('/quizzes', [\App\Http\Controllers\QuizController::class, 'store']);

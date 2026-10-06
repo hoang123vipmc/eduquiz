@@ -15,6 +15,7 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'icon' => $this->icon,
             'description' => $this->description,
+            'quizzes_count' => $this->quizzes_count ?? ($this->relationLoaded('quizzes') ? $this->quizzes->count() : 0),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

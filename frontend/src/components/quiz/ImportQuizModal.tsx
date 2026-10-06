@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, FileText, Loader2, Edit3, ArrowLeft, HelpCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Upload, FileText, Loader2, Edit3, ArrowLeft, HelpCircle, AlertCircle, Folder, FolderPlus, Plus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/lib/axios';
 import { FormatGuideModal } from './FormatGuideModal';
@@ -24,6 +24,45 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
   const [error, setError] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [creatingCat, setCreatingCat] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    api.get('/categories')
+      .then(({ data }) => {
+        if (data?.success || Array.isArray(data)) {
+          setCategories(Array.isArray(data) ? data : (data.data || []));
+        }
+      })
+      .catch(() => {});
+  }, [isOpen]);
+
+  const handleCreateCategory = async (nameToUse?: string) => {
+    const name = (nameToUse || newCatName).trim();
+    if (!name) return;
+    setCreatingCat(true);
+    try {
+      const { data } = await api.post('/categories', { name });
+      if (data.success && data.data) {
+        const created = data.data;
+        setCategories((prev) => {
+          if (prev.some((c) => c.id === created.id)) return prev;
+          return [...prev, created].sort((a, b) => a.name.localeCompare(b.name));
+        });
+        setCategoryId(created.id);
+        setNewCatName('');
+        setShowNewCat(false);
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Không thể tạo danh mục mới.');
+    } finally {
+      setCreatingCat(false);
+    }
+  };
 
   const parsedQuestions = React.useMemo(() => {
     if (step === 2) return parseQuizText(rawText);
@@ -148,7 +187,8 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
       const { data } = await api.post('/quizzes/import-text', {
         title: title,
         text: rawText,
-        cover_image: coverImage
+        cover_image: coverImage,
+        category_id: categoryId,
       });
       
       if (data.success) {
@@ -156,6 +196,8 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
         setTitle('');
         setFile(null);
         setRawText('');
+        setCategoryId(null);
+        setNewCatName('');
         setStep(1);
       }
     } catch (err: any) {
@@ -222,6 +264,107 @@ export function ImportQuizModal({ isOpen, onClose, onSuccess }: ImportQuizModalP
                 className="w-full bg-muted border border-border focus:border-primary text-foreground rounded-xl px-4 py-3 outline-none transition-all placeholder:text-muted-foreground text-sm"
                 disabled={loading}
               />
+            </div>
+
+            {/* Chọn môn học / Danh mục */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <Folder className="w-4 h-4 text-primary" />
+                  <span>Môn học / Danh mục</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCat(!showNewCat)}
+                  className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>{showNewCat ? "Đóng tạo nhanh" : "+ Tạo danh mục mới"}</span>
+                </button>
+              </div>
+
+              <select
+                value={categoryId ?? ""}
+                onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
+                className="w-full bg-muted border border-border focus:border-primary text-foreground rounded-xl px-4 py-2.5 outline-none transition-all text-sm cursor-pointer"
+                disabled={loading}
+              >
+                <option value="">-- Chưa phân loại / Không chọn --</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    📂 {c.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Inline input tạo nhanh danh mục */}
+              {showNewCat && (
+                <div className="flex items-center gap-2 p-2.5 bg-primary/5 border border-primary/20 rounded-xl animate-in fade-in duration-200">
+                  <input
+                    type="text"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleCreateCategory();
+                      }
+                    }}
+                    placeholder="Nhập tên môn học / danh mục..."
+                    className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCreateCategory()}
+                    disabled={creatingCat || !newCatName.trim()}
+                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50 transition-colors shrink-0"
+                  >
+                    {creatingCat ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                    <span>Tạo & Chọn</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Gợi ý danh mục đại học phổ biến */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-500" /> Gợi ý:
+                </span>
+                {[
+                  "Triết học & Khoa học chính trị",
+                  "Công nghệ thông tin",
+                  "Kinh tế & Quản trị kinh doanh",
+                  "Ngoại ngữ & Tiếng Anh",
+                  "Pháp luật đại cương",
+                  "Toán & Khoa học tự nhiên",
+                ].map((sug) => {
+                  const matchedCat = categories.find(
+                    (c) => c.name.toLowerCase() === sug.toLowerCase()
+                  );
+                  const isSelected = matchedCat && categoryId === matchedCat.id;
+                  return (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => {
+                        if (matchedCat) {
+                          setCategoryId(matchedCat.id);
+                        } else {
+                          handleCreateCategory(sug);
+                        }
+                      }}
+                      className={cn(
+                        "text-[11px] px-2 py-0.5 rounded-md border transition-all",
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-primary font-semibold"
+                          : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground border-border/60"
+                      )}
+                    >
+                      {sug}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Chọn ảnh bìa đề thi */}

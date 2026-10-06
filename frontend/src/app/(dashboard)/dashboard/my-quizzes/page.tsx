@@ -29,6 +29,7 @@ import {
   UserCheck,
   Pencil,
   Tag,
+  Folder,
   X as XIcon,
   Share2
 } from "lucide-react";
@@ -186,13 +187,42 @@ export default function MyQuizzesPage() {
     }
   }, [debouncedSearch, adminViewAll, user]);
 
-  // Danh sách thể loại
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    quizzes.forEach((q) => {
-      if (q.category?.name) set.add(q.category.name);
+  const [allCategories, setAllCategories] = useState<{ id: number; name: string; quizzes_count?: number }[]>([]);
+
+  useEffect(() => {
+    api.get("/categories")
+      .then(({ data }) => {
+        if (data?.success && Array.isArray(data.data)) {
+          setAllCategories(data.data);
+        } else if (Array.isArray(data)) {
+          setAllCategories(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Danh sách thể loại tổng hợp từ backend và đề thi hiện có
+  const categoryOptions = useMemo(() => {
+    const map = new Map<string, { id?: number; name: string; count: number }>();
+    allCategories.forEach((c) => {
+      map.set(c.name.toLowerCase(), { id: c.id, name: c.name, count: c.quizzes_count || 0 });
     });
-    return Array.from(set);
+    quizzes.forEach((q) => {
+      if (q.category?.name) {
+        const key = q.category.name.toLowerCase();
+        const existing = map.get(key);
+        if (existing) {
+          if (!existing.count) existing.count = 1;
+        } else {
+          map.set(key, { id: q.category.id, name: q.category.name, count: 1 });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [allCategories, quizzes]);
+
+  const unclassifiedCount = useMemo(() => {
+    return quizzes.filter((q) => !q.category || !q.category.name).length;
   }, [quizzes]);
 
   // Lọc và sắp xếp
@@ -200,7 +230,13 @@ export default function MyQuizzesPage() {
     let result = [...quizzes];
 
     if (selectedCategory !== "all") {
-      result = result.filter((q) => q.category?.name === selectedCategory);
+      if (selectedCategory === "unclassified") {
+        result = result.filter((q) => !q.category || !q.category.name);
+      } else {
+        result = result.filter(
+          (q) => q.category?.name?.toLowerCase() === selectedCategory.toLowerCase()
+        );
+      }
     }
 
     // Tag filter (tìm trong title + description + category)
@@ -328,95 +364,129 @@ export default function MyQuizzesPage() {
       </div>
 
       {/* Filter and Search Controls Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search Box */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Tìm kiếm trong đề thi của tôi"
-            placeholder="Tìm kiếm theo tên đề thi, từ khóa..."
-            className="w-full bg-card border border-border/80 rounded-xl pl-10 pr-9 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-xs"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              aria-label="Xóa từ khóa tìm kiếm"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Tìm kiếm trong đề thi của tôi"
+              placeholder="Tìm kiếm theo tên đề thi, từ khóa..."
+              className="w-full bg-card border border-border/80 rounded-xl pl-10 pr-9 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-xs"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                aria-label="Xóa từ khóa tìm kiếm"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
 
-        {/* Filter and Sort Dropdowns */}
-        <div className="flex items-center gap-2.5 self-end sm:self-auto w-full sm:w-auto">
-          {categories.length > 0 && (
-            <div className="relative flex-1 sm:flex-initial">
+          {/* Filter and Sort Dropdowns */}
+          <div className="flex items-center gap-2.5 self-end sm:self-auto w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial flex items-center bg-card border border-border/80 rounded-xl px-2.5 py-1.5 text-xs text-muted-foreground shadow-xs">
+              <Folder className="w-3.5 h-3.5 text-primary shrink-0 mr-1.5" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 aria-label="Lọc theo thể loại"
-                className="w-full sm:w-auto appearance-none bg-card border border-border/80 rounded-xl px-3.5 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-xs"
+                className="bg-transparent text-foreground font-semibold focus:outline-none cursor-pointer pr-1 max-w-[170px] truncate"
               >
-                <option value="all">Tất cả môn học</option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                <option value="all">📂 Tất cả môn học ({quizzes.length})</option>
+                {categoryOptions.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name} {c.count ? `(${c.count})` : ''}
                   </option>
                 ))}
+                {unclassifiedCount > 0 && (
+                  <option value="unclassified">❓ Chưa phân loại ({unclassifiedCount})</option>
+                )}
               </select>
-              <Filter className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
-          )}
 
-          <div className="relative flex-1 sm:flex-initial">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              aria-label="Sắp xếp theo thứ tự"
-              className="w-full sm:w-auto appearance-none bg-card border border-border/80 rounded-xl px-3.5 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-xs"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="questions">Số câu hỏi</option>
-              <option value="duration">Thời gian thi</option>
-            </select>
-            <ArrowUpDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <div className="relative flex-1 sm:flex-initial flex items-center bg-card border border-border/80 rounded-xl px-2.5 py-1.5 text-xs text-muted-foreground shadow-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground shrink-0 mr-1.5" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                aria-label="Sắp xếp theo thứ tự"
+                className="bg-transparent text-foreground font-medium focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="questions">Số câu hỏi</option>
+                <option value="duration">Thời gian thi</option>
+              </select>
+            </div>
           </div>
+        </div>
+
+        {/* Horizontal Category Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+          <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 shrink-0 mr-0.5">
+            <Filter className="w-3.5 h-3.5 text-primary" />
+            <span>Danh mục:</span>
+          </span>
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5",
+              selectedCategory === "all"
+                ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <span>Tất cả</span>
+            <span className="text-[10px] opacity-80 px-1.5 py-0.2 rounded-full bg-black/15 dark:bg-white/15">
+              {quizzes.length}
+            </span>
+          </button>
+          {categoryOptions.map((cat) => {
+            const isSelected = selectedCategory.toLowerCase() === cat.name.toLowerCase();
+            return (
+              <button
+                key={cat.name}
+                onClick={() => setSelectedCategory(cat.name)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5",
+                  isSelected
+                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span>{cat.name}</span>
+                {cat.count > 0 && (
+                  <span className="text-[10px] opacity-80 px-1.5 py-0.2 rounded-full bg-black/15 dark:bg-white/15">
+                    {cat.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+          {unclassifiedCount > 0 && (
+            <button
+              onClick={() => setSelectedCategory("unclassified")}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5",
+                selectedCategory === "unclassified"
+                  ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                  : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span>Chưa phân loại</span>
+              <span className="text-[10px] opacity-80 px-1.5 py-0.2 rounded-full bg-black/15 dark:bg-white/15">
+                {unclassifiedCount}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tag / Quick-filter pills */}
-      {categories.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-          <span className="text-xs text-muted-foreground font-medium shrink-0">Tag:</span>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveTagFilter(activeTagFilter === cat ? "" : cat)}
-              className={cn(
-                "px-2.5 py-1 rounded-full text-xs font-medium transition-all border",
-                activeTagFilter === cat
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                  : "bg-muted/60 text-muted-foreground border-border/60 hover:border-primary/50 hover:text-foreground"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-          {activeTagFilter && (
-            <button
-              onClick={() => setActiveTagFilter("")}
-              className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-destructive/80 hover:text-destructive border border-destructive/30 hover:border-destructive/60 transition-all"
-            >
-              <XIcon className="w-3 h-3" /> Bỏ lọc
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Grid of Quizzes */}
       {loading ? (
@@ -518,8 +588,14 @@ export default function MyQuizzesPage() {
 
                   {/* Badges on Cover */}
                   <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white bg-black/50 backdrop-blur-md rounded-lg border border-white/10 shadow-xs">
-                      {quiz.category?.name || theme.defaultTag}
+                    <span className={cn(
+                      "px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur-md rounded-lg border shadow-xs flex items-center gap-1",
+                      quiz.category?.name
+                        ? "bg-primary/90 text-primary-foreground border-primary/40"
+                        : "bg-black/50 text-white/90 border-white/10"
+                    )}>
+                      <Folder className="w-3 h-3" />
+                      <span>{quiz.category?.name || "Chưa phân loại"}</span>
                     </span>
                     {isOwner ? (
                       <span className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-blue-300 bg-blue-950/70 backdrop-blur-md rounded-lg border border-blue-500/40">
@@ -577,6 +653,31 @@ export default function MyQuizzesPage() {
                 {/* Card Body */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
+                    {/* Category pill in body */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (quiz.category?.name) {
+                            setSelectedCategory(quiz.category.name);
+                          } else {
+                            setSelectedCategory("unclassified");
+                          }
+                        }}
+                        className={cn(
+                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all hover:scale-105",
+                          quiz.category?.name 
+                            ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/20" 
+                            : "bg-muted text-muted-foreground border-border/80 hover:bg-muted/80"
+                        )}
+                        title={`Lọc danh mục: ${quiz.category?.name || "Chưa phân loại"}`}
+                      >
+                        <Folder className="w-3 h-3" />
+                        <span>{quiz.category?.name || "Chưa phân loại"}</span>
+                      </button>
+                    </div>
+
                     <h3
                       className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1.5 tracking-tight"
                       title={quiz.title}

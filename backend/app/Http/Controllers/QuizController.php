@@ -145,6 +145,29 @@ class QuizController extends Controller
         $data = $request->validated();
         $data['user_id'] = $request->user()->id;
 
+        if ($request->filled('category_name') && empty($data['category_id'])) {
+            $catName = trim($request->category_name);
+            $category = \App\Models\Category::whereRaw('LOWER(name) = ?', [mb_strtolower($catName)])->first();
+            if (!$category) {
+                $slug = Str::slug($catName);
+                if (empty($slug)) $slug = 'danh-muc-' . time();
+                $originalSlug = $slug;
+                $count = 1;
+                while (\App\Models\Category::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $count++;
+                }
+                $category = \App\Models\Category::create([
+                    'name' => $catName,
+                    'slug' => $slug,
+                    'icon' => 'folder',
+                    'description' => "Danh mục đề thi {$catName}",
+                ]);
+                Cache::forget('all_categories_list');
+            }
+            $data['category_id'] = $category->id;
+        }
+        unset($data['category_name']);
+
         $baseSlug = !empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['title']);
         if (empty($baseSlug)) {
             $baseSlug = 'quiz';
@@ -160,6 +183,7 @@ class QuizController extends Controller
         Cache::forget('public_quizzes_default_v1');
         Cache::forget("my_quizzes_user_{$data['user_id']}_v1");
         Cache::forget('admin_all_quizzes_v1');
+        Cache::forget('all_categories_list');
 
         return response()->json([
             'success' => true,
@@ -182,6 +206,7 @@ class QuizController extends Controller
 
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
+            'category_name' => 'nullable|string|max:255',
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string|max:5000',
             'cover_image' => ['nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
@@ -198,10 +223,34 @@ class QuizController extends Controller
             'passing_score' => 'nullable|integer|min:0|max:100',
         ]);
 
+        if ($request->filled('category_name') && empty($validated['category_id'])) {
+            $catName = trim($request->category_name);
+            $category = \App\Models\Category::whereRaw('LOWER(name) = ?', [mb_strtolower($catName)])->first();
+            if (!$category) {
+                $slug = Str::slug($catName);
+                if (empty($slug)) $slug = 'danh-muc-' . time();
+                $originalSlug = $slug;
+                $count = 1;
+                while (\App\Models\Category::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $count++;
+                }
+                $category = \App\Models\Category::create([
+                    'name' => $catName,
+                    'slug' => $slug,
+                    'icon' => 'folder',
+                    'description' => "Danh mục đề thi {$catName}",
+                ]);
+                Cache::forget('all_categories_list');
+            }
+            $validated['category_id'] = $category->id;
+        }
+        unset($validated['category_name']);
+
         $quiz->update($validated);
         Cache::forget('public_quizzes_default_v1');
         Cache::forget("my_quizzes_user_{$quiz->user_id}_v1");
         Cache::forget('admin_all_quizzes_v1');
+        Cache::forget('all_categories_list');
 
         return response()->json([
             'success' => true,
