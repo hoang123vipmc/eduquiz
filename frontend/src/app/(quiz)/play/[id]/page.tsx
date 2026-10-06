@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuizStore } from "@/store/quizStore";
 import { useAuthStore } from "@/store/authStore";
@@ -403,10 +403,10 @@ export default function QuizPlayerPage() {
     router.push('/dashboard');
   };
 
-  const handleSubmit = async (isAutoTimeout = false) => {
+  const handleSubmit = async (isAutoTimeout: boolean | any = false) => {
     if (submitting) return;
 
-    if (!isAutoTimeout) {
+    if (isAutoTimeout !== true) {
       const unansweredCount = questions.length - Object.keys(answers).length;
       const confirmMsg = isPractice
         ? (unansweredCount > 0 
@@ -732,7 +732,7 @@ export default function QuizPlayerPage() {
             )}
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()}
               disabled={submitting}
               className="px-2 py-0.5 bg-[#b91c1c] text-white text-[11px] font-bold rounded shadow-xs"
             >
@@ -1104,7 +1104,7 @@ export default function QuizPlayerPage() {
                 isCorrect={isCorrect}
                 isWrong={isWrong}
                 isFlagged={!!flaggedQuestions[q.id]}
-                onSelect={(selectedIdx) => {
+                onSelect={(selectedIdx: number) => {
                   setCurrentQuestionIndex(selectedIdx);
                   if (isModal) setShowMobilePaletteModern(false);
                 }}
@@ -1204,7 +1204,7 @@ export default function QuizPlayerPage() {
             <QuizTimer />
             
             <button 
-              onClick={handleSubmit} 
+              onClick={() => handleSubmit()} 
               disabled={submitting} 
               aria-label="Nộp bài thi"
               className="flex items-center gap-1 sm:gap-2 bg-[#10B981] hover:bg-emerald-600 text-white font-bold px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full shadow-[0_2px_10px_rgba(16,185,129,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"

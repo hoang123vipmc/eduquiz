@@ -96,9 +96,8 @@ class NotificationController extends Controller
     {
         // To show history of global announcements. 
         // We can just query distinct title/messages to infer announcements.
-        // For simplicity, we fetch unique recent notifications.
         $announcements = Notification::select('title', 'message', 'type', 'created_at')
-            ->groupBy('title', 'message', 'type', 'created_at')
+            ->distinct()
             ->orderBy('created_at', 'desc')
             ->take(50)
             ->get();
