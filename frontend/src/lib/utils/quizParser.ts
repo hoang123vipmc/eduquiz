@@ -60,8 +60,8 @@ export function parseQuizText(text: string): ParsedQuestion[] {
     }
 
     let isCorrectOption = line.startsWith('*');
-    // Regex matches A. A) A- 1. 1) 1- (also handles " E .INT")
-    const optionRegex = /^[A-F1-6]\s*[\.\)\-]/i;
+    // Regex matches A. A) A- 1. 1) 1- (with digits requiring space after dot to avoid matching decimals like 3.0)
+    const optionRegex = /^(?:[A-Za-z]\s*[\.\:\)\-]|[1-6]\s*[\:\)\-]|[1-6]\.\s+)/i;
     const isOption = isCorrectOption || optionRegex.test(line);
 
     if (isOption && currentQuestion) {

@@ -55,11 +55,31 @@ export function cleanInlineText(text?: string | null): string {
 }
 
 /**
- * Strips leading option prefixes such as "A. ", "*B. ", "1) ", "A) ", etc.
+ * Strips leading option prefixes such as "A. ", "*B. ", "1) ", "A) ", "(A) ", etc.
+ * Safely preserves decimal and version numbers like "3.0", "1.0", "3.14", etc.
  */
 export function cleanOptionPrefix(text?: string | null): string {
   if (!text) return "";
-  return String(text).replace(/^(\*?\s*[A-F1-6]\s*[\.\)\-]\s*)+/i, "").trim();
+  const str = String(text).trim();
+
+  // Strip leading prefixes while protecting decimal/version numbers (e.g. 3.0, 1.0)
+  const cleaned = str
+    // Remove leading bullet/asterisk/dash if present before prefix (e.g. "* A. ", "- B. ")
+    .replace(/^[\*\•\-\–]\s*/, "")
+    // Parenthesized label like (A) or (1)
+    .replace(/^\([A-Za-z0-9]\)\s*/, "")
+    // Letter prefix with delimiter and trailing whitespace (e.g. "A. ", "B) ", "C: ", "D - ")
+    .replace(/^[A-Za-z]\s*[\.\:\)\-]\s+/, "")
+    // Letter prefix without space only if followed by non-digits/non-punctuation (e.g. "A.Hà Nội")
+    .replace(/^[A-Za-z]\s*[\.\:\)\-](?=[^\d\.\:\)\-\s])/, "")
+    // Number prefix with dot: '1. ' (MUST be followed by whitespace, protecting decimals like 3.0, 1.5)
+    .replace(/^\d+\.\s+/, "")
+    // Number prefix with closing parenthesis, colon or dash: '1) ', '1: ', '1- '
+    .replace(/^\d+\s*[\:\)\-]\s*/, "")
+    .trim();
+
+  // If cleaning resulted in an empty string (e.g. text was literally "A." or "1"), return original trimmed string
+  return cleaned || str;
 }
 
 /**

@@ -135,7 +135,10 @@ class QuizImportController extends Controller
 
             // Kiểm tra xem có phải option không
             $isCorrectOption = str_starts_with($line, '*');
-            $isOption = $isCorrectOption || preg_match('/^[A-F]\s*[\.\)\-]/i', $line) || preg_match('/^[1-6]\s*[\.\)\-]/', $line);
+            $isOption = $isCorrectOption 
+                || preg_match('/^[A-Za-z]\s*[\.\:\)\-]/i', $line) 
+                || preg_match('/^[1-6]\s*[\:\)\-]/', $line)
+                || preg_match('/^[1-6]\.\s+/', $line);
 
             if ($isOption) {
                 $optText = $line;
