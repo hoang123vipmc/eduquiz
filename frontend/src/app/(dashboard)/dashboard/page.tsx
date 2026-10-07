@@ -209,14 +209,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       
-      {/* Hero Section with 3D Illustration */}
-      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 p-4 sm:p-7 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border shadow-sm">
+      {/* Hero Section — Google Workspace Clean Canvas */}
+      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 p-5 sm:p-7 rounded-2xl bg-card border border-border/80 shadow-2xs">
         <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-2 sm:mb-3">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-secondary text-xs font-semibold text-primary mb-2.5">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Nền tảng ôn thi trắc nghiệm OpenQuiz</span>
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-1.5 sm:mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground mb-1.5 sm:mb-2">
             Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
           </h2>
           <p className="text-muted-foreground text-xs sm:text-sm md:text-[15px] leading-relaxed mb-4 sm:mb-5">
@@ -227,23 +227,23 @@ export default function DashboardPage() {
           {!loading && !userMsv && (
             <div 
               onClick={() => router.push('/dashboard/settings')}
-              className="mb-4 sm:mb-5 p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/25 transition-all cursor-pointer flex items-center justify-between gap-3 group shadow-xs"
+              className="mb-4 sm:mb-5 p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border/80 transition-all cursor-pointer flex items-center justify-between gap-3 group shadow-2xs"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <GraduationCap className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <span>Cá nhân hóa theo lịch thi</span>
-                    <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-400">Chưa cài MSV</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-primary/10 text-primary">Chưa cài MSV</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground truncate">
                     Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-semibold text-blue-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
+              <span className="text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
                 Cài đặt ngay <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
@@ -251,15 +251,15 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button 
               onClick={() => router.push('/dashboard/quizzes')}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md active:scale-95"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all shadow-xs hover:shadow-sm active:scale-95"
             >
               <Play className="w-4 h-4 fill-current" /> Bắt đầu luyện thi
             </button>
             <button 
               onClick={() => router.push('/dashboard/bank')}
-              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-colors border border-border/60"
+              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-foreground px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-colors border border-border/60"
             >
-              <BookOpen className="w-4 h-4" /> Ngân hàng câu hỏi
+              <BookOpen className="w-4 h-4 text-primary" /> Ngân hàng câu hỏi
             </button>
           </div>
         </div>

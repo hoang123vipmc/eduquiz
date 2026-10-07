@@ -46,19 +46,21 @@ export default function DashboardLayout({
       <Sidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <Topbar onOpenMobile={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 lg:p-8 pb-24 md:pb-8">
-          <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {children}
-            
-            {/* Footer Disclaimer */}
-            <footer className="mt-12 sm:mt-16 py-6 border-t border-border/40 text-center text-xs text-muted-foreground space-y-1">
-              <p className="font-semibold text-foreground/80">
-                OpenQuiz — Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận
-              </p>
-              <p>
-                Dự án cá nhân độc lập phục vụ mục đích học tập, ôn thi và nghiên cứu công nghệ cho sinh viên. Hoàn toàn miễn phí.
-              </p>
-            </footer>
+        <main className="flex-1 overflow-hidden p-0 sm:p-2 sm:pt-0 sm:pr-3 md:p-3 md:pt-0 md:pr-4">
+          <div className="h-full overflow-y-auto bg-card rounded-none sm:rounded-2xl border-0 sm:border border-border/80 shadow-2xs p-3 sm:p-5 md:p-7 pb-24 md:pb-12 transition-colors">
+            <div className="max-w-7xl mx-auto animate-in fade-in duration-300">
+              {children}
+              
+              {/* Footer Disclaimer */}
+              <footer className="mt-12 sm:mt-16 py-6 border-t border-border/40 text-center text-xs text-muted-foreground space-y-1">
+                <p className="font-semibold text-foreground/80">
+                  OpenQuiz — Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận
+                </p>
+                <p>
+                  Dự án cá nhân độc lập phục vụ mục đích học tập, ôn thi và nghiên cứu công nghệ cho sinh viên. Hoàn toàn miễn phí.
+                </p>
+              </footer>
+            </div>
           </div>
         </main>
 

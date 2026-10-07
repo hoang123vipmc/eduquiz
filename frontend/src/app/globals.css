@@ -41,62 +41,62 @@
 }
 
 :root {
-  /* LIGHT MODE — Premium & Refined */
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* LIGHT MODE — Google Drive / Material Design 3 */
+  --background: #f8fafd;
+  --foreground: #1f1f1f;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #4f46e5;
+  --card-foreground: #1f1f1f;
+  --primary: #0b57d0;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --accent: #e0e7ff;
-  --accent-foreground: #3730a3;
-  --destructive: #ef4444;
+  --secondary: #edf2fc;
+  --secondary-foreground: #1f1f1f;
+  --muted: #f0f4f9;
+  --muted-foreground: #444746;
+  --accent: #c2e7ff;
+  --accent-foreground: #001d35;
+  --destructive: #b3261e;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #4f46e5;
-  --radius: 10px;
-  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --gradient-glass: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --shadow-primary: 0 4px 24px rgba(79, 70, 229, 0.25);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --border: #e0e2ec;
+  --input: #e9eef6;
+  --ring: #0b57d0;
+  --radius: 16px;
+  --gradient-primary: linear-gradient(135deg, #0b57d0 0%, #1a73e8 100%);
+  --gradient-success: linear-gradient(135deg, #137333 0%, #1e8e3e 100%);
+  --gradient-danger: linear-gradient(135deg, #c5221f 0%, #d93025 100%);
+  --gradient-gold: linear-gradient(135deg, #e37400 0%, #f9ab00 100%);
+  --gradient-glass: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(224, 226, 236, 0.8);
+  --shadow-primary: 0 1px 3px rgba(11, 87, 208, 0.2), 0 4px 12px rgba(11, 87, 208, 0.12);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
 }
 
 .dark {
-  /* DARK MODE — Deep Space Aesthetic */
-  --background: #080c14;
-  --foreground: #f0f4ff;
-  --card: #0d1117;
-  --card-foreground: #f0f4ff;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #111827;
-  --secondary-foreground: #e2e8f0;
-  --muted: #111827;
-  --muted-foreground: #94a3b8;
-  --accent: #1e1b4b;
-  --accent-foreground: #a5b4fc;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #1e2533;
-  --input: #1e2533;
-  --ring: #6366f1;
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-  --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-  --gradient-glass: rgba(13, 17, 23, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.07);
-  --shadow-primary: 0 4px 24px rgba(99, 102, 241, 0.35);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  /* DARK MODE — Google Workspace Dark */
+  --background: #131314;
+  --foreground: #e3e3e3;
+  --card: #1e1f20;
+  --card-foreground: #e3e3e3;
+  --primary: #a8c7fa;
+  --primary-foreground: #042e6f;
+  --secondary: #282a2c;
+  --secondary-foreground: #e3e3e3;
+  --muted: #282a2c;
+  --muted-foreground: #8e918f;
+  --accent: #004a77;
+  --accent-foreground: #c2e7ff;
+  --destructive: #f2b8b5;
+  --destructive-foreground: #601410;
+  --border: #353637;
+  --input: #282a2c;
+  --ring: #a8c7fa;
+  --gradient-primary: linear-gradient(135deg, #a8c7fa 0%, #8ab4f8 100%);
+  --gradient-success: linear-gradient(135deg, #81c995 0%, #a8dab5 100%);
+  --gradient-danger: linear-gradient(135deg, #f28b82 0%, #f6aea9 100%);
+  --gradient-gold: linear-gradient(135deg, #fdd663 0%, #fee79a 100%);
+  --gradient-glass: rgba(30, 31, 32, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-primary: 0 2px 8px rgba(168, 199, 250, 0.25);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 @layer base {

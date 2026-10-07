@@ -18,7 +18,8 @@ import {
   X,
   CalendarCheck,
   Bookmark,
-  Megaphone
+  Megaphone,
+  Plus
 } from "lucide-react";
 
 interface SidebarProps {
@@ -87,81 +88,56 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   };
 
   const navContent = (
-    <div className="flex flex-col h-full text-foreground">
+    <div className="flex flex-col h-full text-foreground bg-background">
       {/* Brand Header */}
-      <div className="pt-5 sm:pt-6 pb-4 sm:pb-5 px-4 sm:px-5 border-b border-border/40 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-violet-500 to-purple-600" />
-            <div className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">
-              OQ
-            </div>
+      <div className="pt-4 pb-2 px-5 flex items-center justify-between">
+        <Link 
+          href="/dashboard" 
+          onClick={() => onClose?.()}
+          className="flex items-center gap-3 group cursor-pointer"
+        >
+          <div className="w-9 h-9 rounded-xl bg-card border border-border shadow-xs flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+            <BookOpen className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <div className="font-black text-lg tracking-tight leading-tight gradient-text">
+            <div className="font-extrabold text-base tracking-tight text-foreground leading-tight">
               OpenQuiz
             </div>
-            <div className="text-[10px] text-muted-foreground font-medium tracking-wide">
-              Học tập phi lợi nhuận ✦
+            <div className="text-[11px] text-muted-foreground font-medium">
+              Kho đề & Luyện thi
             </div>
           </div>
-        </div>
+        </Link>
 
         {onClose && (
           <button
             onClick={onClose}
             aria-label="Đóng menu"
-            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-xl hover:bg-muted active:scale-90 active:rotate-90 transition-all duration-200"
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      {/* User Info Card */}
-      <div className="p-2.5 mx-3 mt-3 mb-1 rounded-xl bg-secondary/80 border border-border/60 flex items-center justify-between gap-2 hover:border-primary/30 transition-colors">
-        <div 
+      {/* Google Drive "+ Mới" (Tạo đề thi mới) Pill Button */}
+      <div className="px-3 pt-2 pb-2">
+        <button
           onClick={() => {
             onClose?.();
-            router.push('/dashboard/settings');
+            router.push('/dashboard/my-quizzes');
           }}
-          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group"
-          title="Xem thông tin tài khoản"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-card hover:bg-secondary text-foreground border border-border shadow-xs hover:shadow-md transition-all active:scale-[0.98] cursor-pointer group"
         >
-          <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-primary/20 shrink-0 group-hover:border-primary/50 transition-colors">
-            <img 
-              src={user?.avatar || "/images/avatar-student.jpg"} 
-              alt={user?.name || "Avatar"} 
-              className="w-full h-full object-cover" 
-            />
-            <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-full" />
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:rotate-90 transition-transform">
+            <Plus className="w-5 h-5 stroke-[2.5]" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs sm:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
-              {user?.name || "Học viên"}
-            </div>
-            <div className="text-[10px] text-muted-foreground truncate capitalize flex items-center gap-1">
-              {isSuperAdmin ? (
-                <><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />Quản trị viên</>
-              ) : (
-                <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />Học viên</>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <button 
-          onClick={() => setShowLogoutModal(true)}
-          aria-label="Đăng xuất tài khoản"
-          className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all shrink-0 border border-transparent hover:border-rose-500/20"
-          title="Đăng xuất tài khoản"
-        >
-          <LogOut className="w-4 h-4" />
+          <span className="font-semibold text-sm">Mới / Tạo đề thi</span>
         </button>
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 py-4 overflow-y-auto px-3 space-y-1 scrollbar-hide">
+      <div className="flex-1 py-1 overflow-y-auto px-3 space-y-1 scrollbar-hide">
         {links.map((link) => {
           const Icon = link.icon;
           
@@ -169,8 +145,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           if ((link as any).isDivider) {
             return (
               <div key={link.name} className="my-2 px-3">
-                <div className="h-px bg-border" />
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mt-3 mb-1 px-0.5">
+                <div className="h-px bg-border/60" />
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-3 mb-1 px-1">
                   Quản trị
                 </p>
               </div>
@@ -186,27 +162,24 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               href={link.href}
               onClick={() => onClose?.()}
               className={cn(
-                "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.97]",
+                "group relative flex items-center gap-3.5 px-4 py-2.5 rounded-full text-sm font-medium transition-colors cursor-pointer",
                 reallyActive 
-                  ? "bg-primary/10 text-primary font-semibold" 
+                  ? "bg-accent text-accent-foreground font-semibold" 
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               )}
             >
-              {reallyActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-primary to-violet-500 rounded-r-full" />
-              )}
-              
-              <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shrink-0",
-                reallyActive 
-                  ? "bg-primary/15 text-primary"
-                  : "text-muted-foreground group-hover:text-foreground"
-              )}>
-                <Icon className="w-4 h-4" />
-              </div>
+              <Icon className={cn(
+                "w-5 h-5 shrink-0 transition-colors",
+                reallyActive ? "text-accent-foreground" : "text-muted-foreground group-hover:text-foreground"
+              )} />
               <span className="flex-1 truncate">{link.name}</span>
               {(link as any).badge && (
-                <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                  reallyActive 
+                    ? "bg-card text-accent-foreground border-accent-foreground/20" 
+                    : "bg-muted text-primary border-primary/20"
+                )}>
                   {(link as any).badge}
                 </span>
               )}
@@ -215,27 +188,41 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         })}
       </div>
 
-      {/* Bottom badge */}
-      <div className="p-3 mt-auto border-t border-border/30">
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/8 via-primary/5 to-transparent border border-primary/10 p-3">
-          <div className="font-bold text-xs text-foreground flex items-center gap-1.5 mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            OpenQuiz Phi lợi nhuận
+      {/* User Info Card */}
+      <div className="p-2 mx-3 my-2 rounded-2xl bg-card border border-border/80 flex items-center justify-between gap-2 shadow-2xs">
+        <div 
+          onClick={() => {
+            onClose?.();
+            router.push('/dashboard/settings');
+          }}
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group"
+          title="Xem thông tin tài khoản"
+        >
+          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-border shrink-0">
+            <img 
+              src={user?.avatar || "/images/avatar-student.jpg"} 
+              alt={user?.name || "Avatar"} 
+              className="w-full h-full object-cover" 
+            />
           </div>
-          <p className="text-[11px] text-muted-foreground leading-snug">
-            Dự án cá nhân phục vụ học tập và nghiên cứu, miễn phí 100%.
-          </p>
-          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/80">
-            <Link href="/terms" className="hover:text-primary transition-colors underline underline-offset-2">
-              Điều khoản
-            </Link>
-            <span>•</span>
-            <Link href="/privacy" className="hover:text-primary transition-colors underline underline-offset-2">
-              Bảo mật
-            </Link>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">
+              {user?.name || "Học viên"}
+            </div>
+            <div className="text-[10px] text-muted-foreground truncate capitalize">
+              {isSuperAdmin ? "Quản trị viên" : "Học viên"}
+            </div>
           </div>
-          <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-primary/5 rounded-full blur-xl pointer-events-none" />
         </div>
+
+        <button 
+          onClick={() => setShowLogoutModal(true)}
+          aria-label="Đăng xuất tài khoản"
+          className="p-2 rounded-full text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all shrink-0"
+          title="Đăng xuất tài khoản"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
