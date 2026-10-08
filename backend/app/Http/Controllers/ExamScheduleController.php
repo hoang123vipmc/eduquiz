@@ -23,32 +23,27 @@ class ExamScheduleController extends Controller
             ], 400);
         }
 
+        $isForceRefresh = $request->boolean('refresh') || $request->boolean('fresh');
         $cacheKey = 'hubt_schedule_' . strtoupper($msv);
         $cachedData = Cache::get($cacheKey);
-        if ($cachedData) {
+        if (!$isForceRefresh && $cachedData) {
             return response()->json($cachedData);
         }
 
         try {
-            // 1. ƯU TIÊN SỐ 1: Cổng tra cứu Khoa CNTT - HUBT (fit.hubt.edu.vn)
+            // Tra cứu đồng thời cả cổng Khoa CNTT và ITC để ghép đầy đủ mọi môn
             $fitData = $this->lookupFit($msv);
-            if ($fitData && !empty($fitData['schedules'])) {
-                $payload = [
-                    'success' => true,
-                    'data' => $fitData
-                ];
-                Cache::put($cacheKey, $payload, 300);
-                return response()->json($payload);
-            }
-
-            // 2. FALLBACK SỐ 2: Cổng ITC (itc.hubt.edu.vn) cho sinh viên khoa khác hoặc lớp
             $itcData = $this->lookupItc($msv);
-            if ($itcData && !empty($itcData['schedules'])) {
+
+            $finalData = $this->mergeScheduleSources($fitData, $itcData);
+
+            if ($finalData && !empty($finalData['schedules'])) {
                 $payload = [
                     'success' => true,
-                    'data' => $itcData
+                    'data' => $finalData
                 ];
-                Cache::put($cacheKey, $payload, 300);
+                $ttl = !empty($fitData['schedules']) ? 300 : 30;
+                Cache::put($cacheKey, $payload, $ttl);
                 return response()->json($payload);
             }
 
@@ -67,16 +62,65 @@ class ExamScheduleController extends Controller
     }
 
     /**
+     * Chuẩn hóa tên môn học để gộp trùng lặp
+     */
+    private function normalizeSubjectKey($name)
+    {
+        $str = mb_strtolower((string) $name, 'UTF-8');
+        $str = str_replace(['đ', 'Đ'], 'd', $str);
+        if (class_exists('Normalizer')) {
+            $norm = \Normalizer::normalize($str, \Normalizer::FORM_D);
+            if ($norm) {
+                $str = preg_replace('/[\x{0300}-\x{036f}]/u', '', $norm);
+            }
+        }
+        $str = preg_replace('/[^a-z0-9]/', '', $str);
+        return trim($str);
+    }
+
+    /**
+     * Gộp dữ liệu FIT và ITC đảm bảo không bao giờ sót môn
+     */
+    private function mergeScheduleSources($fitData, $itcData)
+    {
+        if (!$fitData && !$itcData) return null;
+        if ($fitData && !$itcData) return $fitData;
+        if (!$fitData && $itcData) return $itcData;
+
+        $mergedSchedules = $fitData['schedules'] ?? [];
+        $existingKeys = [];
+        foreach ($mergedSchedules as $s) {
+            $existingKeys[$this->normalizeSubjectKey($s['subject'] ?? '')] = true;
+        }
+
+        foreach (($itcData['schedules'] ?? []) as $itcItem) {
+            $key = $this->normalizeSubjectKey($itcItem['subject'] ?? '');
+            if (!isset($existingKeys[$key])) {
+                $existingKeys[$key] = true;
+                $itcItem['index'] = (string) (count($mergedSchedules) + 1);
+                $mergedSchedules[] = $itcItem;
+            }
+        }
+
+        $fitData['schedules'] = $mergedSchedules;
+        $fitData['totalSubjects'] = count($mergedSchedules);
+        $fitData['source'] = 'Khoa CNTT - HUBT (fit.hubt.edu.vn)';
+        return $fitData;
+    }
+
+    /**
      * Lấy dữ liệu từ cổng Khoa CNTT: https://fit.hubt.edu.vn/wp-json/hubt/v1/lookup
      */
     private function lookupFit($msv)
     {
         try {
             $response = Http::withoutVerifying()
-                ->timeout(8)
+                ->retry(2, 600)
+                ->timeout(12)
                 ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json, text/plain, */*',
                     'Origin' => 'https://fit.hubt.edu.vn',
                     'Referer' => 'https://fit.hubt.edu.vn/lichthi/',
                 ])

@@ -127,7 +127,7 @@ export default function ExamSchedulePage() {
     }
   }, [queryMsv, user?.student_id]);
 
-  const fetchSchedule = async (searchCode: string) => {
+  const fetchSchedule = async (searchCode: string, forceRefresh = false) => {
     const code = searchCode.trim();
     if (!code) return;
 
@@ -137,8 +137,9 @@ export default function ExamSchedulePage() {
     try {
       // Ưu tiên gọi Next.js API serverless route, fallback qua axios instance
       let resData = null;
+      const refreshParam = forceRefresh ? '&refresh=1' : '';
       try {
-        const localRes = await fetch(`/api/schedule?msv=${encodeURIComponent(code)}`);
+        const localRes = await fetch(`/api/schedule?msv=${encodeURIComponent(code)}${refreshParam}`);
         const json = await localRes.json();
         if (json.success) {
           resData = json.data;
@@ -147,7 +148,7 @@ export default function ExamSchedulePage() {
         }
       } catch (clientErr) {
         // Fallback to Laravel backend API
-        const { data: apiData } = await api.get(`/exam-schedule/lookup?msv=${encodeURIComponent(code)}`);
+        const { data: apiData } = await api.get(`/exam-schedule/lookup?msv=${encodeURIComponent(code)}${refreshParam}`);
         if (apiData.success) {
           resData = apiData.data;
         } else {
@@ -169,7 +170,7 @@ export default function ExamSchedulePage() {
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!msvInput.trim()) return;
-    fetchSchedule(msvInput);
+    fetchSchedule(msvInput, true);
   };
 
   const handleSaveDefault = () => {
@@ -279,6 +280,16 @@ export default function ExamSchedulePage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => fetchSchedule(msvInput || savedMsv || "2823231208", true)}
+            disabled={loading}
+            title="Đồng bộ lại lịch thi mới nhất từ Cổng Nhà trường"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-all shadow-xs disabled:opacity-50"
+          >
+            <RefreshCcw className={cn("w-3.5 h-3.5 text-primary", loading && "animate-spin")} />
+            <span>{loading ? "Đang tải..." : "Làm mới"}</span>
+          </button>
+
           <button
             onClick={handleShare}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-all shadow-xs"
