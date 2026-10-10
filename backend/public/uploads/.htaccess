@@ -1,0 +1,26 @@
+# Ngăn chặn hoàn toàn việc thực thi mã nguồn PHP / CGI / Script trong thư mục uploads
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Vô hiệu hóa handlers cho file script
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .py .sh
+SetHandler default-handler
+
+# Chỉ cho phép truy cập các định dạng tệp hình ảnh an toàn
+<FilesMatch "\.(?i:jpe?g|png|gif|webp)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Chặn mọi tệp có đuôi nguy hiểm
+<FilesMatch "\.(?i:php|phtml|php[0-9]|phps|phar|cgi|pl|py|sh|bash|exe|dll|bat|cmd|env|htaccess)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -143,7 +143,11 @@ class QuestionController extends Controller
 
         $validated = $request->validate([
             'question_text' => 'sometimes|required|string',
-            'question_image' => 'sometimes|nullable|string',
+            'question_image' => ['sometimes', 'nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
+                if ($value && !preg_match('#^(https?://|/images/|/uploads/|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
+                    $fail('Ảnh câu hỏi phải là URL hợp lệ (http/https) hoặc ảnh tải lên hệ thống.');
+                }
+            }],
             'type'          => 'sometimes|nullable|string',
             'question_type' => 'sometimes|nullable|string',
             'explanation'   => 'nullable|string',

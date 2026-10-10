@@ -320,9 +320,6 @@ class AdminController extends Controller
      */
     private function isOwnerOrSuperAdmin(User $user): bool
     {
-        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-        $email = strtolower($user->email ?? '');
-        return ($adminEmail && $email === strtolower($adminEmail))
-            || $email === 'hoangdeptraivodich12@gmail.com';
+        return $user->isOwnerOrSuperAdmin();
     }
 }

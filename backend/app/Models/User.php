@@ -42,4 +42,15 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
         ];
     }
+
+    /**
+     * Kiểm tra xem người dùng có phải là Quản trị viên tối cao / Chủ sở hữu hay không
+     */
+    public function isOwnerOrSuperAdmin(): bool
+    {
+        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
+        $email = strtolower($this->email ?? '');
+        return ($adminEmail && $email === strtolower($adminEmail))
+            || $email === 'hoangdeptraivodich12@gmail.com';
+    }
 }

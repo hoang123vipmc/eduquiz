@@ -118,9 +118,9 @@ class UserController extends Controller
             'name'   => 'required|string|max:255',
             'student_id' => 'nullable|string|max:20',
             'avatar' => ['nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
-                // Chỉ cho phép URL http/https hoặc data URI ảnh - ngăn JavaScript URI (XSS)
-                if ($value && !preg_match('#^(https?://|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
-                    $fail('Avatar phải là URL ảnh hợp lệ (http/https).');
+                // Chỉ cho phép URL http/https, ảnh hệ thống hoặc data URI ảnh - ngăn JavaScript URI (XSS)
+                if ($value && !preg_match('#^(https?://|/images/|/uploads/|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
+                    $fail('Avatar phải là URL ảnh hợp lệ (http/https) hoặc ảnh tải lên hệ thống.');
                 }
             }],
         ]);

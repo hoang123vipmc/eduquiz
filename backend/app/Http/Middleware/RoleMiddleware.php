@@ -23,11 +23,7 @@ class RoleMiddleware
             ], 401);
         }
 
-        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-        $isOwnerOrAdmin = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
-            || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
-
-        if ($isOwnerOrAdmin && $role === 'admin') {
+        if ($user->isOwnerOrSuperAdmin() && $role === 'admin') {
             return $next($request);
         }
 

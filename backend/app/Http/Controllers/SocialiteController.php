@@ -13,6 +13,16 @@ class SocialiteController extends Controller
 {
     public function redirect(Request $request, $provider)
     {
+        if ($provider !== 'google') {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Phương thức đăng nhập không được hỗ trợ.'
+                ], 400);
+            }
+            return redirect()->away(rtrim(config('app.frontend_url') ?: 'https://openquiz-free.vercel.app', '/') . '/login?error=unsupported_provider');
+        }
+
         $targetUrl = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
 
         if ($request->wantsJson()) {
@@ -29,26 +39,31 @@ class SocialiteController extends Controller
     {
         $frontendUrl = rtrim(config('app.frontend_url') ?: env('FRONTEND_URL') ?: 'https://openquiz-free.vercel.app', '/');
 
+        if ($provider !== 'google') {
+            return redirect()->away($frontendUrl . '/login?error=unsupported_provider');
+        }
+
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
+            $socialEmail = strtolower(trim((string) $socialUser->getEmail()));
             
-            $user = User::where('email', $socialUser->getEmail())->first();
+            $user = User::where('email', $socialEmail)->first();
 
             if (!$user) {
                 $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-                $isOwner = ($adminEmail && strtolower($socialUser->getEmail()) === strtolower($adminEmail))
-                    || strtolower($socialUser->getEmail()) === 'hoangdeptraivodich12@gmail.com';
+                $isOwner = ($adminEmail && $socialEmail === strtolower($adminEmail))
+                    || $socialEmail === 'hoangdeptraivodich12@gmail.com';
                 $role = $isOwner ? 'admin' : 'student';
 
                 $userName = $socialUser->getName() ?: $socialUser->getNickname();
                 if (!$userName) {
-                    $parts = explode('@', $socialUser->getEmail() ?? 'user');
+                    $parts = explode('@', $socialEmail ?: 'user');
                     $userName = $parts[0] ?: 'User';
                 }
 
                 $user = User::create([
                     'name'        => $userName,
-                    'email'       => $socialUser->getEmail(),
+                    'email'       => $socialEmail,
                     'password'    => Hash::make(Str::random(32)),
                     'avatar'      => $socialUser->getAvatar(),
                     'role'        => $role,
@@ -71,10 +86,7 @@ class SocialiteController extends Controller
             }
 
             // ── Sync ADMIN_EMAIL on login ────────────────────────────────────
-            $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-            $isOwner = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
-                || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
-            if ($isOwner && $user->role !== 'admin') {
+            if ($user->isOwnerOrSuperAdmin() && $user->role !== 'admin') {
                 $user->role = 'admin';
                 $user->save();
             }

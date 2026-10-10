@@ -22,6 +22,9 @@ class SecurityHeadersMiddleware
         // Ngăn trình duyệt đoán sai MIME type (chống MIME Sniffing)
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
+        // Bật bộ lọc XSS của trình duyệt
+        $response->headers->set('X-XSS-Protection', '1; mode=block');
+
         // Không gửi Referrer header khi điều hướng sang domain khác (bảo vệ privacy URL)
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 

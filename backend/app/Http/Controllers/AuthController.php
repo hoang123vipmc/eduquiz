@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -30,10 +32,8 @@ class AuthController extends Controller
             'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ]);
 
-        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-        $isOwner = ($adminEmail && strtolower($request->email) === strtolower($adminEmail))
-            || strtolower($request->email) === 'hoangdeptraivodich12@gmail.com';
-        $role = $isOwner ? 'admin' : 'student';
+        // ── Security: Đăng ký công khai luôn gán vai trò student để tránh chiếm quyền Admin ──
+        $role = 'student';
 
         try {
             $user = User::create([
@@ -79,13 +79,29 @@ class AuthController extends Controller
             'password.required' => 'Vui lòng nhập mật khẩu.',
         ]);
 
+        // ── Security: Chặn tấn công dò mật khẩu (Brute Force / Credential Stuffing) ──
+        // Tối đa 5 lần đăng nhập sai trên mỗi cặp email + IP trong 60 giây
+        $throttleKey = Str::transliterate($request->input('email') . '|' . $request->ip());
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return response()->json([
+                'success' => false,
+                'message' => "Quá nhiều lần đăng nhập không thành công. Vui lòng thử lại sau {$seconds} giây.",
+            ], 429);
+        }
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            RateLimiter::hit($throttleKey, 60);
             throw ValidationException::withMessages([
                 'email' => ['Thông tin đăng nhập không chính xác.'],
             ]);
         }
+
+        // Đăng nhập thành công -> Xóa bộ đếm số lần thử sai
+        RateLimiter::clear($throttleKey);
 
         if ($user->is_banned) {
             return response()->json([
@@ -94,11 +110,8 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Tự động đồng bộ quyền Admin nếu email trùng khớp với cấu hình ADMIN_EMAIL trên server
-        $adminEmail = config('app.admin_email') ?: env('ADMIN_EMAIL');
-        $isOwner = ($adminEmail && strtolower($user->email) === strtolower($adminEmail))
-            || strtolower($user->email) === 'hoangdeptraivodich12@gmail.com';
-        if ($isOwner && $user->role !== 'admin') {
+        // Tự động đồng bộ quyền Admin nếu email trùng khớp với cấu hình ADMIN_EMAIL hoặc Chủ sở hữu
+        if ($user->isOwnerOrSuperAdmin() && $user->role !== 'admin') {
             $user->role = 'admin';
         }
 

@@ -46,7 +46,11 @@ class StoreQuestionRequest extends FormRequest
     {
         return [
             'question_text' => 'required|string',
-            'question_image' => 'nullable|string',
+            'question_image' => ['nullable', 'string', 'max:2048', function ($attr, $value, $fail) {
+                if ($value && !preg_match('#^(https?://|/images/|/uploads/|data:image/(jpeg|png|webp|gif);base64,)#i', $value)) {
+                    $fail('Ảnh câu hỏi phải là URL hợp lệ (http/https) hoặc ảnh tải lên hệ thống.');
+                }
+            }],
             'explanation' => 'nullable|string',
             'type' => 'required|in:single_choice,multiple_choice',
             'difficulty' => 'required|in:easy,medium,hard',

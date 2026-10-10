@@ -34,7 +34,31 @@ function escapeHtml(str: string): string {
 }
 
 function renderMd(text: string) {
-  return text.split("\n").map((line, i) => {
+  return text.split("\n").map((rawLine, i) => {
+    let line = rawLine;
+    let type: "h1" | "h2" | "h3" | "ul" | "ol" | "p" | "br" = "p";
+
+    if (line.startsWith("### ")) {
+      type = "h3";
+      line = line.slice(4);
+    } else if (line.startsWith("## ")) {
+      type = "h2";
+      line = line.slice(3);
+    } else if (line.startsWith("# ")) {
+      type = "h1";
+      line = line.slice(2);
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+      type = "ul";
+      line = line.slice(2);
+    } else if (/^\d+\.\s/.test(line)) {
+      type = "ol";
+      line = line.replace(/^\d+\.\s/, "");
+    } else if (line.trim() === "") {
+      type = "br";
+    }
+
+    if (type === "br") return <br key={i} />;
+
     // ── Security: HTML-escape before formatting to completely prevent XSS ──
     const escaped = escapeHtml(line);
     const html = escaped
@@ -42,18 +66,20 @@ function renderMd(text: string) {
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
       .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:4px;font-size:0.85em">$1</code>');
 
-    if (line.startsWith("### "))
-      return <h3 key={i} className="text-[15px] font-bold mt-3 mb-1" dangerouslySetInnerHTML={{ __html: html.slice(8) }} />;
-    if (line.startsWith("## "))
-      return <h2 key={i} className="text-base font-bold mt-4 mb-1.5 text-foreground" dangerouslySetInnerHTML={{ __html: html.slice(7) }} />;
-    if (line.startsWith("# "))
-      return <h1 key={i} className="text-lg font-bold mt-4 mb-2 text-foreground" dangerouslySetInnerHTML={{ __html: html.slice(6) }} />;
-    if (line.startsWith("- ") || line.startsWith("* "))
-      return <li key={i} className="ml-5 list-disc my-0.5 leading-relaxed" dangerouslySetInnerHTML={{ __html: html.slice(2) }} />;
-    if (/^\d+\.\s/.test(line))
-      return <li key={i} className="ml-5 list-decimal my-0.5 leading-relaxed" dangerouslySetInnerHTML={{ __html: html.replace(/^\d+\.\s/, "") }} />;
-    if (line.trim() === "") return <br key={i} />;
-    return <p key={i} className="leading-relaxed my-0.5" dangerouslySetInnerHTML={{ __html: html }} />;
+    switch (type) {
+      case "h3":
+        return <h3 key={i} className="text-[15px] font-bold mt-3 mb-1 text-foreground" dangerouslySetInnerHTML={{ __html: html }} />;
+      case "h2":
+        return <h2 key={i} className="text-base font-bold mt-4 mb-1.5 text-foreground" dangerouslySetInnerHTML={{ __html: html }} />;
+      case "h1":
+        return <h1 key={i} className="text-lg font-bold mt-4 mb-2 text-foreground" dangerouslySetInnerHTML={{ __html: html }} />;
+      case "ul":
+        return <li key={i} className="ml-5 list-disc my-0.5 leading-relaxed" dangerouslySetInnerHTML={{ __html: html }} />;
+      case "ol":
+        return <li key={i} className="ml-5 list-decimal my-0.5 leading-relaxed" dangerouslySetInnerHTML={{ __html: html }} />;
+      default:
+        return <p key={i} className="leading-relaxed my-0.5" dangerouslySetInnerHTML={{ __html: html }} />;
+    }
   });
 }
 
