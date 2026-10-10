@@ -21,7 +21,8 @@ import {
   Megaphone,
   Plus,
   Award,
-  Coffee
+  Coffee,
+  ChevronDown
 } from "lucide-react";
 import { DonateModal } from "@/components/common/DonateModal";
 
@@ -86,6 +87,39 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   const [showDonateModal, setShowDonateModal] = React.useState(false);
 
+  // Theo dõi cuộn của menu để hiện kí hiệu khi bên dưới còn chức năng
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollDown, setCanScrollDown] = React.useState(false);
+
+  const checkScroll = React.useCallback(() => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      setCanScrollDown(scrollHeight - scrollTop - clientHeight > 16);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    checkScroll();
+    window.addEventListener("resize", checkScroll);
+    const timer = setTimeout(checkScroll, 200);
+    return () => {
+      window.removeEventListener("resize", checkScroll);
+      clearTimeout(timer);
+    };
+  }, [checkScroll, pathname, isSuperAdmin, isOpen]);
+
+  // Phân biệt active route chính xác để không bị sáng đồng thời Quản lý người dùng và Quản lý thông báo
+  const isItemActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    if (href === "/dashboard/admin") {
+      // Chỉ sáng đúng trang Quản lý người dùng, không sáng khi vào Quản lý thông báo
+      return pathname === "/dashboard/admin";
+    }
+    return pathname === href || (pathname.startsWith(href + "/") && href !== "#");
+  };
+
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
     onClose?.();
@@ -143,66 +177,92 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex-1 py-1 overflow-y-auto px-3 space-y-1 scrollbar-hide">
-        {links.map((link) => {
-          const Icon = link.icon;
-          
-          // Render visual divider for admin section
-          if ((link as any).isDivider) {
+      <div className="relative flex-1 min-h-0 flex flex-col">
+        <div 
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex-1 py-1 overflow-y-auto px-3 space-y-0.5 scrollbar-thin scrollbar-thumb-border/60 hover:scrollbar-thumb-border transition-colors"
+        >
+          {links.map((link) => {
+            const Icon = link.icon;
+            
+            // Render visual divider for admin section
+            if ((link as any).isDivider) {
+              return (
+                <div key={link.name} className="my-1.5 px-3">
+                  <div className="h-px bg-border/60" />
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-2 mb-1 px-1">
+                    Quản trị
+                  </p>
+                </div>
+              );
+            }
+
+            const reallyActive = isItemActive(link.href);
+
             return (
-              <div key={link.name} className="my-2 px-3">
-                <div className="h-px bg-border/60" />
-                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-3 mb-1 px-1">
-                  Quản trị
-                </p>
-              </div>
-            );
-          }
-
-          const isActive = pathname === link.href || (pathname.startsWith(link.href + "/") && link.href !== '/dashboard');
-          const reallyActive = link.href === '/dashboard' ? pathname === '/dashboard' : isActive;
-
-          return (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => onClose?.()}
-              className={cn(
-                "group relative flex items-center gap-3.5 px-4 py-2.5 rounded-full text-sm font-medium transition-colors cursor-pointer",
-                reallyActive 
-                  ? "bg-accent text-accent-foreground font-semibold" 
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-              )}
-            >
-              <Icon className={cn(
-                "w-5 h-5 shrink-0 transition-colors",
-                reallyActive ? "text-accent-foreground" : "text-muted-foreground group-hover:text-foreground"
-              )} />
-              <span className="flex-1 truncate">{link.name}</span>
-              {(link as any).badge && (
-                <span className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-bold border",
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={() => onClose?.()}
+                className={cn(
+                  "group relative flex items-center gap-3.5 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer",
                   reallyActive 
-                    ? "bg-card text-accent-foreground border-accent-foreground/20" 
-                    : "bg-muted text-primary border-primary/20"
-                )}>
-                  {(link as any).badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+                    ? "bg-accent text-accent-foreground font-semibold" 
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                )}
+              >
+                <Icon className={cn(
+                  "w-5 h-5 shrink-0 transition-colors",
+                  reallyActive ? "text-accent-foreground" : "text-muted-foreground group-hover:text-foreground"
+                )} />
+                <span className="flex-1 truncate">{link.name}</span>
+                {(link as any).badge && (
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                    reallyActive 
+                      ? "bg-card text-accent-foreground border-accent-foreground/20" 
+                      : "bg-muted text-primary border-primary/20"
+                  )}>
+                    {(link as any).badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Scroll Indicator: Kí hiệu nhận biết bên dưới còn chức năng khi danh sách bị tràn */}
+        {canScrollDown && (
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex flex-col items-center">
+            {/* Lớp chuyển tiếp mờ */}
+            <div className="w-full h-8 bg-gradient-to-t from-background via-background/85 to-transparent" />
+            <button
+              type="button"
+              onClick={() => {
+                if (scrollRef.current) {
+                  scrollRef.current.scrollBy({ top: 140, behavior: "smooth" });
+                }
+              }}
+              className="pointer-events-auto -mt-3.5 mb-1 flex items-center gap-1.5 px-3 py-1 rounded-full bg-card hover:bg-secondary text-primary border border-border/90 shadow-xs text-[11px] font-semibold transition-all active:scale-95 cursor-pointer group animate-bounce"
+              title="Bấm hoặc cuộn để xem thêm chức năng bên dưới (Cài đặt...)"
+            >
+              <span>Còn chức năng bên dưới</span>
+              <ChevronDown className="w-3.5 h-3.5 stroke-[2.5] text-primary group-hover:translate-y-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Donate Card with QR Image ABOVE text */}
       <div className="px-3 pt-1">
         <div
           onClick={() => setShowDonateModal(true)}
-          className="w-full p-2.5 rounded-2xl bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/35 transition-all cursor-pointer group shadow-2xs flex flex-col items-center text-center space-y-2 select-none active:scale-98"
+          className="w-full p-2 rounded-2xl bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/35 transition-all cursor-pointer group shadow-2xs flex flex-col items-center text-center space-y-1.5 select-none active:scale-98"
           title="Bấm để mở mã QR ủng hộ admin"
         >
           {/* Ảnh mã QR ở TRÊN dòng chữ */}
-          <div className="relative w-24 sm:w-28 rounded-xl overflow-hidden shadow-xs border border-border/80 bg-white p-1 group-hover:scale-105 transition-transform duration-200">
+          <div className="relative w-20 sm:w-24 rounded-xl overflow-hidden shadow-xs border border-border/80 bg-white p-1 group-hover:scale-105 transition-transform duration-200">
             <img
               src="/images/donate-qr.png"
               alt="Mã QR ủng hộ admin"
