@@ -20,8 +20,10 @@ import {
   Bookmark,
   Megaphone,
   Plus,
-  Award
+  Award,
+  Coffee
 } from "lucide-react";
+import { DonateModal } from "@/components/common/DonateModal";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -82,6 +84,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const links = isSuperAdmin ? adminLinks : studentLinks;
 
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+  const [showDonateModal, setShowDonateModal] = React.useState(false);
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
@@ -189,6 +192,23 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </Link>
           );
         })}
+      </div>
+
+      {/* Donate Button */}
+      <div className="px-3 pt-1">
+        <button
+          onClick={() => setShowDonateModal(true)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-xs font-semibold transition-all group active:scale-95 shadow-2xs"
+          title="Mời admin ly cà phê / Quỹ duy trì website"
+        >
+          <div className="flex items-center gap-2">
+            <Coffee className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
+            <span>Mời admin cà phê ☕</span>
+          </div>
+          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
+            Ủng hộ
+          </span>
+        </button>
       </div>
 
       {/* User Info Card */}
@@ -299,6 +319,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
         </div>
       )}
+
+      {/* Modal Donate QR */}
+      <DonateModal 
+        isOpen={showDonateModal} 
+        onClose={() => setShowDonateModal(false)} 
+      />
     </>
   );
 }

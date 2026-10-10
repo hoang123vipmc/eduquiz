@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { LayoutDashboard, BookOpen, Library, Trophy, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DonateFloatingButton } from "@/components/common/DonateModal";
 
 export default function DashboardLayout({
   children,
@@ -63,6 +64,9 @@ export default function DashboardLayout({
             </div>
           </div>
         </main>
+
+        {/* Nút ủng hộ admin ở góc màn hình */}
+        <DonateFloatingButton />
 
         {/* Mobile Sticky Bottom Navigation Bar */}
         <nav 
