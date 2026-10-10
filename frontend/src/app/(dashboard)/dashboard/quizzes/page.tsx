@@ -499,13 +499,13 @@ export default function QuizzesPage() {
 
       {/* MSV Prompt Banner if not provided */}
       {!studentMsv && (
-        <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-secondary/50 border border-border/80 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs sm:text-sm font-semibold text-foreground">
+              <p className="text-xs sm:text-sm font-bold text-foreground">
                 Cá nhân hóa theo lịch thi của bạn
               </p>
               <p className="text-xs text-muted-foreground">
@@ -515,7 +515,7 @@ export default function QuizzesPage() {
           </div>
           <button
             onClick={() => router.push('/dashboard/settings')}
-            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 self-start sm:self-auto transition-colors"
+            className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shrink-0 self-start sm:self-auto transition-colors shadow-xs"
           >
             Cài đặt MSV ngay
           </button>

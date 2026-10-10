@@ -163,7 +163,7 @@ export default function LandingPage() {
       {/* ── 2. HERO SECTION ── */}
       <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 border-b border-border/50 overflow-hidden">
         {/* Subtle Ambient Background Gradients (Not harsh neon blobs) */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(79,70,229,0.12),transparent)]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(11,87,208,0.08),transparent)]" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-4">

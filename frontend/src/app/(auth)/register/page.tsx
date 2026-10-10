@@ -74,63 +74,63 @@ export default function RegisterPage() {
     <div className="w-full max-w-md space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 px-2 sm:px-0">
       <div className="text-center">
         {/* Mobile Brand Logo */}
-        <div className="md:hidden flex items-center justify-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/25">
+        <div className="md:hidden flex items-center justify-center gap-2.5 mb-6">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center font-black text-primary-foreground shadow-sm">
             OQ
           </div>
-          <span className="font-extrabold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
+          <span className="font-bold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Tạo tài khoản</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Tạo tài khoản mới</h2>
         <p className="text-sm text-muted-foreground mt-2">
-          Gia nhập OpenQuiz ngay hôm nay
+          Bắt đầu ôn thi hiệu quả cùng cộng đồng sinh viên OpenQuiz
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-6 sm:mt-8">
         {error && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
+          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20 font-medium">
             {error}
           </div>
         )}
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Họ và tên</label>
+            <label className="block text-sm font-medium mb-1.5 text-foreground">Họ và tên</label>
             <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nguyễn Văn A"
               required
-              className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="h-11"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1.5 text-foreground">Email</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="nhapemail@example.com"
               required
-              className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="h-11"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Mật khẩu</label>
+            <label className="block text-sm font-medium mb-1.5 text-foreground">Mật khẩu</label>
             <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ít nhất 8 ký tự"
+              placeholder="Tối thiểu 8 ký tự"
               required
               minLength={8}
-              className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="h-11"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Xác nhận mật khẩu</label>
+            <label className="block text-sm font-medium mb-1.5 text-foreground">Xác nhận mật khẩu</label>
             <Input
               type="password"
               value={passwordConfirmation}
@@ -138,16 +138,16 @@ export default function RegisterPage() {
               placeholder="Nhập lại mật khẩu"
               required
               minLength={8}
-              className="h-11 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="h-11"
             />
           </div>
 
           {/* Optional Student ID field */}
-          <div className="rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-900/10 p-3.5 space-y-2.5">
+          <div className="rounded-2xl border border-border/80 bg-secondary/50 p-4 space-y-2.5">
             <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-              <label className="block text-sm font-medium text-blue-900 dark:text-blue-200">
-                Mã sinh viên HUBT <span className="text-xs font-normal text-blue-500 dark:text-blue-400">(Không bắt buộc)</span>
+              <GraduationCap className="w-4 h-4 text-primary shrink-0" />
+              <label className="block text-sm font-medium text-foreground">
+                Mã sinh viên HUBT <span className="text-xs font-normal text-muted-foreground">(Không bắt buộc)</span>
               </label>
             </div>
             <Input
@@ -156,11 +156,11 @@ export default function RegisterPage() {
               onChange={(e) => setStudentId(e.target.value)}
               placeholder="Ví dụ: 2823231208"
               maxLength={20}
-              className="h-10 bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800/50 focus-visible:ring-blue-500"
+              className="h-10 bg-card"
             />
-            <p className="flex items-start gap-1.5 text-xs text-blue-600/80 dark:text-blue-400/80">
-              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-              Nhập MSV để website tự động tra cứu lịch thi và ưu tiên đề xuất các bộ đề ôn tập phù hợp với các môn thi sắp tới của bạn.
+            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+              Nhập MSV để OpenQuiz tự động tra cứu lịch thi và gợi ý đề ôn tập tương ứng cho bạn.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export default function RegisterPage() {
               checked={agreedTerms}
               onChange={(e) => setAgreedTerms(e.target.checked)}
               required
-              className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
+              className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
             />
             <label htmlFor="agree-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
               Tôi xác nhận đã đọc, hiểu và đồng ý với{" "}
@@ -188,14 +188,14 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading || !agreedTerms}>
-          {loading ? "Đang xử lý..." : "Đăng ký"}
+        <Button type="submit" className="w-full h-11 text-base font-semibold rounded-xl" disabled={loading || !agreedTerms}>
+          {loading ? "Đang xử lý..." : "Đăng ký tài khoản"}
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-8">
         Đã có tài khoản?{" "}
-        <Link href="/login" className="font-semibold text-primary hover:text-primary/80">
+        <Link href="/login" className="font-semibold text-primary hover:underline">
           Đăng nhập
         </Link>
       </p>

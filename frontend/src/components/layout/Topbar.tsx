@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { Search, X, Menu } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Search, X, Menu, Sun, Moon } from "lucide-react";
 import { NotificationDropdown } from "./NotificationDropdown";
 
 interface TopbarProps {
@@ -13,7 +14,13 @@ interface TopbarProps {
 export function Topbar({ onOpenMobile }: TopbarProps) {
   const { user } = useAuthStore();
   const router = useRouter();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +71,7 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
                 type="button"
                 onClick={() => setSearchTerm("")}
                 aria-label="Xóa tìm kiếm"
-                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -73,15 +80,31 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
         </form>
       </div>
 
-      {/* Right Controls: Notification & Google Profile Chip */}
-      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      {/* Right Controls: Theme, Notification & Google Profile Chip */}
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
         <button 
           onClick={() => router.push('/dashboard/quizzes')}
           aria-label="Tìm kiếm đề thi"
-          className="sm:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors"
+          className="sm:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors cursor-pointer"
         >
           <Search className="w-5 h-5" />
         </button>
+
+        {mounted && (
+          <button
+            type="button"
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            aria-label="Chuyển đổi giao diện sáng/tối"
+            title={resolvedTheme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
+            className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors cursor-pointer"
+          >
+            {resolvedTheme === "dark" ? (
+              <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700 dark:text-slate-300" />
+            )}
+          </button>
+        )}
 
         <NotificationDropdown />
 

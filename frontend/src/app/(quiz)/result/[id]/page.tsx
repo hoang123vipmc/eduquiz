@@ -185,7 +185,7 @@ export default function QuizResultPage() {
         {/* Quiz Title Banner */}
         <div className="text-center space-y-2">
           {categoryName && (
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-[#4F7CFF] border border-blue-500/20 mb-1">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-1">
               {categoryName}
             </span>
           )}
@@ -198,7 +198,7 @@ export default function QuizResultPage() {
         </div>
 
         {/* Điểm số tổng quan Card */}
-        <div className="relative overflow-hidden rounded-[24px] bg-card border border-border shadow-[0_8px_30px_rgba(0,0,0,0.3)] text-center p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-card border border-border/80 shadow-2xs text-center p-8">
           <div 
             className="absolute -top-24 -left-24 w-64 h-64 rounded-full pointer-events-none opacity-20"
             style={{ background: isPass ? 'radial-gradient(circle, #10B981, transparent 70%)' : 'radial-gradient(circle, #EF4444, transparent 70%)' }}
@@ -238,23 +238,23 @@ export default function QuizResultPage() {
 
         {/* Thống kê 4 ô chi tiết */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
-          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border/80 text-center space-y-1 shadow-2xs">
             <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 mx-auto mb-1.5" />
             <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đúng</p>
             <p className="text-xl sm:text-2xl font-bold text-emerald-400">{result.correct_answers}</p>
           </div>
-          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border/80 text-center space-y-1 shadow-2xs">
             <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-rose-500 mx-auto mb-1.5" />
             <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sai</p>
             <p className="text-xl sm:text-2xl font-bold text-rose-500">{result.wrong_answers}</p>
           </div>
-          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border/80 text-center space-y-1 shadow-2xs">
             <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mx-auto mb-1.5" />
             <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bỏ qua</p>
             <p className="text-xl sm:text-2xl font-bold text-amber-500">{result.skipped_answers}</p>
           </div>
-          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-[#4F7CFF] mx-auto mb-1.5" />
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-card border border-border/80 text-center space-y-1 shadow-2xs">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-primary mx-auto mb-1.5" />
             <p className="text-[11px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thời gian</p>
             <p className="text-base sm:text-xl font-bold text-foreground">{formatTime(result.time_taken_seconds)}</p>
           </div>

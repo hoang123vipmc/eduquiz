@@ -434,10 +434,10 @@ export default function DashboardPage() {
         </div>
       ) : nextExam ? (
         <div className={cn(
-          "relative overflow-hidden rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5 border transition-all",
+          "relative overflow-hidden rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 border transition-all",
           nextExam.status === 'today'
-            ? "bg-gradient-to-r from-rose-950/30 via-amber-950/15 to-card border-rose-500/40"
-            : "bg-gradient-to-r from-blue-950/30 via-indigo-950/20 to-card border-blue-500/30"
+            ? "bg-rose-50/70 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50"
+            : "bg-secondary/60 border-border/80"
         )}>
           <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
             {/* Calendar Date Block */}
@@ -513,17 +513,17 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-950/40 via-indigo-950/20 to-card border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative overflow-hidden bg-secondary/50 border border-border/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
+            <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm">
               <GraduationCap className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Cá nhân hóa theo lịch thi
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent text-accent-foreground border border-border/60">
                   Tự động ưu tiên đề thi
                 </span>
               </div>

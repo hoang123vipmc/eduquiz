@@ -85,9 +85,9 @@ export default function BookmarksPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-300 pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-card via-card to-amber-500/5 border border-border shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-card border border-border/80 shadow-2xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/25">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/25">
             <Bookmark className="w-6 h-6 fill-current" />
           </div>
           <div>

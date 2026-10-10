@@ -230,7 +230,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="w-[260px] bg-secondary border-r border-border hidden md:flex flex-col h-full shrink-0">
+      <aside className="w-[260px] bg-background border-r border-border/60 hidden md:flex flex-col h-full shrink-0 select-none">
         {navContent}
       </aside>
 

@@ -482,7 +482,7 @@ export default function ExamSchedulePage() {
             <>
               {/* Student Info Passport Card */}
               {data.student && (
-                <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-xs before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-primary before:via-blue-500 before:to-indigo-500">
+                <div className="relative overflow-hidden bg-card border border-border/80 rounded-2xl p-5 sm:p-6 shadow-2xs before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-primary">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
                       <div className="w-13 h-13 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-black text-xl shadow-xs shrink-0">

@@ -286,18 +286,18 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Student ID Section */}
-                <div className="rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-900/10 p-4 space-y-3">
+                <div className="rounded-2xl border border-border/80 bg-secondary/50 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <label className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+                      <GraduationCap className="w-4 h-4 text-primary" />
+                      <label className="text-sm font-semibold text-foreground">
                         Mã sinh viên (MSV)
                       </label>
                     </div>
                     {studentId && (
                       <a
                         href={`/dashboard/schedule?msv=${encodeURIComponent(studentId)}`}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
                       >
                         Xem lịch thi <ExternalLink className="w-3 h-3" />
                       </a>
@@ -309,9 +309,9 @@ export default function SettingsPage() {
                     onChange={(e) => setStudentId(e.target.value)}
                     placeholder="VD: 2823231208 (không bắt buộc)"
                     maxLength={20}
-                    className="w-full bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800/50 focus:border-blue-500 text-foreground rounded-xl px-4 py-2.5 outline-none transition-colors text-sm"
+                    className="w-full bg-card border border-border/80 focus:border-primary text-foreground rounded-xl px-4 py-2.5 outline-none transition-colors text-sm shadow-2xs"
                   />
-                  <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                  <p className="text-xs text-muted-foreground">
                     Website sẽ dùng MSV này để tự động gợi ý các đề thi phù hợp với lịch thi của bạn.
                   </p>
                 </div>

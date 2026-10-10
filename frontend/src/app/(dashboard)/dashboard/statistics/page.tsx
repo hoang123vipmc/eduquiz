@@ -133,7 +133,7 @@ export default function StatisticsPage() {
                     cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-                  <Bar dataKey="time_minutes" name="Thời gian (Phút)" fill="#4F7CFF" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="time_minutes" name="Thời gian (Phút)" fill="#0b57d0" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="quizzes" name="Số bài đã làm" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

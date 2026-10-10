@@ -107,10 +107,10 @@ export default function HistoryPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-emerald-700 dark:text-[#10B981] bg-emerald-500/10 border-emerald-500/20";
-    if (score >= 70) return "text-blue-700 dark:text-[#4F7CFF] bg-blue-500/10 border-blue-500/20";
-    if (score >= 50) return "text-amber-700 dark:text-[#F59E0B] bg-amber-500/10 border-amber-500/20";
-    return "text-rose-700 dark:text-[#EF4444] bg-rose-500/10 border-rose-500/20";
+    if (score >= 90) return "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+    if (score >= 70) return "text-primary bg-primary/10 border-primary/20";
+    if (score >= 50) return "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20";
+    return "text-rose-700 dark:text-rose-400 bg-rose-500/10 border-rose-500/20";
   };
 
   // Client-side sort on current view
@@ -146,7 +146,7 @@ export default function HistoryPage() {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-border/40">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4F7CFF] to-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-xs shrink-0">
             <History className="w-6 h-6" />
           </div>
           <div>
