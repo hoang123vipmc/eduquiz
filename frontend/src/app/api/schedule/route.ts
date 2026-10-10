@@ -260,32 +260,185 @@ async function fetchFromHubtFit(msv: string) {
 }
 
 /**
+ * Trích xuất bảng Điểm thi trắc nghiệm & Kết quả học phần từ HTML của ITC HUBT
+ */
+function parseScoresFromItcHtml(html: string): any[] {
+  const tables = html.match(/<table[^>]*>([\s\S]*?)<\/table>/gi) || [];
+  let scoreTableHtml = "";
+  for (const t of tables) {
+    if (t.includes("ĐIỂM HP") || t.includes("Điểm HP") || (t.includes("ĐIỂM THI") && t.includes("MÔN THI"))) {
+      scoreTableHtml = t;
+      break;
+    }
+  }
+  // Nếu không thấy bằng từ khóa nhưng có từ 3 bảng trở lên -> lấy bảng thứ 3 (index 2)
+  if (!scoreTableHtml && tables.length >= 3) {
+    scoreTableHtml = tables[2] || "";
+  } else if (!scoreTableHtml && tables.length >= 2) {
+    scoreTableHtml = tables[1] || "";
+  }
+  if (!scoreTableHtml) return [];
+
+  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  let rowMatch;
+  const scores: any[] = [];
+
+  while ((rowMatch = rowRegex.exec(scoreTableHtml)) !== null) {
+    const rowHtml = rowMatch[1];
+    if (rowHtml.includes("<th") || rowHtml.includes("bg-primary") || rowHtml.includes("class=\"info\"")) continue;
+
+    const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+    let tdMatch;
+    const cells: string[] = [];
+    while ((tdMatch = tdRegex.exec(rowHtml)) !== null) {
+      cells.push(tdMatch[1].replace(/<[^>]+>/g, "").trim());
+    }
+
+    if (cells.length >= 10) {
+      const subject = cells[6] || "";
+      const examDate = cells[7] || "";
+      const testScoreVal = cells[8] ? parseFloat(cells[8].replace(",", ".")) : null;
+      const examScoreVal = cells[9] ? parseFloat(cells[9].replace(",", ".")) : null;
+      const finalScoreVal = cells[10] ? parseFloat(cells[10].replace(",", ".")) : null;
+      const note = cells[11] || "";
+
+      const testScore = isNaN(testScoreVal as number) ? null : testScoreVal;
+      const examScore = isNaN(examScoreVal as number) ? null : examScoreVal;
+      const finalScore = isNaN(finalScoreVal as number) ? null : finalScoreVal;
+
+      let letterGrade = "";
+      let gpa4: number | null = null;
+      let status: "passed" | "failed" | "pending" = "pending";
+
+      if (finalScore !== null) {
+        if (finalScore >= 8.5) { letterGrade = "A"; gpa4 = 4.0; }
+        else if (finalScore >= 8.0) { letterGrade = "B+"; gpa4 = 3.5; }
+        else if (finalScore >= 7.0) { letterGrade = "B"; gpa4 = 3.0; }
+        else if (finalScore >= 6.5) { letterGrade = "C+"; gpa4 = 2.5; }
+        else if (finalScore >= 5.5) { letterGrade = "C"; gpa4 = 2.0; }
+        else if (finalScore >= 5.0) { letterGrade = "D+"; gpa4 = 1.5; }
+        else if (finalScore >= 4.0) { letterGrade = "D"; gpa4 = 1.0; }
+        else { letterGrade = "F"; gpa4 = 0.0; }
+
+        status = finalScore >= 4.0 ? "passed" : "failed";
+      }
+
+      if (subject) {
+        scores.push({
+          index: cells[0] || String(scores.length + 1),
+          msv: cells[1] || "",
+          fullName: `${cells[2] || ""} ${cells[3] || ""}`.trim(),
+          dob: cells[4] || "",
+          className: cells[5] || "",
+          subject,
+          examDate,
+          testScore,
+          examScore,
+          finalScore,
+          note,
+          letterGrade,
+          gpa4,
+          status,
+          searchKeyword: guessSearchKeyword(subject),
+        });
+      }
+    }
+  }
+
+  return scores;
+}
+
+function calculateScoreStats(scores: any[]) {
+  const graded = scores.filter(s => s.finalScore !== null);
+  if (graded.length === 0) {
+    return {
+      totalGraded: 0,
+      averageFinalScore: null,
+      averageGpa4: null,
+      passedCount: 0,
+      failedCount: 0,
+      highestScoreSubject: null
+    };
+  }
+  const sum10 = graded.reduce((acc, s) => acc + (s.finalScore || 0), 0);
+  const sum4 = graded.reduce((acc, s) => acc + (s.gpa4 || 0), 0);
+  const passed = graded.filter(s => s.status === 'passed').length;
+  const failed = graded.filter(s => s.status === 'failed').length;
+  const sorted = [...graded].sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+
+  return {
+    totalGraded: graded.length,
+    averageFinalScore: Math.round((sum10 / graded.length) * 100) / 100,
+    averageGpa4: Math.round((sum4 / graded.length) * 100) / 100,
+    passedCount: passed,
+    failedCount: failed,
+    highestScoreSubject: sorted[0]?.subject || null
+  };
+}
+
+/**
  * Fallback / Dự phòng: Tra cứu từ cổng ITC (itc.hubt.edu.vn) cho sinh viên các khoa khác hoặc lớp
+ * Đồng thời lấy cả Lịch thi và Kết quả điểm thi trắc nghiệm
  */
 async function fetchFromHubtItc(code: string) {
   try {
-    const targetUrl = `https://itc.hubt.edu.vn/tra-cuu/lich-thi?msv=${encodeURIComponent(code)}`;
-    const response = await fetch(targetUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-      },
-      signal: AbortSignal.timeout(8000),
-    });
+    let html = "";
+    // 1. Thử GET trước
+    try {
+      const targetUrl = `https://itc.hubt.edu.vn/tra-cuu/lich-thi?msv=${encodeURIComponent(code)}`;
+      const response = await fetch(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (response.ok) {
+        html = await response.text();
+      }
+    } catch {}
 
-    if (!response.ok) return null;
-    const html = await response.text();
+    // 2. Nếu GET không có nội dung bảng, thử POST qua https://itc.hubt.edu.vn/lichthi/
+    if (!html || !html.includes("<table")) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append("thongtinsinhvien", code);
+        formData.append("btn_submit", "");
+        const postRes = await fetch("https://itc.hubt.edu.vn/lichthi/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+          },
+          body: formData.toString(),
+          signal: AbortSignal.timeout(8000),
+        });
+        if (postRes.ok) {
+          html = await postRes.text();
+        }
+      } catch {}
+    }
 
-    const tableMatch = html.match(/<table[^>]*>([\s\S]*?)<\/table>/i);
-    if (!tableMatch) return null;
+    if (!html || !html.includes("<table")) return null;
+
+    const tables = html.match(/<table[^>]*>([\s\S]*?)<\/table>/gi) || [];
+    let scheduleTableContent = "";
+    for (const t of tables) {
+      if (t.includes("PHÒNG THI") || t.includes("Phòng thi") || t.includes("GIỜ THI") || t.includes("Giờ thi")) {
+        scheduleTableContent = t;
+        break;
+      }
+    }
+    if (!scheduleTableContent && tables.length > 0) {
+      scheduleTableContent = tables[0] || "";
+    }
 
     const semesterMatch = html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
     const semester = semesterMatch ? semesterMatch[1].replace(/<[^>]+>/g, "").trim().replace(/\s+/g, " ") : "LỊCH THI HỌC KỲ";
 
-    const tableContent = tableMatch[1];
-    const tbodyMatch = tableContent.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
-    const rowsContent = tbodyMatch ? tbodyMatch[1] : tableContent;
+    const tbodyMatch = scheduleTableContent.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
+    const rowsContent = tbodyMatch ? tbodyMatch[1] : scheduleTableContent;
 
     const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
     let rowMatch;
@@ -295,6 +448,8 @@ async function fetchFromHubtItc(code: string) {
 
     while ((rowMatch = rowRegex.exec(rowsContent)) !== null) {
       const rowHtml = rowMatch[1];
+      if (rowHtml.includes("<th") || rowHtml.includes("class=\"info\"") || rowHtml.includes("bg-primary")) continue;
+
       const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
       let tdMatch;
       const cells: string[] = [];
@@ -378,6 +533,10 @@ async function fetchFromHubtItc(code: string) {
       }
     }
 
+    // 3. Trích xuất bảng Điểm thi trắc nghiệm (Table 2)
+    const scores = parseScoresFromItcHtml(html);
+    const scoreStats = calculateScoreStats(scores);
+
     let examResultNote = "Chưa có kết quả thi trắc nghiệm.";
     const resultNoteMatches = html.match(/<p[^>]*class="[^"]*text-slate-500[^"]*"[^>]*>([\s\S]*?)<\/p>/gi);
     if (resultNoteMatches && resultNoteMatches.length > 0) {
@@ -388,6 +547,8 @@ async function fetchFromHubtItc(code: string) {
       semester,
       student: studentInfo,
       schedules,
+      scores,
+      scoreStats,
       examResultNote,
       totalSubjects: schedules.length,
       source: "HUBT ITC (Trung tâm Tin học ứng dụng)",
@@ -398,21 +559,21 @@ async function fetchFromHubtItc(code: string) {
 }
 
 /**
- * Gộp dữ liệu từ FIT và ITC để đảm bảo không bao giờ bị sót môn học
+ * Gộp dữ liệu từ FIT và ITC để đảm bảo không bao giờ bị sót môn học và có đủ điểm thi
  */
 function mergeScheduleSources(fitData: any, itcData: any) {
   if (!fitData && !itcData) return null;
   if (fitData && !itcData) return fitData;
   if (!fitData && itcData) return itcData;
 
-  // Cả hai nguồn đều có dữ liệu: Lấy FIT làm dữ liệu gốc chính xác nhất
+  // Cả hai nguồn đều có dữ liệu: Lấy FIT làm dữ liệu lịch thi gốc
   const mergedSchedules = [...fitData.schedules];
   const existingKeys = new Set(
     mergedSchedules.map((s: any) => normalizeSubjectKey(s.subject))
   );
 
-  // Nếu ITC có môn nào mà FIT chưa có (ví dụ môn chung, môn chưa đồng bộ) -> tự động ghép thêm
-  for (const itcItem of itcData.schedules) {
+  // Nếu ITC có môn nào mà FIT chưa có -> tự động ghép thêm
+  for (const itcItem of itcData.schedules || []) {
     const key = normalizeSubjectKey(itcItem.subject);
     if (!existingKeys.has(key)) {
       existingKeys.add(key);
@@ -423,11 +584,17 @@ function mergeScheduleSources(fitData: any, itcData: any) {
     }
   }
 
+  // Kết quả thi & Bảng điểm (Điểm thi trắc nghiệm & Điểm HP từ ITC)
+  const scores = itcData.scores || [];
+  const scoreStats = itcData.scoreStats || calculateScoreStats(scores);
+
   return {
     ...fitData,
     schedules: mergedSchedules,
+    scores,
+    scoreStats,
     totalSubjects: mergedSchedules.length,
-    source: "Khoa CNTT - HUBT (fit.hubt.edu.vn)",
+    source: "Khoa CNTT & HUBT ITC",
   };
 }
 
@@ -465,7 +632,7 @@ export async function GET(request: NextRequest) {
 
     const finalData = mergeScheduleSources(fitData, itcData);
 
-    if (finalData && finalData.schedules.length > 0) {
+    if (finalData && ((finalData.schedules && finalData.schedules.length > 0) || (finalData.scores && finalData.scores.length > 0))) {
       const payload = {
         success: true,
         data: finalData,

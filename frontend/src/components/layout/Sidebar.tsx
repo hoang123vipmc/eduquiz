@@ -19,7 +19,8 @@ import {
   CalendarCheck,
   Bookmark,
   Megaphone,
-  Plus
+  Plus,
+  Award
 } from "lucide-react";
 
 interface SidebarProps {
@@ -46,7 +47,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   
   const studentLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Lịch thi & Điểm thi", href: "/dashboard/schedule", icon: CalendarCheck, badge: "ITC" },
+    { name: "Lịch thi học kỳ", href: "/dashboard/schedule", icon: CalendarCheck },
+    { name: "Bảng điểm thi", href: "/dashboard/scores", icon: Award, badge: "Mới" },
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },
@@ -59,7 +61,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const adminLinks = [
     { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Lịch thi & Điểm thi", href: "/dashboard/schedule", icon: CalendarCheck, badge: "ITC" },
+    { name: "Lịch thi học kỳ", href: "/dashboard/schedule", icon: CalendarCheck },
+    { name: "Bảng điểm thi", href: "/dashboard/scores", icon: Award, badge: "Mới" },
     { name: "Danh sách đề thi", href: "/dashboard/quizzes", icon: BookOpen },
     { name: "Đề thi của tôi", href: "/dashboard/my-quizzes", icon: Library },
     { name: "Ngân hàng câu hỏi", href: "/dashboard/bank", icon: FileQuestion },

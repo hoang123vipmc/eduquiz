@@ -17,8 +17,16 @@ export interface NotificationItem {
   link?: string;
 }
 
-// Danh sách thông báo mặc định về các tính năng mới nhất của hệ thống OpenQuiz
 const SYSTEM_FEATURE_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "feat-scores",
+    type: "feature",
+    title: "🎯 Tra cứu Bảng điểm thi trắc nghiệm HUBT",
+    message: "Xem điểm thi trắc nghiệm, điểm điều kiện KT, điểm học phần HP và GPA quy đổi thang điểm 4 trực tiếp từ hệ thống ITC với giao diện thẻ Bento & bảng điểm chuẩn trường.",
+    is_read: false,
+    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    link: "/dashboard/scores"
+  },
   {
     id: "feat-ai",
     type: "feature",

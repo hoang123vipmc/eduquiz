@@ -21,7 +21,8 @@ import {
   CalendarCheck,
   ArrowRight,
   MapPin,
-  GraduationCap
+  GraduationCap,
+  Award
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { QuizSettingsModal } from "@/components/quiz/QuizSettingsModal";
@@ -495,7 +496,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Action buttons */}
-          <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+          <div className="flex items-center gap-2 self-start md:self-center shrink-0 flex-wrap">
             <button
               onClick={() => router.push(`/dashboard/quizzes?search=${encodeURIComponent(nextExam.searchKeyword || nextExam.subject)}`)}
               className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
@@ -504,10 +505,18 @@ export default function DashboardPage() {
               <span>Ôn thi môn này ngay</span>
             </button>
             <button
+              onClick={() => router.push('/dashboard/scores')}
+              className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              title="Tra cứu điểm thi trắc nghiệm & học phần"
+            >
+              <Award className="w-3.5 h-3.5 text-amber-500" />
+              <span>Xem điểm</span>
+            </button>
+            <button
               onClick={() => router.push('/dashboard/schedule')}
               className="px-3.5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
             >
-              <span>Xem tất cả ({nextExam.total})</span>
+              <span>Xem lịch thi ({nextExam.total})</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
