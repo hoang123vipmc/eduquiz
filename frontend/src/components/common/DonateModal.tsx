@@ -43,40 +43,35 @@ export function DonateModal({ isOpen, onClose }: DonateModalProps) {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Header */}
-        <div className="text-center space-y-2 pt-1">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto shadow-xs">
-            <Coffee className="w-6 h-6" />
-          </div>
-
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 mb-1">
-              <Heart className="w-3 h-3 fill-rose-500" />
-              <span>Góc ủng hộ admin</span>
-            </div>
-            <h3 className="text-lg font-extrabold text-foreground tracking-tight">
-              Mời Admin Ly Cà Phê ☕
-            </h3>
-          </div>
-
-          <p className="text-xs text-muted-foreground leading-relaxed px-1">
-            OpenQuiz là nền tảng luyện thi hoàn toàn miễn phí. Mọi sự ủng hộ dù chỉ là <strong className="text-foreground">2k, 5k hay 10k</strong> đều là nguồn động viên to lớn giúp admin có kinh phí duy trì máy chủ, thức đêm nâng cấp web và <span className="italic text-foreground">góp chút quỹ chữa bệnh trĩ vì ngồi code xuyên màn đêm</span>! 🥰
-          </p>
-        </div>
-
-        {/* VietQR Code Image Card */}
-        <div className="p-3 rounded-2xl bg-muted/40 border border-border/80 flex flex-col items-center justify-center space-y-2">
-          <div className="relative w-56 sm:w-60 rounded-xl overflow-hidden shadow-xs border border-border bg-white p-2">
+        {/* 1. MÃ QR TO & RÕ NÉT Ở TRÊN CÙNG */}
+        <div className="pt-2 flex flex-col items-center justify-center space-y-2">
+          <div className="relative w-64 max-w-full rounded-2xl overflow-hidden shadow-md border-2 border-primary/20 bg-white p-2">
             <img
               src="/images/donate-qr.png"
-              alt="Mã VietQR ủng hộ admin DONG HUY HOANG - MB Bank 0336125598"
-              className="w-full h-auto object-contain rounded-lg"
+              alt="Mã VietQR MB Bank DONG HUY HOANG - 0336125598"
+              className="w-full h-auto object-contain rounded-xl"
             />
           </div>
           <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
             <QrCode className="w-3.5 h-3.5 text-primary" />
-            <span>Mở app ngân hàng bất kỳ để quét mã VietQR</span>
+            <span>Quét bằng app ngân hàng bất kỳ</span>
           </span>
+        </div>
+
+        {/* 2. TIÊU ĐỀ & LỜI NHẮN ĐẶT PHÍA DƯỚI ẢNH QR */}
+        <div className="text-center space-y-2 pt-1 border-t border-border/50">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+            <Heart className="w-3 h-3 fill-rose-500" />
+            <span>Góc ủng hộ admin</span>
+          </div>
+
+          <h3 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight flex items-center justify-center gap-1.5">
+            <span>Mời Admin Ly Cà Phê ☕</span>
+          </h3>
+
+          <p className="text-xs text-muted-foreground leading-relaxed px-1">
+            OpenQuiz là nền tảng luyện thi hoàn toàn miễn phí. Mọi sự ủng hộ dù chỉ là <strong className="text-foreground">2k, 5k hay 10k</strong> đều là nguồn động viên to lớn giúp admin duy trì máy chủ, thức đêm nâng cấp web và <span className="italic text-foreground">góp chút quỹ chữa bệnh trĩ vì ngồi code xuyên màn đêm</span>! 🥰
+          </p>
         </div>
 
         {/* Chi tiết tài khoản & Copy STK */}

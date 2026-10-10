@@ -194,21 +194,36 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         })}
       </div>
 
-      {/* Donate Button */}
+      {/* Donate Card with QR Image ABOVE text */}
       <div className="px-3 pt-1">
-        <button
+        <div
           onClick={() => setShowDonateModal(true)}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/25 text-amber-700 dark:text-amber-400 text-xs font-semibold transition-all group active:scale-95 shadow-2xs"
-          title="Mời admin ly cà phê / Quỹ duy trì website"
+          className="w-full p-2.5 rounded-2xl bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/35 transition-all cursor-pointer group shadow-2xs flex flex-col items-center text-center space-y-2 select-none active:scale-98"
+          title="Bấm để mở mã QR ủng hộ admin"
         >
-          <div className="flex items-center gap-2">
-            <Coffee className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
-            <span>Mời admin cà phê ☕</span>
+          {/* Ảnh mã QR ở TRÊN dòng chữ */}
+          <div className="relative w-24 sm:w-28 rounded-xl overflow-hidden shadow-xs border border-border/80 bg-white p-1 group-hover:scale-105 transition-transform duration-200">
+            <img
+              src="/images/donate-qr.png"
+              alt="Mã QR ủng hộ admin"
+              className="w-full h-auto object-contain rounded-lg"
+            />
           </div>
-          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400">
-            Ủng hộ
-          </span>
-        </button>
+
+          {/* Dòng chữ ở DƯỚI ảnh QR */}
+          <div className="w-full">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+              <Coffee className="w-3.5 h-3.5 text-amber-500 group-hover:rotate-12 transition-transform" />
+              <span>Mời admin cà phê ☕</span>
+              <span className="text-[10px] px-1 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold">
+                💖
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5 truncate px-1">
+              Quỹ duy trì web & hỗ trợ admin
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* User Info Card */}
