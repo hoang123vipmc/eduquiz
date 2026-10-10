@@ -32,14 +32,18 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-// Danh sách các model theo thứ tự ưu tiên tốc độ & độ ổn định cao nhất
-// Dùng fallback tuần tự để triệt tiêu hoàn toàn lỗi 503 High Demand hoặc 429 Rate Limit
+// In-memory cache cho lời giải AI (TTL 12h) - tiết kiệm hạn ngạch tối đa
+const aiResponseCache = new Map<string, { text: string; expiresAt: number }>();
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+
+// Danh sách các model theo thứ tự ưu tiên hạn ngạch cao nhất (500 RPD & 15 RPM)
+// Loại bỏ hoàn toàn các model bị kịch trần 20 RPD (gemini-3.6-flash, gemini-3.8-flash, gemini-3.7-flash)
 const CANDIDATE_MODELS = [
-  "gemini-flash-lite-latest",
-  "gemini-3.5-flash-lite",
-  "gemini-flash-latest",
-  "gemini-3.5-flash",
-  "gemini-3.8-flash",
+  "gemini-3.5-flash-lite",     // 500 RPD / 15 RPM - Cực nhanh & nhiều quota nhất
+  "gemini-3.1-flash-lite",     // 500 RPD / 15 RPM - Ổn định
+  "gemini-flash-lite-latest",  // Route Lite tự động
+  "gemini-3.5-flash",          // 20 RPD - Dự phòng
+  "gemini-3-flash-preview",    // 20 RPD - Dự phòng
 ];
 
 export async function POST(request: NextRequest) {
@@ -86,6 +90,19 @@ export async function POST(request: NextRequest) {
         : mode === "debate"
         ? "debate"
         : "explain";
+
+    // 3.5 Kiểm tra bộ nhớ đệm (Cache Hit -> Phản hồi tức thì 0ms, không tốn quota API)
+    const cacheKey = `${aiMode}:${questionText.trim()}:${correctOptionText || ""}`;
+    const cachedEntry = aiResponseCache.get(cacheKey);
+    if (cachedEntry && Date.now() < cachedEntry.expiresAt) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          text: cachedEntry.text,
+          cached: true,
+        },
+      });
+    }
 
     // 4. Build Prompt
     const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -201,6 +218,16 @@ Trả lời khách quan, có dẫn chứng, bằng tiếng Việt, dùng markdow
         },
         { status: 502 }
       );
+    }
+
+    // Lưu vào bộ nhớ đệm (giới hạn tối đa 500 câu hỏi gần nhất)
+    aiResponseCache.set(cacheKey, {
+      text: answerText,
+      expiresAt: Date.now() + CACHE_TTL_MS,
+    });
+    if (aiResponseCache.size > 500) {
+      const oldestKey = aiResponseCache.keys().next().value;
+      if (oldestKey) aiResponseCache.delete(oldestKey);
     }
 
     return NextResponse.json({
