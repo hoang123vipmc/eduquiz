@@ -676,13 +676,24 @@ export default function ExamSchedulePage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-start sm:self-center bg-muted/50 px-4 py-2.5 rounded-xl border border-border/60">
-                      <div className="text-right">
+                    <div className="flex items-center gap-2.5 self-start sm:self-center flex-wrap">
+                      <div className="bg-muted/50 px-4 py-2.5 rounded-xl border border-border/60 text-right">
                         <span className="text-[11px] font-medium text-muted-foreground block">Môn thi học kỳ</span>
                         <span className="text-lg sm:text-xl font-black font-mono tabular-nums text-foreground">
                           {data.totalSubjects} môn
                         </span>
                       </div>
+
+                      {data?.scores && data.scores.length > 0 && (
+                        <button
+                          onClick={() => setActiveTab("scores")}
+                          className="px-3.5 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs hover:scale-[1.02] active:scale-95"
+                          title="Bấm để xem ngay điểm thi trắc nghiệm và điểm học phần của bạn"
+                        >
+                          <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <span>Xem điểm thi ({data.scores.length} môn)</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
