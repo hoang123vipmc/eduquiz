@@ -1,0 +1,10 @@
+﻿# GitHub Linguist overrides
+# Tell GitHub that the backend (Laravel/PHP) is a "vendored" supporting layer
+# so language stats reflect the primary frontend (TypeScript/Next.js)
+backend/** linguist-vendored
+
+# Also exclude scripts folder
+scripts/** linguist-vendored
+
+# Explicitly include only the frontend as the primary codebase
+frontend/src/** linguist-detectable
