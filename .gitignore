@@ -5,4 +5,26 @@
 .impeccable/
 .vscode/
 .idea/
+
+# Sensitive / security-risk files
+*.har
+*.env.local
+*.env.*.local
+
+# Backup archives
 *.zip
+*.tar.gz
+*.bak
+
+# AI-generated planning artifacts (keep out of version history)
+implementation_plan.md
+OPERATIONS.md
+PRODUCT.md
+
+# Temporary / scratch files
+de_cuong.*
+data.*
+
+# OS junk
+.DS_Store
+Thumbs.db
