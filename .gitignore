@@ -16,7 +16,8 @@
 *.tar.gz
 *.bak
 
-# AI-generated planning artifacts (keep out of version history)
+# AI agent & planning artifacts (keep local, hide from GitHub)
+AGENTS.md
 implementation_plan.md
 OPERATIONS.md
 PRODUCT.md
