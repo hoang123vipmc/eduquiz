@@ -45,6 +45,14 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Hardening: Use official production php.ini & suppress server signatures
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/expose_php = On/expose_php = Off/g' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/display_errors = On/display_errors = Off/g' "$PHP_INI_DIR/php.ini" && \
+    sed -i 's/register_argc_argv = On/register_argc_argv = Off/g' "$PHP_INI_DIR/php.ini" && \
+    echo "ServerTokens Prod" >> /etc/apache2/apache2.conf && \
+    echo "ServerSignature Off" >> /etc/apache2/apache2.conf
+
 # Setup start script
 COPY start.sh /usr/local/bin/start
 RUN chmod +x /usr/local/bin/start
