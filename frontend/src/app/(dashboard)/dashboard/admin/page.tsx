@@ -441,7 +441,7 @@ export default function AdminPage() {
                       >
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 text-primary-foreground text-xs font-bold">
+                            <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary text-xs font-bold">
                               {u.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
@@ -516,7 +516,7 @@ export default function AdminPage() {
 
                 {/* Avatar & identity */}
                 <div className="flex items-center gap-4 pt-1">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-xl font-black shrink-0">
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xl font-bold shrink-0">
                     {selectedUser.user.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">

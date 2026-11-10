@@ -51,9 +51,8 @@ function getQuizTheme(title: string, categoryName?: string) {
   if (text.includes("java") || text.includes("code") || text.includes("mã nguồn") || text.includes("web") || text.includes("lập trình") || text.includes("python")) {
     return {
       icon: Code2,
-      accentBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-      gradient: "from-blue-600 to-indigo-600",
-      badgeColor: "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+      accentBg: "bg-primary/10 text-primary border-primary/20",
+      badgeColor: "bg-secondary text-foreground border-border",
       defaultTag: "Lập trình"
     };
   }
@@ -61,25 +60,22 @@ function getQuizTheme(title: string, categoryName?: string) {
     return {
       icon: Cpu,
       accentBg: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-      gradient: "from-cyan-500 to-blue-600",
-      badgeColor: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
+      badgeColor: "bg-secondary text-foreground border-border",
       defaultTag: "Hệ thống"
     };
   }
   if (text.includes("hỗ trợ") || text.includes("ai") || text.includes("thông minh") || text.includes("dữ liệu") || text.includes("data")) {
     return {
       icon: BrainCircuit,
-      accentBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20",
-      gradient: "from-purple-600 to-indigo-600",
-      badgeColor: "bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border-violet-200 dark:border-violet-800",
-      defaultTag: "Trí tuệ nhân tạo"
+      accentBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      badgeColor: "bg-secondary text-foreground border-border",
+      defaultTag: "Dữ liệu & AI"
     };
   }
   return {
     icon: GraduationCap,
-    accentBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-    gradient: "from-indigo-500 to-blue-600",
-    badgeColor: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+    accentBg: "bg-secondary text-foreground border-border",
+    badgeColor: "bg-secondary text-foreground border-border",
     defaultTag: "Học phần"
   };
 }
@@ -360,14 +356,14 @@ export default function QuizzesPage() {
                 className="bg-transparent text-foreground font-semibold focus:outline-none cursor-pointer pr-1 max-w-[170px] truncate"
                 aria-label="Lọc theo danh mục đề thi"
               >
-                <option value="all">📂 Tất cả danh mục ({quizzes.length})</option>
+                <option value="all">Tất cả danh mục ({quizzes.length})</option>
                 {categoryOptions.map((cat) => (
                   <option key={cat.name} value={cat.name}>
                     {cat.name} {cat.count ? `(${cat.count})` : ''}
                   </option>
                 ))}
                 {unclassifiedCount > 0 && (
-                  <option value="unclassified">❓ Chưa phân loại ({unclassifiedCount})</option>
+                  <option value="unclassified">Chưa phân loại ({unclassifiedCount})</option>
                 )}
               </select>
             </div>
@@ -382,7 +378,7 @@ export default function QuizzesPage() {
                 aria-label="Sắp xếp danh sách đề thi"
               >
                 {schedules.length > 0 && (
-                  <option value="recommended">🎯 Theo lịch thi</option>
+                  <option value="recommended">Theo lịch thi</option>
                 )}
                 <option value="newest">Mới nhất</option>
                 <option value="questions">Nhiều câu nhất</option>
@@ -478,7 +474,7 @@ export default function QuizzesPage() {
               )}
               title={`Lọc đề thi môn ${s.subject}`}
             >
-              <span>🎯 {s.subject}</span>
+              <span>{s.subject}</span>
               {s.status === 'today' ? (
                 <span className="text-[10px] bg-rose-500 text-white px-1 py-0.2 rounded font-bold">Hôm nay</span>
               ) : s.countdownText ? (
@@ -610,7 +606,7 @@ export default function QuizzesPage() {
                   {/* Badges on Cover */}
                   <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
                     {quiz.isRecommended && quiz.matchedSubject && (
-                      <span className="px-2.5 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 backdrop-blur-md rounded-lg shadow-md border border-amber-300/40 flex items-center gap-1 animate-pulse">
+                      <span className="px-2.5 py-1 text-[11px] font-bold text-white bg-amber-600 backdrop-blur-md rounded-md shadow-xs border border-amber-400/40 flex items-center gap-1">
                         <Sparkles className="w-3 h-3 fill-current" />
                         <span>Trùng môn: {quiz.matchedSubject.subject}</span>
                       </span>
@@ -728,7 +724,7 @@ export default function QuizzesPage() {
                     {/* Matched exam highlight note */}
                     {quiz.isRecommended && quiz.matchedSubject && (
                       <div className="mb-2 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                        <span>📅 Lịch thi: {quiz.matchedSubject.date} ({quiz.matchedSubject.time})</span>
+                        <span>Lịch thi: {quiz.matchedSubject.date} ({quiz.matchedSubject.time})</span>
                         {quiz.matchedSubject.countdownText && (
                           <span className="px-1.5 py-0.2 bg-amber-500/15 rounded text-[10px] font-bold">
                             {quiz.matchedSubject.countdownText}

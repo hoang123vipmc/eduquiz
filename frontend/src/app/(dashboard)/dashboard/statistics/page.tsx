@@ -71,7 +71,7 @@ export default function StatisticsPage() {
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-3.5 sm:p-5 shadow-xs flex items-center gap-3 sm:gap-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
             <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>

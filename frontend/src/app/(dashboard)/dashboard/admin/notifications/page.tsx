@@ -156,7 +156,7 @@ export default function AdminNotificationsPage() {
                   <div className="flex gap-2 items-start mb-2">
                     <span className={cn(
                       "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                      n.type === 'feature' ? "bg-purple-500/10 text-purple-600" :
+                      n.type === 'feature' ? "bg-primary/10 text-primary" :
                       n.type === 'update' ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"
                     )}>
                       {n.type}

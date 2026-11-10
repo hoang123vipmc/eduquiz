@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, FileText, Clock } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -9,71 +9,78 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background text-foreground">
-      {/* Cột trái: Hình ảnh/Branding */}
-      <div className="relative hidden md:flex w-1/2 flex-col items-center justify-center bg-secondary/50 p-12 border-r border-border/80">
+      {/* Left Column: Architectural Preview & Brand */}
+      <div className="relative hidden md:flex w-1/2 flex-col justify-between bg-secondary/40 p-10 lg:p-14 border-r border-border">
         
-        {/* Floating Quiz Cards Illustration */}
-        <div className="relative w-full max-w-md h-64 mb-10 flex items-center justify-center">
-          {/* Card 1 */}
-          <div className="absolute z-10 w-72 h-36 bg-card border border-border/80 rounded-2xl p-5 shadow-sm -rotate-2">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-accent text-accent-foreground">
-                Kinh tế vi mô
-              </span>
-              <span className="text-xs text-muted-foreground">40 câu hỏi</span>
+        {/* Top Brand Link */}
+        <div>
+          <Link href="/" className="inline-flex items-center gap-2.5 group">
+            <div className="w-8 h-8 bg-foreground text-background rounded-lg flex items-center justify-center font-mono font-bold text-xs">
+              OQ
             </div>
-            <div className="w-full h-2.5 bg-muted rounded-full mb-2"></div>
-            <div className="w-4/5 h-2.5 bg-muted rounded-full mb-4"></div>
-            <div className="flex items-center gap-2 mt-auto">
-              <div className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold">A</div>
-              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground font-medium">B</div>
-              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground font-medium">C</div>
-              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground font-medium">D</div>
+            <span className="text-base font-semibold tracking-tight text-foreground">
+              OpenQuiz
+            </span>
+            <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5 bg-card">
+              2.6
+            </span>
+          </Link>
+        </div>
+
+        {/* Center Architectural Preview Card */}
+        <div className="my-auto py-8 max-w-md">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3 text-xs">
+              <span className="font-mono font-semibold text-primary flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" />
+                <span>KINH_TE_VI_MO.DOCX</span>
+              </span>
+              <span className="font-mono text-muted-foreground flex items-center gap-1 tabular-nums">
+                <Clock className="w-3 h-3" /> 14:20
+              </span>
+            </div>
+
+            <p className="text-sm font-semibold text-foreground leading-relaxed">
+              Khi giá của một hàng hóa tăng lên 10% làm lượng cầu giảm 20%, hệ số co giãn của cầu theo giá có độ lớn bằng bao nhiêu?
+            </p>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-xs font-medium text-emerald-800 dark:text-emerald-300">
+                <span>A. |Ed| = 2.0 (Co giãn nhiều)</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-border bg-background text-xs text-muted-foreground">
+                <span>B. |Ed| = 0.5 (Ít co giãn)</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground tabular-nums">
+              <span>Độ chính xác: 96.4%</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">+100 XP</span>
             </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="absolute z-20 w-80 h-40 bg-card border border-primary/30 rounded-2xl p-5 shadow-md translate-x-8 translate-y-6 rotate-1">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                Chính xác!
-              </span>
-              <span className="text-xs font-medium text-primary">Điểm: 10/10</span>
-            </div>
-            <div className="text-sm font-semibold text-foreground line-clamp-1 mb-2">
-              Khái niệm về độ co giãn của cầu theo giá là...
-            </div>
-            <div className="w-full bg-muted rounded-full h-2 mb-4 overflow-hidden">
-              <div className="bg-primary h-2 rounded-full w-full transition-all"></div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Thời gian làm bài: 15:30</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+100 XP</span>
-            </div>
+          <div className="mt-8 space-y-2">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Không gian luyện thi học thuật chuẩn xác
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Tự động bóc tách đề cương Word, đồng bộ lịch thi và bảng điểm học phần, kết hợp trợ lý phân tích AI miễn phí cho sinh viên.
+            </p>
           </div>
         </div>
-        
-        {/* Typography */}
-        <div className="relative z-10 text-center max-w-md">
-          <Link href="/" className="inline-flex items-center justify-center gap-2.5 mb-5 group">
-            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <span className="text-2xl font-black text-primary-foreground tracking-tighter">OQ</span>
-            </div>
-            <span className="text-3xl font-bold tracking-tight text-foreground">
-              Open<span className="text-primary">Quiz</span>
-            </span>
-          </Link>
-          <h1 className="text-2xl font-bold mb-3 tracking-tight text-foreground">
-            Luyện thi thông minh & Cá nhân hóa
-          </h1>
-          <p className="text-sm text-muted-foreground font-normal leading-relaxed">
-            Nền tảng ôn luyện trắc nghiệm mở, tra cứu lịch thi tự động và kho câu hỏi chuẩn xác dành cho sinh viên.
-          </p>
+
+        {/* Bottom Copyright */}
+        <div className="text-xs text-muted-foreground flex items-center justify-between">
+          <span>OpenQuiz — Dự án giáo dục mở</span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Bảo mật</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Điều khoản</Link>
+          </div>
         </div>
       </div>
 
-      {/* Cột phải: Form */}
+      {/* Right Column: Auth Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-background relative">
         {children}
       </div>

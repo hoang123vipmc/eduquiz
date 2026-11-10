@@ -48,9 +48,8 @@ function getQuizTheme(title: string, categoryName?: string) {
   if (text.includes("java") || text.includes("code") || text.includes("mã nguồn") || text.includes("web") || text.includes("lập trình") || text.includes("python")) {
     return {
       icon: Code2,
-      accentBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-      gradient: "from-blue-600 to-indigo-600",
-      badgeColor: "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+      accentBg: "bg-primary/10 text-primary border-primary/20",
+      badgeColor: "bg-secondary text-foreground border-border",
       defaultTag: "Lập trình"
     };
   }
@@ -58,25 +57,22 @@ function getQuizTheme(title: string, categoryName?: string) {
     return {
       icon: Cpu,
       accentBg: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-      gradient: "from-cyan-500 to-blue-600",
-      badgeColor: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
+      badgeColor: "bg-secondary text-foreground border-border",
       defaultTag: "Hệ thống"
     };
   }
   if (text.includes("hỗ trợ") || text.includes("ai") || text.includes("thông minh") || text.includes("dữ liệu") || text.includes("data")) {
     return {
       icon: BrainCircuit,
-      accentBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20",
-      gradient: "from-purple-600 to-indigo-600",
-      badgeColor: "bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border-violet-200 dark:border-violet-800",
-      defaultTag: "Trí tuệ nhân tạo"
+      accentBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      badgeColor: "bg-secondary text-foreground border-border",
+      defaultTag: "Dữ liệu & AI"
     };
   }
   return {
     icon: GraduationCap,
-    accentBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-    gradient: "from-indigo-500 to-blue-600",
-    badgeColor: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+    accentBg: "bg-secondary text-foreground border-border",
+    badgeColor: "bg-secondary text-foreground border-border",
     defaultTag: "Học phần"
   };
 }
@@ -398,14 +394,14 @@ export default function MyQuizzesPage() {
                 aria-label="Lọc theo thể loại"
                 className="bg-transparent text-foreground font-semibold focus:outline-none cursor-pointer pr-1 max-w-[170px] truncate"
               >
-                <option value="all">📂 Tất cả môn học ({quizzes.length})</option>
+                <option value="all">Tất cả môn học ({quizzes.length})</option>
                 {categoryOptions.map((c) => (
                   <option key={c.name} value={c.name}>
                     {c.name} {c.count ? `(${c.count})` : ''}
                   </option>
                 ))}
                 {unclassifiedCount > 0 && (
-                  <option value="unclassified">❓ Chưa phân loại ({unclassifiedCount})</option>
+                  <option value="unclassified">Chưa phân loại ({unclassifiedCount})</option>
                 )}
               </select>
             </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/axios";
-import { Sparkles, ArrowRight, GraduationCap } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -84,58 +84,55 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] space-y-6 sm:space-y-8 z-10 px-2 sm:px-0 animate-in fade-in duration-300">
-      <div className="text-center md:text-left">
+    <div className="w-full max-w-[380px] space-y-6 z-10 animate-in fade-in duration-200">
+      <div>
         {/* Mobile Brand Logo */}
-        <div className="md:hidden flex items-center justify-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-xs">
-            <GraduationCap className="w-5 h-5" />
+        <Link href="/" className="md:hidden inline-flex items-center gap-2 mb-6">
+          <div className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs">
+            OQ
           </div>
-          <span className="font-extrabold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
-        </div>
+          <span className="font-semibold text-lg tracking-tight text-foreground">OpenQuiz</span>
+        </Link>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">Chào mừng trở lại</h2>
-        <p className="text-sm text-muted-foreground mt-2 font-normal leading-relaxed">
-          Đăng nhập để tiếp tục ôn thi, luyện đề và tra cứu lịch thi cá nhân.
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Đăng nhập tài khoản</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
+          Nhập thông tin tài khoản để tiếp tục ôn luyện và tra cứu lịch thi.
         </p>
       </div>
 
       {redirectUrl && (
-        <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/20 flex items-start gap-3 text-left animate-in fade-in slide-in-from-top-2">
-          <div className="p-2 rounded-xl bg-primary/15 text-primary shrink-0 mt-0.5">
-            <Sparkles className="w-4 h-4" />
-          </div>
+        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-start gap-2.5 text-left">
+          <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <div className="space-y-0.5">
-            <h4 className="text-xs sm:text-sm font-bold text-foreground">Bạn nhận được lời mời làm bài thi!</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Vui lòng đăng nhập để hệ thống tự động đưa bạn vào phòng thi ngay.
+            <h4 className="text-xs font-semibold text-foreground">Lời mời vào phòng thi</h4>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Đăng nhập để hệ thống đưa bạn vào thẳng bài thi được chia sẻ.
             </p>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3.5 text-xs sm:text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20 font-medium">
+          <div className="p-3 text-xs text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-medium">
             {error}
           </div>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-foreground">Email</label>
+            <label className="block text-xs font-medium text-foreground">Địa chỉ Email</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
               required
-              className="h-11 bg-card border-border/80 text-foreground placeholder:text-muted-foreground rounded-xl"
             />
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-foreground">Mật khẩu</label>
+              <label className="block text-xs font-medium text-foreground">Mật khẩu</label>
               <Link href="#" className="text-xs text-primary hover:underline font-medium">
                 Quên mật khẩu?
               </Link>
@@ -146,32 +143,31 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="h-11 bg-card border-border/80 text-foreground placeholder:text-muted-foreground rounded-xl"
             />
           </div>
         </div>
 
         <Button 
           type="submit" 
-          className="w-full h-11 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs" 
+          className="w-full h-10 text-xs sm:text-sm font-semibold" 
           disabled={loading}
         >
-          {loading ? "Đang xử lý..." : "Đăng nhập"}
+          {loading ? "Đang xác thực..." : "Đăng nhập"}
         </Button>
 
-        <div className="relative my-5">
+        <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border/70"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
-          <div className="relative flex justify-center text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            <span className="px-3 bg-background">Hoặc tiếp tục với</span>
+          <div className="relative flex justify-center text-[11px] font-mono text-muted-foreground uppercase">
+            <span className="px-2.5 bg-background">Hoặc</span>
           </div>
         </div>
 
         <Button
           type="button"
           variant="outline"
-          className="w-full h-11 flex items-center justify-center gap-2.5 rounded-xl border-border/80 bg-card hover:bg-secondary text-foreground font-semibold text-sm shadow-2xs"
+          className="w-full h-10 flex items-center justify-center gap-2 text-xs sm:text-sm font-medium"
           onClick={loginWithGoogle}
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -180,12 +176,12 @@ export default function LoginPage() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          <span>Đăng nhập với Google</span>
+          <span>Tiếp tục với Google</span>
         </Button>
 
-        <p className="text-center text-xs text-muted-foreground pt-1">
+        <p className="text-center text-xs text-muted-foreground pt-2">
           Chưa có tài khoản?{" "}
-          <Link href="/register" className="font-bold text-primary hover:underline">
+          <Link href="/register" className="font-semibold text-primary hover:underline">
             Đăng ký ngay
           </Link>
         </p>

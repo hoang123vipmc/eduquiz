@@ -193,7 +193,7 @@ export function PrintQuizModal({ isOpen, onClose, quiz }: PrintQuizModalProps) {
 
                     {/* Explanation */}
                     {showAnswers && q.explanation && (
-                      <div className="pl-3 py-1 text-xs text-muted-foreground italic border-l-2 border-primary/40">
+                      <div className="pl-3 py-1 text-xs text-muted-foreground italic border-l border-primary/40">
                         <strong>Giải thích:</strong>{" "}
                         <FormattedText text={q.explanation} />
                       </div>

@@ -198,17 +198,12 @@ export default function QuizResultPage() {
         </div>
 
         {/* Điểm số tổng quan Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-card border border-border/80 shadow-2xs text-center p-8">
-          <div 
-            className="absolute -top-24 -left-24 w-64 h-64 rounded-full pointer-events-none opacity-20"
-            style={{ background: isPass ? 'radial-gradient(circle, #10B981, transparent 70%)' : 'radial-gradient(circle, #EF4444, transparent 70%)' }}
-          />
-
-          <div className="w-24 h-24 rounded-full border-4 border-card mx-auto flex items-center justify-center shadow-lg relative z-10 mb-4 bg-muted">
+        <div className="relative overflow-hidden rounded-xl bg-card border border-border shadow-2xs text-center p-8">
+          <div className="w-20 h-20 rounded-2xl border border-border mx-auto flex items-center justify-center relative z-10 mb-4 bg-secondary/50">
             {isPass ? (
-              <CheckCircle2 className="w-14 h-14 text-emerald-400" />
+              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
             ) : (
-              <XCircle className="w-14 h-14 text-rose-500" />
+              <XCircle className="w-10 h-10 text-rose-500" />
             )}
           </div>
 
@@ -549,7 +544,7 @@ export default function QuizResultPage() {
             </button>
 
             {/* Scorecard Visual Box */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-primary/20 shadow-md text-center space-y-4">
+            <div className="p-6 rounded-xl bg-card border border-border shadow-xs text-center space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>CHỨNG NHẬN KẾT QUẢ ÔN THI</span>

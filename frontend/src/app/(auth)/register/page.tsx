@@ -46,14 +46,14 @@ export default function RegisterPage() {
         password_confirmation: passwordConfirmation,
         student_id: studentId.trim() || null,
       });
-        if (data.success) {
-          login(data.data.token, data.data.user);
-          const redirectTarget = typeof window !== 'undefined' ? (sessionStorage.getItem("auth_redirect") || "/dashboard") : "/dashboard";
-          if (typeof window !== 'undefined') {
-            sessionStorage.removeItem("auth_redirect");
-          }
-          router.push(redirectTarget);
+      if (data.success) {
+        login(data.data.token, data.data.user);
+        const redirectTarget = typeof window !== 'undefined' ? (sessionStorage.getItem("auth_redirect") || "/dashboard") : "/dashboard";
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem("auth_redirect");
         }
+        router.push(redirectTarget);
+      }
     } catch (err: any) {
       if (err.response?.data?.errors) {
         const firstErrorKey = Object.keys(err.response.data.errors)[0];
@@ -71,83 +71,80 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 px-2 sm:px-0">
-      <div className="text-center">
-        {/* Mobile Brand Logo */}
-        <div className="md:hidden flex items-center justify-center gap-2.5 mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center font-black text-primary-foreground shadow-sm">
+    <div className="w-full max-w-[400px] space-y-5 animate-in fade-in duration-200">
+      <div>
+        <Link href="/" className="md:hidden inline-flex items-center gap-2 mb-5">
+          <div className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs">
             OQ
           </div>
-          <span className="font-bold text-2xl tracking-tight text-foreground">Open<span className="text-primary">Quiz</span></span>
-        </div>
+          <span className="font-semibold text-lg tracking-tight text-foreground">OpenQuiz</span>
+        </Link>
 
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Tạo tài khoản mới</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Bắt đầu ôn thi hiệu quả cùng cộng đồng sinh viên OpenQuiz
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Tạo tài khoản mới</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          Khởi tạo không gian ôn thi cá nhân trên OpenQuiz
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-6 sm:mt-8">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20 font-medium">
+          <div className="p-3 text-xs text-destructive bg-destructive/10 rounded-lg border border-destructive/20 font-medium">
             {error}
           </div>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-foreground">Họ và tên</label>
+            <label className="block text-xs font-medium mb-1 text-foreground">Họ và tên</label>
             <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nguyễn Văn A"
               required
-              className="h-11"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5 text-foreground">Email</label>
+            <label className="block text-xs font-medium mb-1 text-foreground">Email</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="nhapemail@example.com"
               required
-              className="h-11"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5 text-foreground">Mật khẩu</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Tối thiểu 8 ký tự"
-              required
-              minLength={8}
-              className="h-11"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5 text-foreground">Xác nhận mật khẩu</label>
-            <Input
-              type="password"
-              value={passwordConfirmation}
-              onChange={(e) => setPasswordConfirmation(e.target.value)}
-              placeholder="Nhập lại mật khẩu"
-              required
-              minLength={8}
-              className="h-11"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1 text-foreground">Mật khẩu</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Tối thiểu 8 ký tự"
+                required
+                minLength={8}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-foreground">Xác nhận</label>
+              <Input
+                type="password"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                placeholder="Nhập lại mật khẩu"
+                required
+                minLength={8}
+              />
+            </div>
           </div>
 
-          {/* Optional Student ID field */}
-          <div className="rounded-2xl border border-border/80 bg-secondary/50 p-4 space-y-2.5">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-primary shrink-0" />
-              <label className="block text-sm font-medium text-foreground">
-                Mã sinh viên HUBT <span className="text-xs font-normal text-muted-foreground">(Không bắt buộc)</span>
+          {/* Optional Student ID */}
+          <div className="rounded-lg border border-border bg-secondary/40 p-3.5 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <GraduationCap className="w-3.5 h-3.5 text-primary shrink-0" />
+              <label className="block text-xs font-semibold text-foreground">
+                Mã sinh viên HUBT <span className="font-normal text-muted-foreground">(Tùy chọn)</span>
               </label>
             </div>
             <Input
@@ -156,31 +153,31 @@ export default function RegisterPage() {
               onChange={(e) => setStudentId(e.target.value)}
               placeholder="Ví dụ: 2823231208"
               maxLength={20}
-              className="h-10 bg-card"
+              className="h-9 bg-card font-mono text-xs"
             />
-            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
-              Nhập MSV để OpenQuiz tự động tra cứu lịch thi và gợi ý đề ôn tập tương ứng cho bạn.
+            <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
+              <Info className="w-3 h-3 mt-0.5 shrink-0 text-primary" />
+              <span>Tự động đồng bộ lịch thi học kỳ, bảng điểm và gợi ý đề ôn tập theo môn thi.</span>
             </p>
           </div>
 
           {/* Legal agreement checkbox */}
-          <div className="flex items-start gap-2.5 pt-1">
+          <div className="flex items-start gap-2 pt-1">
             <input
               id="agree-terms"
               type="checkbox"
               checked={agreedTerms}
               onChange={(e) => setAgreedTerms(e.target.checked)}
               required
-              className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
+              className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
             />
             <label htmlFor="agree-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
-              Tôi xác nhận đã đọc, hiểu và đồng ý với{" "}
-              <Link href="/terms" target="_blank" className="text-primary font-semibold hover:underline">
+              Tôi đồng ý với{" "}
+              <Link href="/terms" target="_blank" className="text-primary font-medium hover:underline">
                 Điều khoản sử dụng
               </Link>{" "}
               và{" "}
-              <Link href="/privacy" target="_blank" className="text-primary font-semibold hover:underline">
+              <Link href="/privacy" target="_blank" className="text-primary font-medium hover:underline">
                 Chính sách bảo mật
               </Link>{" "}
               của OpenQuiz.
@@ -188,12 +185,12 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-11 text-base font-semibold rounded-xl" disabled={loading || !agreedTerms}>
-          {loading ? "Đang xử lý..." : "Đăng ký tài khoản"}
+        <Button type="submit" className="w-full h-10 text-xs sm:text-sm font-semibold" disabled={loading || !agreedTerms}>
+          {loading ? "Đang khởi tạo..." : "Đăng ký tài khoản"}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground mt-8">
+      <p className="text-center text-xs text-muted-foreground pt-1">
         Đã có tài khoản?{" "}
         <Link href="/login" className="font-semibold text-primary hover:underline">
           Đăng nhập

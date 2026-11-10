@@ -47,31 +47,28 @@ export default function DashboardLayout({
       <Sidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <Topbar onOpenMobile={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-hidden p-0 sm:p-2 sm:pt-0 sm:pr-3 md:p-3 md:pt-0 md:pr-4">
-          <div className="h-full overflow-y-auto bg-card rounded-none sm:rounded-2xl border-0 sm:border border-border/80 shadow-2xs p-3 sm:p-5 md:p-7 pb-24 md:pb-12 transition-colors">
-            <div className="max-w-7xl mx-auto animate-in fade-in duration-300">
-              {children}
-              
-              {/* Footer Disclaimer */}
-              <footer className="mt-12 sm:mt-16 py-6 border-t border-border/40 text-center text-xs text-muted-foreground space-y-1">
-                <p className="font-semibold text-foreground/80">
-                  OpenQuiz — Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận
-                </p>
-                <p>
-                  Dự án cá nhân độc lập phục vụ mục đích học tập, ôn thi và nghiên cứu công nghệ cho sinh viên. Hoàn toàn miễn phí.
-                </p>
-              </footer>
-            </div>
+        <main className="flex-1 overflow-y-auto bg-background px-3 py-4 sm:px-6 sm:py-6 md:px-8 md:py-7 pb-24 md:pb-12">
+          <div className="max-w-7xl mx-auto animate-in fade-in duration-200">
+            {children}
+            
+            {/* Footer Disclaimer */}
+            <footer className="mt-14 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground/80">
+                OpenQuiz — Nền tảng ôn thi trắc nghiệm mở & phi lợi nhuận
+              </p>
+              <p>
+                Dự án học thuật độc lập dành cho sinh viên. Hoàn toàn miễn phí.
+              </p>
+            </footer>
           </div>
         </main>
 
-        {/* Nút ủng hộ admin ở góc màn hình */}
         <DonateFloatingButton />
 
         {/* Mobile Sticky Bottom Navigation Bar */}
         <nav 
           aria-label="Điều hướng di động"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around h-16 px-1 shadow-lg"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around h-14 px-1"
         >
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
@@ -83,13 +80,11 @@ export default function DashboardLayout({
                 className={cn(
                   "flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium transition-colors",
                   isActive
-                    ? "text-primary font-bold"
-                    : "text-muted-foreground hover:text-foreground active:scale-95"
+                    ? "text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <div className={cn("p-1 rounded-xl transition-all", isActive && "bg-primary/10")}>
-                  <Icon className="w-5 h-5" />
-                </div>
+                <Icon className="w-4 h-4" />
                 <span className="mt-0.5 tracking-tight">{item.label}</span>
               </Link>
             );
@@ -98,21 +93,13 @@ export default function DashboardLayout({
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Thêm mục khác"
-            className="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground active:scale-90 transition-all duration-150 group"
+            className={cn(
+              "flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium transition-colors",
+              mobileOpen ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <div className={cn(
-              "p-1 rounded-xl transition-all duration-200 group-hover:bg-primary/10 group-active:scale-80 group-active:rotate-12",
-              mobileOpen && "bg-primary/15 text-primary scale-105"
-            )}>
-              <Menu className={cn(
-                "w-5 h-5 transition-transform duration-300 ease-out",
-                mobileOpen && "rotate-90 text-primary scale-110"
-              )} />
-            </div>
-            <span className={cn(
-              "mt-0.5 tracking-tight transition-colors duration-200",
-              mobileOpen && "text-primary font-bold"
-            )}>Thêm</span>
+            <Menu className="w-4 h-4" />
+            <span className="mt-0.5 tracking-tight">Thêm</span>
           </button>
         </nav>
       </div>

@@ -24,24 +24,24 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-xs">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs">
               OQ
             </div>
-            <span className="font-extrabold text-xl tracking-tight">
-              Open<span className="text-primary">Quiz</span>
+            <span className="font-semibold text-base tracking-tight">
+              OpenQuiz
             </span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
+            <Link href="/terms" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
               Điều khoản sử dụng
             </Link>
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+                <ArrowLeft className="w-3.5 h-3.5" />
                 Quay lại đăng nhập
               </Button>
             </Link>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
       </header>
 
       {/* Hero Header */}
-      <div className="border-b border-border/40 bg-gradient-to-b from-blue-500/5 via-transparent to-transparent py-12 sm:py-16">
+      <div className="border-b border-border bg-secondary/20 py-10 sm:py-14">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-2">
             <ShieldCheck className="w-3.5 h-3.5" />

@@ -210,57 +210,57 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       
-      {/* Hero Section — Google Workspace Clean Canvas */}
-      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 p-5 sm:p-7 rounded-2xl bg-card border border-border/80 shadow-2xs">
+      {/* Hero Section — 2026 Minimalist SaaS Header */}
+      <div className="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 p-5 sm:p-6 rounded-xl bg-card border border-border shadow-2xs">
         <div className="relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-secondary text-xs font-semibold text-primary mb-2.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Nền tảng ôn thi trắc nghiệm OpenQuiz</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-secondary border border-border text-[11px] font-mono font-medium text-foreground mb-2.5">
+            <Sparkles className="w-3 h-3 text-primary" />
+            <span>TRUNG TÂM ÔN LUYỆN • OPENQUIZ</span>
           </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground mb-1.5 sm:mb-2">
-            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}!
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-1.5">
+            Chào mừng trở lại, {user?.name ? (user.name.includes('@') ? user.name.split('@')[0] : user.name).replace(/^\w/, c => c.toUpperCase()) : 'Học viên'}
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm md:text-[15px] leading-relaxed mb-4 sm:mb-5">
-            Tiếp tục hành trình học tập, rèn luyện kỹ năng và chuẩn bị cho các kỳ thi học phần với ngân hàng đề thi thông minh.
+          <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed mb-4">
+            Theo dõi tiến độ học tập, tra cứu lịch thi học kỳ và luyện tập với ngân hàng đề thi trắc nghiệm.
           </p>
 
           {/* Banner Thông báo Cá nhân hóa nếu chưa cài đặt MSV */}
           {!loading && !userMsv && (
             <div 
               onClick={() => router.push('/dashboard/settings')}
-              className="mb-4 sm:mb-5 p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border/80 transition-all cursor-pointer flex items-center justify-between gap-3 group shadow-2xs"
+              className="mb-4 p-3 rounded-lg bg-secondary/50 hover:bg-secondary border border-border transition-colors cursor-pointer flex items-center justify-between gap-3 group"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
                   <GraduationCap className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <span>Cá nhân hóa theo lịch thi</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-primary/10 text-primary">Chưa cài MSV</span>
+                  <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <span>Đồng bộ lịch thi tự động</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/10 text-primary border border-primary/20">Chưa gắn MSV</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground truncate">
-                    Nhập Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên gợi ý các đề thi đúng môn bạn sắp thi!
+                    Cập nhật Mã sinh viên trong Cài đặt để hệ thống tự động ưu tiên đề ôn tập theo lịch thi.
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
-                Cài đặt ngay <ArrowRight className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium text-primary flex items-center gap-1 shrink-0">
+                <span>Cài đặt</span> <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <button 
               onClick={() => router.push('/dashboard/quizzes')}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all shadow-xs hover:shadow-sm active:scale-95"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors shadow-2xs cursor-pointer"
             >
-              <Play className="w-4 h-4 fill-current" /> Bắt đầu luyện thi
+              <Play className="w-3.5 h-3.5 fill-current" /> Bắt đầu luyện thi
             </button>
             <button 
               onClick={() => router.push('/dashboard/bank')}
-              className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-foreground px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-colors border border-border/60"
+              className="flex items-center gap-2 bg-card hover:bg-secondary text-foreground px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors border border-border cursor-pointer"
             >
-              <BookOpen className="w-4 h-4 text-primary" /> Ngân hàng câu hỏi
+              <BookOpen className="w-3.5 h-3.5 text-muted-foreground" /> Ngân hàng câu hỏi
             </button>
           </div>
         </div>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-baseline gap-1.5 sm:gap-2">
                 <div className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">{stats.streak_days}d</div>
-                <span className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 font-bold">Liên tục 🔥</span>
+                <span className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 font-bold">Liên tục</span>
               </div>
             </div>
           </>
@@ -435,21 +435,21 @@ export default function DashboardPage() {
         </div>
       ) : nextExam ? (
         <div className={cn(
-          "relative overflow-hidden rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 border transition-all",
+          "relative overflow-hidden rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 border transition-all",
           nextExam.status === 'today'
-            ? "bg-rose-50/70 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50"
-            : "bg-secondary/60 border-border/80"
+            ? "bg-rose-500/[0.04] border-rose-500/30"
+            : "bg-card border-border"
         )}>
           <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
             {/* Calendar Date Block */}
-            <div className="flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-card border border-border shadow-xs shrink-0 text-center">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+            <div className="flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-secondary/60 border border-border shrink-0 text-center">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
                 {nextExam.date ? `Thg ${nextExam.date.split('/')[1] || '10'}` : 'THI'}
               </span>
-              <span className="text-xl sm:text-2xl font-black text-foreground tabular-nums leading-none mt-0.5">
+              <span className="text-xl sm:text-2xl font-bold text-foreground font-mono tabular-nums leading-none mt-0.5">
                 {nextExam.date ? nextExam.date.split('/')[0] : '09'}
               </span>
-              <span className="text-[9px] text-muted-foreground font-semibold mt-0.5 font-mono">
+              <span className="text-[9px] text-muted-foreground font-semibold mt-0.5 font-mono tabular-nums">
                 {nextExam.time || '10h30'}
               </span>
             </div>
@@ -458,19 +458,19 @@ export default function DashboardPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className={cn(
-                  "text-[11px] font-extrabold uppercase tracking-wider",
-                  nextExam.status === 'today' ? "text-rose-500" : "text-blue-500 dark:text-blue-400"
+                  "text-[11px] font-mono font-semibold uppercase tracking-wider",
+                  nextExam.status === 'today' ? "text-rose-500" : "text-primary"
                 )}>
                   {nextExam.status === 'today' ? "Lịch thi hôm nay • " : "Lịch thi học kỳ • "}
                   {nextExam.source?.includes("Khoa CNTT") ? "Khoa CNTT - HUBT" : "HUBT ITC"}
                 </span>
                 {nextExam.status === 'today' ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse flex items-center gap-1">
-                    🔥 HÔM NAY THI!
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
+                    HÔM NAY THI
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-                    ⏱️ {nextExam.countdownText || "Sắp thi"}
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    {nextExam.countdownText || "Sắp thi"}
                   </span>
                 )}
               </div>
@@ -713,8 +713,8 @@ export default function DashboardPage() {
                   className={cn(
                     "group flex items-center gap-3.5 p-3 rounded-xl border transition-all cursor-pointer overflow-hidden",
                     q.isRecommended
-                      ? "border-amber-500/40 bg-gradient-to-r from-amber-500/[0.04] to-orange-500/[0.02] hover:border-amber-500 hover:shadow-md hover:shadow-amber-500/5"
-                      : "border-border/70 bg-card hover:border-primary/40 hover:bg-accent/40"
+                      ? "border-amber-500/40 bg-amber-500/[0.04] hover:border-amber-500"
+                      : "border-border bg-card hover:border-primary/40 hover:bg-secondary/40"
                   )}
                   onClick={() => setSelectedQuiz(q)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedQuiz(q); } }}

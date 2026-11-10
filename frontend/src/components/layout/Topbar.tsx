@@ -14,7 +14,7 @@ interface TopbarProps {
 export function Topbar({ onOpenMobile }: TopbarProps) {
   const { user } = useAuthStore();
   const router = useRouter();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -32,62 +32,66 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
   };
 
   return (
-    <header className="h-16 sm:h-[68px] bg-background sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between gap-3 sm:gap-6">
-      {/* Mobile Hamburger & Logo */}
+    <header className="h-14 bg-background/95 backdrop-blur-xs border-b border-border sticky top-0 z-30 px-3 sm:px-6 flex items-center justify-between gap-3 sm:gap-6 shrink-0">
+      {/* Mobile Hamburger & Brand */}
       <div className="flex items-center gap-2 sm:hidden shrink-0">
         <button
           onClick={onOpenMobile}
           aria-label="Mở menu"
-          className="p-2 -ml-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors"
+          className="p-1.5 -ml-1 text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
         <div 
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 font-bold text-foreground cursor-pointer"
+          className="flex items-center gap-2 font-semibold text-foreground cursor-pointer"
         >
-          <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center text-xs font-black shadow-xs">
+          <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center text-[11px] font-mono font-bold">
             OQ
           </div>
-          <span className="text-base tracking-tight font-extrabold text-foreground">OpenQuiz</span>
+          <span className="text-sm tracking-tight font-semibold text-foreground">OpenQuiz</span>
         </div>
       </div>
 
-      {/* Google Drive Signature Wide Search Pill */}
-      <div className="flex-1 max-w-2xl min-w-0">
+      {/* Command Search Bar */}
+      <div className="flex-1 max-w-xl min-w-0">
         <form onSubmit={handleSearch} className="relative hidden sm:block w-full">
-          <div className="flex items-center h-11 sm:h-12 w-full rounded-full bg-secondary hover:bg-[#dfe4ec] dark:hover:bg-[#353637] focus-within:bg-card focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/20 border border-transparent focus-within:border-primary/30 px-4 transition-all gap-3">
-            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
+          <div className="flex items-center h-9 w-full rounded-lg bg-secondary/60 hover:bg-secondary focus-within:bg-card focus-within:ring-2 focus-within:ring-primary/20 border border-border focus-within:border-primary px-3 transition-all gap-2.5">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
             <input 
               type="text" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm kiếm trong OpenQuiz (đề thi, môn học, câu hỏi...)" 
+              placeholder="Tìm kiếm đề thi, môn học, ngân hàng câu hỏi..." 
               aria-label="Tìm kiếm đề thi"
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="w-full bg-transparent text-xs sm:text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
-            {searchTerm && (
+            {searchTerm ? (
               <button
                 type="button"
                 onClick={() => setSearchTerm("")}
                 aria-label="Xóa tìm kiếm"
-                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="p-0.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
+            ) : (
+              <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-card border border-border rounded">
+                /
+              </kbd>
             )}
           </div>
         </form>
       </div>
 
-      {/* Right Controls: Theme, Notification & Google Profile Chip */}
-      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+      {/* Right Controls */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <button 
           onClick={() => router.push('/dashboard/quizzes')}
           aria-label="Tìm kiếm đề thi"
-          className="sm:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors cursor-pointer"
+          className="sm:hidden p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors cursor-pointer"
         >
-          <Search className="w-5 h-5" />
+          <Search className="w-4 h-4" />
         </button>
 
         {mounted && (
@@ -96,34 +100,34 @@ export function Topbar({ onOpenMobile }: TopbarProps) {
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             aria-label="Chuyển đổi giao diện sáng/tối"
             title={resolvedTheme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
-            className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary transition-colors cursor-pointer"
+            className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors cursor-pointer"
           >
             {resolvedTheme === "dark" ? (
-              <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+              <Sun className="w-4 h-4 text-foreground" />
             ) : (
-              <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700 dark:text-slate-300" />
+              <Moon className="w-4 h-4 text-foreground" />
             )}
           </button>
         )}
 
         <NotificationDropdown />
 
-        <div className="h-5 w-px bg-border/60 mx-1 hidden sm:block" />
+        <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
 
         <div 
           onClick={() => router.push('/dashboard/settings')}
-          className="flex items-center gap-2.5 p-1 pl-2 rounded-full hover:bg-secondary transition-colors cursor-pointer group"
+          className="flex items-center gap-2 py-1 px-1.5 rounded-lg hover:bg-secondary transition-colors cursor-pointer group"
           title="Tài khoản cá nhân"
         >
           <div className="hidden md:flex flex-col items-end">
-            <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+            <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
               {user?.name || "Học viên"}
             </span>
-            <span className="text-[10px] text-muted-foreground capitalize leading-tight">
+            <span className="text-[10px] text-muted-foreground leading-tight">
               {user?.role === 'admin' ? 'Quản trị viên' : 'Học viên'}
             </span>
           </div>
-          <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-border group-hover:border-primary/40 transition-colors shadow-2xs shrink-0">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border border-border shrink-0">
             <img 
               src={user?.avatar || "/images/avatar-student.jpg"} 
               alt={user?.name || "Avatar"} 

@@ -2,45 +2,30 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   BookOpen,
   FileText,
-  Sparkles,
   CheckCircle2,
-  XCircle,
   Clock,
   ArrowRight,
-  ShieldCheck,
-  Zap,
-  Bookmark,
-  Award,
-  BarChart3,
   Sun,
   Moon,
   Laptop,
-  GraduationCap,
   ChevronRight,
-  Upload,
-  Layers,
-  HelpCircle,
-  FileCheck2,
   RefreshCcw,
-  Volume2,
   Check,
-  X
+  X,
+  Terminal
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
 export default function LandingPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { isAuthenticated } = useAuthStore();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Interactive Quiz Mini-Demo State in Hero
   const [demoTheme, setDemoTheme] = useState<"modern" | "itest">("modern");
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -51,14 +36,14 @@ export default function LandingPage() {
 
   const demoQuestion = {
     title: "Trong mô hình quan hệ đối tượng (OODB), quan hệ kế thừa (Inheritance) thường được biểu diễn thông qua mệnh đề nào?",
-    diagramLabel: "Sơ đồ thực thể kế thừa: [Lớp Con] ──▷ [Lớp Cha]",
+    diagramLabel: "[SubClass: SinhVien] ──▷ [SuperClass: Nguoi]",
     options: [
       { id: 0, text: "Mệnh đề 'IMPLEMENTS' giữa hai giao diện độc lập", isCorrect: false },
       { id: 1, text: "Mệnh đề 'EXTENDS' hoặc quan hệ 'Is-a' giữa lớp con và lớp cha", isCorrect: true },
       { id: 2, text: "Mệnh đề 'HAS-A' thông qua con trỏ tham chiếu thành phần", isCorrect: false },
       { id: 3, text: "Cơ chế 'JOIN' trên khóa ngoại (Foreign Key) của bảng quan hệ", isCorrect: false }
     ],
-    explanation: "Chính xác! Trong OODB, quan hệ kế thừa thể hiện bản chất 'Is-a' (Là-một). Lớp dẫn xuất kế thừa toàn bộ thuộc tính và phương thức từ lớp cơ sở."
+    explanation: "Chính xác. Trong OODB, quan hệ kế thừa thể hiện bản chất 'Is-a' (Là-một). Lớp dẫn xuất kế thừa toàn bộ thuộc tính và phương thức từ lớp cơ sở."
   };
 
   const handleSelectOption = (index: number) => {
@@ -72,61 +57,96 @@ export default function LandingPage() {
     setIsAnswered(false);
   };
 
+  const capabilities = [
+    {
+      index: "01",
+      id: "word-ingestion",
+      code: "DOCX_PARSER",
+      title: "Bóc tách đề cương Word (.docx) & Giữ nguyên sơ đồ kỹ thuật",
+      description:
+        "Tải lên trực tiếp file đề cương môn học. Bộ phân tích tự động nhận diện cấu trúc câu hỏi tiếng Việt (Câu 1:, *A., => Đáp án: C) và trích xuất toàn bộ hình vẽ, biểu đồ vào đúng vị trí câu hỏi.",
+      spec: "Hỗ trợ dán ảnh trực tiếp Ctrl+V • Dung lượng tối đa 10MB/file"
+    },
+    {
+      index: "02",
+      id: "itest-simulation",
+      code: "ITEST_RUNTIME",
+      title: "Mô phỏng chuẩn xác giao diện phòng máy thi đại học (iTest)",
+      description:
+        "Rèn luyện phản xạ phòng thi thực tế với ma trận câu hỏi, đồng hồ đếm ngược tabular-nums chống lệch nhịp, lưu trạng thái bài làm tức thời khi gián đoạn mạng và phím tắt chọn nhanh A-B-C-D.",
+      spec: "Chuyển đổi tức thì 1-click giữa OpenQuiz Modern và iTest Classic"
+    },
+    {
+      index: "03",
+      id: "error-notebook",
+      code: "ERROR_LEDGER",
+      title: "Sổ tay câu hỏi khó & Thuật toán cô lập câu trả lời sai",
+      description:
+        "Không lãng phí thời gian làm lại những câu đã thuộc. Hệ thống tự động gom các câu trả lời sai hoặc đánh dấu lưu ý vào sổ tay riêng biệt, tích hợp trợ lý AI giải thích bản chất và tạo từ khóa nhớ nhanh 3 giây.",
+      spec: "Rút ngắn 50% thời gian ôn tập trước kỳ thi học kỳ"
+    },
+    {
+      index: "04",
+      id: "open-platform",
+      code: "ZERO_PAYWALL",
+      title: "Vận hành phi lợi nhuận, không quảng cáo, bảo mật dữ liệu",
+      description:
+        "Xây dựng độc lập phục vụ cộng đồng sinh viên. Không khóa lời giải sau gói VIP, không hiển thị banner quảng cáo gây xao nhãng, đồng bộ trực tiếp lịch thi và bảng điểm học phần cá nhân.",
+      spec: "Miễn phí 100% • Mã nguồn minh bạch"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       
       {/* ── 1. TOP NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           
-          {/* Logo & Platform Pill */}
+          {/* Brand Identity */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-5 h-5" />
+            <div className="w-7 h-7 rounded-lg bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs tracking-tight">
+              OQ
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-foreground">
+              <span className="font-semibold text-base tracking-tight text-foreground">
                 OpenQuiz
               </span>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                Phi lợi nhuận
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-secondary text-muted-foreground border border-border">
+                v2.6 • Open Academic
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">
-              Tính năng
+              Kiến trúc tính năng
             </a>
             <a href="#itest-simulation" className="hover:text-foreground transition-colors">
-              Mô phỏng iTest
+              Phòng thi iTest
             </a>
-            <a href="#word-ingestion" className="hover:text-foreground transition-colors">
-              Nhập đề Word
-            </a>
-            <a href="#error-notebook" className="hover:text-foreground transition-colors">
-              Sổ tay câu khó
+            <a href="#workflow" className="hover:text-foreground transition-colors">
+              Quy trình
             </a>
             <a href="#comparison" className="hover:text-foreground transition-colors">
-              Ưu điểm
+              So sánh
             </a>
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-2.5">
-            {/* Theme Toggle */}
+          {/* Right Action Controls */}
+          <div className="flex items-center gap-2">
             {mounted && (
               <button
                 type="button"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label="Chuyển đổi giao diện sáng/tối"
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
               >
                 {resolvedTheme === "dark" ? (
-                  <Sun className="w-4 h-4 text-amber-400" />
+                  <Sun className="w-4 h-4 text-foreground" />
                 ) : (
-                  <Moon className="w-4 h-4 text-slate-700" />
+                  <Moon className="w-4 h-4 text-foreground" />
                 )}
               </button>
             )}
@@ -134,7 +154,7 @@ export default function LandingPage() {
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
               >
                 <span>Bảng điều khiển</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -143,13 +163,13 @@ export default function LandingPage() {
               <>
                 <Link
                   href="/login"
-                  className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Đăng nhập
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-foreground text-background hover:bg-foreground/90 text-xs font-medium transition-colors"
                 >
                   <span>Bắt đầu ôn thi</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -160,425 +180,421 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── 2. HERO SECTION ── */}
-      <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 border-b border-border/50 overflow-hidden">
-        {/* Subtle Ambient Background Gradients (Not harsh neon blobs) */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(11,87,208,0.08),transparent)]" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+      {/* ── 2. HERO SECTION (12-COLUMN ASYMMETRIC ARCHITECTURAL SPLIT) ── */}
+      <section className="py-12 md:py-20 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             
-            {/* Announcement badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold shadow-2xs animate-in fade-in duration-300">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>Nền tảng ôn thi trắc nghiệm đại học thế hệ mới</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-              Biến đề cương Word thành{" "}
-              <span className="text-primary underline decoration-primary/30 decoration-wavy underline-offset-8">
-                phòng thi trắc nghiệm
-              </span>{" "}
-              trong 3 giây.
-            </h1>
-
-            {/* Clear, honest description */}
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Hệ thống ôn luyện thông minh dành cho sinh viên. Tự động bóc tách sơ đồ &amp; hình ảnh từ file <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono text-foreground font-semibold">.docx</code>, mô phỏng phòng thi iTest chuẩn trường, và ghi nhớ câu sai bằng sổ tay thông minh.
-            </p>
-
-            {/* Hero CTA buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/register"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
-              >
-                <span>Bắt đầu ôn thi ngay</span>
-                <span className="text-xs font-normal opacity-80">(Miễn phí 100%)</span>
-                <ArrowRight className="w-4 h-4 ml-0.5" />
-              </Link>
-              <a
-                href="#demo-interactive"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-sm font-semibold transition-colors shadow-2xs"
-              >
-                <Laptop className="w-4 h-4 text-primary" />
-                <span>Trải nghiệm câu hỏi mẫu bên dưới</span>
-              </a>
-            </div>
-
-            {/* Trust signals */}
-            <div className="pt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-500" /> Không cần cài đặt phần mềm
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-500" /> Tự động trích xuất ảnh sơ đồ
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-500" /> Không quảng cáo gián đoạn
-              </span>
-            </div>
-          </div>
-
-          {/* ── HERO INTERACTIVE SHOWCASE: LIVE QUIZ CARD ── */}
-          <div id="demo-interactive" className="mt-12 max-w-3xl mx-auto">
-            <div className="rounded-2xl border border-border bg-card shadow-xl overflow-hidden transition-all duration-300">
-              
-              {/* Card Window Topbar */}
-              <div className="px-4 sm:px-5 py-3 border-b border-border bg-muted/40 flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground ml-2">
-                    Luyện thi tương tác trực tiếp
-                  </span>
-                </div>
-
-                {/* Theme Switcher in Demo: Modern vs iTest */}
-                <div className="flex items-center gap-1 p-0.5 bg-muted rounded-lg border border-border/70 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setDemoTheme("modern")}
-                    className={cn(
-                      "px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer",
-                      demoTheme === "modern"
-                        ? "bg-card text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Giao diện Hiện đại
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDemoTheme("itest")}
-                    className={cn(
-                      "px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer",
-                      demoTheme === "itest"
-                        ? "bg-card text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Phòng thi iTest
-                  </button>
-                </div>
+            {/* Left Column: Editorial Headline + CTAs + Metrics */}
+            <div className="lg:col-span-6 space-y-6 pt-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary border border-border text-foreground text-xs font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <span>HỆ THỐNG LUYỆN THI ĐẠI HỌC • OPENQUIZ 2026</span>
               </div>
 
-              {/* Card Body with chosen Theme styling */}
-              <div
-                className={cn(
-                  "p-5 sm:p-7 transition-all duration-300",
-                  demoTheme === "itest"
-                    ? "bg-[#faf9f5] dark:bg-[#131720] font-serif text-[#1e293b] dark:text-[#f1f5f9]"
-                    : "bg-card font-sans text-foreground"
-                )}
-              >
-                {/* Meta Header */}
-                <div className="flex items-center justify-between text-xs font-semibold mb-3 text-muted-foreground">
-                  <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px] font-bold text-primary">
-                    <FileText className="w-3.5 h-3.5" />
-                    Đề cương: Lập trình &amp; CSDL • Câu 1 / 1
-                  </span>
-                  <span className="flex items-center gap-1 font-mono text-[11px] px-2 py-0.5 rounded bg-muted border border-border">
-                    <Clock className="w-3 h-3 text-amber-500" /> 45:00
-                  </span>
+              <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-[1.12]">
+                Chuyển đổi đề cương Word thành phòng thi chuẩn xác trong 3 giây.
+              </h1>
+
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
+                Không gian ôn luyện trắc nghiệm tối giản dành cho sinh viên. Tự động bóc tách sơ đồ từ file <code className="text-xs bg-secondary border border-border px-1.5 py-0.5 rounded font-mono text-foreground">.docx</code>, mô phỏng 100% phòng máy iTest, kết hợp trợ lý AI phân tích câu hỏi và sổ tay cô lập câu sai.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-semibold hover:bg-primary/90 transition-colors shadow-2xs"
+                >
+                  <span>Tạo tài khoản miễn phí</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/dashboard/quizzes"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-card hover:bg-secondary text-foreground text-xs sm:text-sm font-medium transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 text-muted-foreground" />
+                  <span>Duyệt kho 500+ đề thi</span>
+                </Link>
+              </div>
+
+              {/* Architectural Metrics Strip */}
+              <div className="pt-6 border-t border-border grid grid-cols-3 gap-4">
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold text-foreground font-mono tabular-nums tracking-tight">
+                    500+
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Bộ đề cương đại học
+                  </div>
+                </div>
+                <div className="border-l border-border pl-4">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground font-mono tabular-nums tracking-tight">
+                    &lt; 3.0s
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Tốc độ phân tích .docx
+                  </div>
+                </div>
+                <div className="border-l border-border pl-4">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground font-mono tabular-nums tracking-tight">
+                    0đ
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Chi phí &amp; Không quảng cáo
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Live Interactive Quiz Simulator */}
+            <div id="demo-interactive" className="lg:col-span-6">
+              <div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+                
+                {/* Window Header */}
+                <div className="px-4 py-2.5 border-b border-border bg-secondary/40 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-mono font-medium text-foreground">
+                       interactive-exam-preview
+                    </span>
+                  </div>
+
+                  {/* Theme Switcher */}
+                  <div className="flex items-center gap-1 p-0.5 bg-secondary rounded-lg border border-border text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setDemoTheme("modern")}
+                      className={cn(
+                        "px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer",
+                        demoTheme === "modern"
+                          ? "bg-card text-foreground shadow-2xs border border-border"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Modern SaaS
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDemoTheme("itest")}
+                      className={cn(
+                        "px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer",
+                        demoTheme === "itest"
+                          ? "bg-card text-foreground shadow-2xs border border-border"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      iTest Phòng máy
+                    </button>
+                  </div>
                 </div>
 
-                {/* Question Text */}
-                <p className="text-base sm:text-lg font-bold leading-relaxed mb-3">
-                  {demoQuestion.title}
-                </p>
+                {/* Simulator Body */}
+                <div
+                  className={cn(
+                    "p-5 sm:p-6 transition-colors",
+                    demoTheme === "itest"
+                      ? "bg-[#faf9f5] dark:bg-[#14171f] font-serif text-[#18181b] dark:text-[#f4f4f5]"
+                      : "bg-card font-sans text-foreground"
+                  )}
+                >
+                  {/* Meta Header */}
+                  <div className="flex items-center justify-between text-xs mb-3 pb-2.5 border-b border-border">
+                    <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-primary">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>CSDL_OODB.DOCX • CÂU 01/40</span>
+                    </span>
+                    <span className="flex items-center gap-1 font-mono text-[11px] px-2 py-0.5 rounded bg-secondary border border-border tabular-nums text-foreground">
+                      <Clock className="w-3 h-3 text-muted-foreground" /> 44:59
+                    </span>
+                  </div>
 
-                {/* Simulated Diagram / Image Box */}
-                <div className="mb-4 p-2.5 rounded-xl border border-dashed border-primary/30 bg-primary/5 flex items-center justify-center text-xs font-mono text-primary">
-                  <span>📐 {demoQuestion.diagramLabel}</span>
-                </div>
+                  {/* Question Stem */}
+                  <p className="text-sm sm:text-base font-semibold leading-relaxed mb-3">
+                    {demoQuestion.title}
+                  </p>
 
-                {/* Options List */}
-                <div className="space-y-2.5">
-                  {demoQuestion.options.map((opt, idx) => {
-                    const letter = String.fromCharCode(65 + idx);
-                    const isSelected = selectedOption === idx;
-                    const showResult = isAnswered;
+                  {/* Extracted Diagram Preview */}
+                  <div className="mb-4 px-3 py-2 rounded-lg border border-border bg-secondary/40 flex items-center justify-between text-xs font-mono text-foreground">
+                    <span>{demoQuestion.diagramLabel}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">Sơ đồ trích xuất</span>
+                  </div>
 
-                    let optionStyle = "border-border/80 bg-background hover:border-primary/50 hover:bg-muted/40 text-foreground";
-                    if (showResult) {
-                      if (opt.isCorrect) {
-                        optionStyle = "border-emerald-500/60 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-semibold";
-                      } else if (isSelected && !opt.isCorrect) {
-                        optionStyle = "border-rose-500/60 bg-rose-500/10 text-rose-800 dark:text-rose-300 font-semibold";
-                      } else {
-                        optionStyle = "border-border/50 opacity-60 text-muted-foreground";
+                  {/* Options List */}
+                  <div className="space-y-2">
+                    {demoQuestion.options.map((opt, idx) => {
+                      const letter = String.fromCharCode(65 + idx);
+                      const isSelected = selectedOption === idx;
+                      const showResult = isAnswered;
+
+                      let optionStyle = "border-border bg-background hover:border-foreground/30 hover:bg-secondary/40 text-foreground";
+                      if (showResult) {
+                        if (opt.isCorrect) {
+                          optionStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-medium";
+                        } else if (isSelected && !opt.isCorrect) {
+                          optionStyle = "border-rose-500/50 bg-rose-500/10 text-rose-800 dark:text-rose-300 font-medium";
+                        } else {
+                          optionStyle = "border-border opacity-55 text-muted-foreground";
+                        }
                       }
-                    }
 
-                    return (
-                      <div
-                        key={idx}
-                        onClick={() => handleSelectOption(idx)}
-                        className={cn(
-                          "flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none",
-                          optionStyle,
-                          !isAnswered && "active:scale-[0.99]"
-                        )}
-                      >
+                      return (
                         <div
+                          key={idx}
+                          onClick={() => handleSelectOption(idx)}
                           className={cn(
-                            "w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                            showResult && opt.isCorrect
-                              ? "bg-emerald-500 text-white"
-                              : showResult && isSelected && !opt.isCorrect
-                              ? "bg-rose-500 text-white"
-                              : "bg-muted text-muted-foreground"
+                            "flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer select-none",
+                            optionStyle
                           )}
                         >
-                          {showResult && opt.isCorrect ? (
-                            <Check className="w-3.5 h-3.5" />
-                          ) : showResult && isSelected && !opt.isCorrect ? (
-                            <X className="w-3.5 h-3.5" />
-                          ) : (
-                            letter
-                          )}
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded text-[11px] font-mono font-semibold flex items-center justify-center shrink-0 mt-0.5 border transition-colors",
+                              showResult && opt.isCorrect
+                                ? "bg-emerald-600 text-white border-emerald-600"
+                                : showResult && isSelected && !opt.isCorrect
+                                ? "bg-rose-600 text-white border-rose-600"
+                                : "bg-secondary text-foreground border-border"
+                            )}
+                          >
+                            {showResult && opt.isCorrect ? (
+                              <Check className="w-3 h-3" />
+                            ) : showResult && isSelected && !opt.isCorrect ? (
+                              <X className="w-3 h-3" />
+                            ) : (
+                              letter
+                            )}
+                          </div>
+                          <div className="flex-1 text-xs sm:text-[13px] leading-relaxed">
+                            {opt.text}
+                          </div>
                         </div>
-                        <div className="flex-1 text-xs sm:text-sm leading-relaxed pt-0.5">
-                          {opt.text}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Explanation Card upon Answer */}
-                {isAnswered && (
-                  <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs sm:text-sm leading-relaxed text-emerald-900 dark:text-emerald-200 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Giải thích chi tiết:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={resetDemo}
-                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <RefreshCcw className="w-3 h-3" /> Thử lại câu hỏi
-                      </button>
-                    </div>
-                    <p>{demoQuestion.explanation}</p>
+                      );
+                    })}
                   </div>
-                )}
 
-                {/* Bottom Tip */}
-                <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="italic">
-                    {!isAnswered ? "👉 Bấm chọn một phương án bất kỳ để xem phản hồi tức thì" : "✅ Hoàn thành câu hỏi thử nghiệm!"}
-                  </span>
-                  <Link
-                    href="/dashboard/quizzes"
-                    className="text-primary font-semibold hover:underline flex items-center gap-1"
-                  >
-                    Vào kho 500+ đề thi <ChevronRight className="w-3 h-3" />
-                  </Link>
+                  {/* Instant Feedback Drawer */}
+                  {isAnswered && (
+                    <div className="mt-3.5 p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs leading-relaxed text-emerald-950 dark:text-emerald-200 animate-in fade-in duration-150">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Giải thích đáp án</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={resetDemo}
+                          className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <RefreshCcw className="w-3 h-3" /> Làm lại câu này
+                        </button>
+                      </div>
+                      <p>{demoQuestion.explanation}</p>
+                    </div>
+                  )}
+
+                  {/* Simulator Footer */}
+                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>
+                      {!isAnswered ? "Chọn một đáp án bất kỳ để kiểm tra phản hồi tức thì" : "Đã chấm điểm tự động"}
+                    </span>
+                    <Link
+                      href="/dashboard/quizzes"
+                      className="text-primary font-medium hover:underline flex items-center gap-1"
+                    >
+                      <span>Mở toàn bộ đề</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* ── 3. FOUR CORE PILLARS (AUTHENTIC CRAFT, NO BENTO SLOP) ── */}
-      <section id="features" className="py-16 md:py-24 border-b border-border/50 bg-muted/20">
+      {/* ── 3. ARCHITECTURAL CAPABILITY LEDGER (NO ICON-GRID SLOP, NO KICKER) ── */}
+      <section id="features" className="py-16 md:py-24 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              Thiết kế chuyên biệt cho sinh viên
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight mt-2">
-              4 Giá trị cốt lõi bạn không thể tìm thấy ở các web trắc nghiệm đại trà
+          <div className="max-w-2xl mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              Kiến trúc chuyên biệt cho kỳ thi trắc nghiệm đại học
             </h2>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+              Mọi công cụ trên OpenQuiz được thiết kế xoay quanh tài liệu học tập thực tế của sinh viên Việt Nam, loại bỏ hoàn toàn các chi tiết rườm rà.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            
-            {/* Pillar 1: Word Ingestion */}
-            <div id="word-ingestion" className="p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-xs space-y-4 hover:border-primary/40 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                <FileCheck2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">
-                Tự động bóc tách đề cương Word (.docx) &amp; Giữ nguyên hình ảnh
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Không cần nhập liệu thủ công từng câu. Chỉ cần tải lên file Word đề cương môn học, thuật toán tự động nhận diện mẫu câu tiếng Việt (<code className="text-xs bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">Câu 1:</code>, <code className="text-xs bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">*A. Đáp án</code>, <code className="text-xs bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">=&gt; Đáp án: C</code>) và <strong>tự động trích xuất các sơ đồ, hình vẽ kỹ thuật</strong> vào đúng câu hỏi.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-primary flex items-center gap-1.5">
-                <span>Hỗ trợ dán ảnh nhanh bằng Ctrl + V</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </div>
+          <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
+            {capabilities.map((item) => (
+              <div
+                key={item.index}
+                id={item.id}
+                className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start hover:bg-secondary/20 transition-colors"
+              >
+                <div className="lg:col-span-3 flex items-center gap-3">
+                  <span className="font-mono text-xs font-semibold px-2 py-1 rounded bg-secondary border border-border text-foreground tabular-nums">
+                    {item.index}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground tracking-wider">
+                    {item.code}
+                  </span>
+                </div>
 
-            {/* Pillar 2: iTest Simulator */}
-            <div id="itest-simulation" className="p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-xs space-y-4 hover:border-primary/40 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-                <Laptop className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">
-                Chế độ mô phỏng phòng thi iTest chuẩn trường đại học
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Luyện tâm lý thi thật 100% với giao diện phòng máy iTest kinh điển: Bảng ma trận 40 câu hỏi, đồng hồ đếm ngược với số học tabular chống giật, lưu đáp án tự động khi mất kết nối và phát hiện rời tab thi để rèn luyện tính trung thực và kỷ luật.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-primary flex items-center gap-1.5">
-                <span>Chuyển đổi 1-click giữa Modern Theme &amp; iTest Theme</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </div>
+                <div className="lg:col-span-5">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs font-mono text-primary mt-2">
+                    {item.spec}
+                  </p>
+                </div>
 
-            {/* Pillar 3: Error Notebook */}
-            <div id="error-notebook" className="p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-xs space-y-4 hover:border-primary/40 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                <Bookmark className="w-6 h-6" />
+                <div className="lg:col-span-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-foreground">
-                Sổ tay câu hỏi khó &amp; Thuật toán luyện lại câu sai
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Sai lầm lớn nhất khi ôn thi là làm lại các câu bản thân đã biết. OpenQuiz tự động gom các câu bạn trả lời sai hoặc đánh dấu bookmark vào <strong>Sổ tay câu khó riêng biệt</strong>, cho phép bạn ghi chú mẹo nhớ cá nhân và xuất bản in PDF trước giờ thi.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-primary flex items-center gap-1.5">
-                <span>Rút ngắn 50% thời gian ôn luyện trước ngày thi</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </div>
-
-            {/* Pillar 4: Non-profit & Zero Ad */}
-            <div className="p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-xs space-y-4 hover:border-primary/40 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">
-                100% Phi lợi nhuận, Không quảng cáo, Tôn trọng quyền riêng tư
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Xây dựng bởi tinh thần hỗ trợ cộng đồng sinh viên. Không bán khóa học, không giấu lời giải sau VIP paywall, không chèn banner quảng cáo cờ bạc gây sao nhãng việc học. Dữ liệu đề thi và quyền học tập thuộc về bạn.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <span>Mã nguồn minh bạch &amp; Miễn phí vĩnh viễn</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── 4. HOW IT WORKS (3 SIMPLE STEPS) ── */}
-      <section className="py-16 md:py-24 border-b border-border/50">
+      {/* ── 4. WORKFLOW PIPELINE ── */}
+      <section id="workflow" className="py-16 md:py-24 border-b border-border bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              Quy trình siêu tốc
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight mt-2">
-              Từ file đề cương đến bài thi trong 3 bước đơn giản
+          <div className="max-w-2xl mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              Từ file đề cương đến phòng thi trong 3 bước
             </h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Quy trình tự động hóa hoàn toàn giúp bạn dành 100% thời gian cho việc ghi nhớ kiến thức.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            
-            {/* Step 1 */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-3 relative">
-              <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground font-bold text-base flex items-center justify-center shadow-xs">
-                1
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-secondary border border-border text-foreground tabular-nums">
+                  BƯỚC 01
+                </span>
+                <span className="font-mono text-[11px] text-muted-foreground">.DOCX / TEXT</span>
               </div>
-              <h4 className="text-base font-bold text-foreground">
-                Tải lên file Word (.docx) hoặc dán text
-              </h4>
+              <h3 className="text-base font-semibold text-foreground">
+                Tải lên file Word hoặc dán nội dung
+              </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Kéo thả file đề cương ôn tập có sẵn của bạn. Hệ thống hỗ trợ file lên tới 10MB và tự động bảo toàn hình ảnh sơ đồ.
+                Kéo thả file đề cương môn học có sẵn. Hệ thống tự động tách câu hỏi, phương án trả lời và hình ảnh đính kèm.
               </p>
             </div>
 
-            {/* Step 2 */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-3 relative">
-              <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground font-bold text-base flex items-center justify-center shadow-xs">
-                2
+            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-secondary border border-border text-foreground tabular-nums">
+                  BƯỚC 02
+                </span>
+                <span className="font-mono text-[11px] text-muted-foreground">LIVE PREVIEW</span>
               </div>
-              <h4 className="text-base font-bold text-foreground">
-                Xem trước &amp; Xác nhận bộ đề thi
-              </h4>
+              <h3 className="text-base font-semibold text-foreground">
+                Kiểm duyệt trực quan bộ câu hỏi
+              </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Kiểm tra trực quan các câu hỏi đã nhận diện, kiểm tra đáp án đúng và hình ảnh ở bảng Live Preview trước khi bấm tạo đề.
+                Rà soát danh sách câu hỏi, đáp án đúng và sơ đồ ở chế độ xem trước. Bổ sung hoặc chỉnh sửa ngay trên trình duyệt.
               </p>
             </div>
 
-            {/* Step 3 */}
-            <div className="p-6 rounded-2xl bg-card border border-border space-y-3 relative">
-              <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground font-bold text-base flex items-center justify-center shadow-xs">
-                3
+            <div className="p-6 rounded-xl bg-card border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-secondary border border-border text-foreground tabular-nums">
+                  BƯỚC 03
+                </span>
+                <span className="font-mono text-[11px] text-muted-foreground">PRACTICE &amp; AI</span>
               </div>
-              <h4 className="text-base font-bold text-foreground">
-                Làm bài, chấm điểm &amp; Tự tin đạt điểm A
-              </h4>
+              <h3 className="text-base font-semibold text-foreground">
+                Luyện thi bấm giờ &amp; Ôn tập câu sai
+              </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Làm bài thi thử có bấm giờ, nhận phân tích chi tiết từng câu và lặp lại những câu sai cho đến khi thành thạo 100%.
+                Chọn chế độ Ôn tập hoặc Thi thử iTest, xem giải thích từ trợ lý AI và luyện lại các câu làm sai cho đến khi nắm vững.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 5. HONEST COMPARISON MATRIX ── */}
-      <section id="comparison" className="py-16 md:py-24 border-b border-border/50 bg-muted/20">
+      {/* ── 5. COMPARISON TABLE ── */}
+      <section id="comparison" className="py-16 md:py-24 border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-              So sánh khách quan
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mt-2">
-              Tại sao sinh viên chọn OpenQuiz thay vì tự đọc PDF hay web khác?
+          <div className="max-w-2xl mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              So sánh hiệu quả ôn tập
             </h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Sự khác biệt giữa việc đọc đề cương tĩnh truyền thống và luyện tập chủ động trên OpenQuiz.
+            </p>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-xs">
+          <div className="overflow-x-auto rounded-xl border border-border bg-card">
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
               <thead>
-                <tr className="border-b border-border bg-muted/60 text-muted-foreground">
-                  <th className="p-4 sm:p-5 font-bold uppercase tracking-wider text-xs w-[40%]">Tiêu chí</th>
-                  <th className="p-4 sm:p-5 font-bold text-center text-xs w-[30%]">Đọc file Word / PDF thủ công</th>
-                  <th className="p-4 sm:p-5 font-bold text-center text-xs text-primary bg-primary/5 w-[30%]">OpenQuiz</th>
+                <tr className="border-b border-border bg-secondary/50 text-muted-foreground">
+                  <th className="p-4 font-semibold text-xs w-[44%]">Tiêu chí đánh giá</th>
+                  <th className="p-4 font-semibold text-center text-xs w-[28%]">Đọc Word / PDF thủ công</th>
+                  <th className="p-4 font-semibold text-center text-xs text-foreground bg-secondary w-[28%]">OpenQuiz 2.6</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 <tr>
-                  <td className="p-4 sm:p-5 font-semibold text-foreground">Tốc độ chuyển đổi thành bài thi</td>
-                  <td className="p-4 sm:p-5 text-center text-muted-foreground">Mất hàng giờ tự tạo quiz</td>
-                  <td className="p-4 sm:p-5 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-primary/5">3 giây (1-click upload)</td>
+                  <td className="p-4 font-medium text-foreground">Thời gian tạo đề trắc nghiệm</td>
+                  <td className="p-4 text-center text-muted-foreground">Mất hàng giờ nhập thủ công</td>
+                  <td className="p-4 text-center font-mono font-semibold text-primary bg-primary/[0.03] tabular-nums">3 giây (Tự động)</td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-semibold text-foreground">Tự động bấm giờ &amp; Mô phỏng phòng thi iTest</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500">❌ Không có</td>
-                  <td className="p-4 sm:p-5 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-primary/5">✓ Chuẩn phòng thi thật</td>
+                  <td className="p-4 font-medium text-foreground">Mô phỏng phòng máy thi thật (iTest)</td>
+                  <td className="p-4 text-center text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <X className="w-3.5 h-3.5 text-rose-500" /> Không hỗ trợ
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-semibold text-emerald-600 dark:text-emerald-400 bg-primary/[0.03]">
+                    <span className="inline-flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Giao diện chuẩn 100%
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-semibold text-foreground">Tự động bóc tách ảnh sơ đồ, biểu đồ kỹ thuật</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500">❌ Mất ảnh khi copy paste</td>
-                  <td className="p-4 sm:p-5 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-primary/5">✓ Tự bóc tách + Phóng to</td>
+                  <td className="p-4 font-medium text-foreground">Trích xuất ảnh sơ đồ, công thức</td>
+                  <td className="p-4 text-center text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <X className="w-3.5 h-3.5 text-rose-500" /> Lỗi định dạng khi sao chép
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-semibold text-emerald-600 dark:text-emerald-400 bg-primary/[0.03]">
+                    <span className="inline-flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Tự động giữ nguyên ảnh
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-semibold text-foreground">Lọc &amp; Gom riêng các câu làm sai để ôn lại</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500">❌ Rất khó theo dõi</td>
-                  <td className="p-4 sm:p-5 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-primary/5">✓ Sổ tay câu khó thông minh</td>
+                  <td className="p-4 font-medium text-foreground">Cô lập câu sai &amp; Trợ lý AI giải thích</td>
+                  <td className="p-4 text-center text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <X className="w-3.5 h-3.5 text-rose-500" /> Phải tự ghi chép tay
+                    </span>
+                  </td>
+                  <td className="p-4 text-center font-semibold text-emerald-600 dark:text-emerald-400 bg-primary/[0.03]">
+                    <span className="inline-flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Sổ tay + AI Mẹo nhớ 3s
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td className="p-4 sm:p-5 font-semibold text-foreground">Chi phí sử dụng</td>
-                  <td className="p-4 sm:p-5 text-center text-muted-foreground">Miễn phí nhưng tốn công</td>
-                  <td className="p-4 sm:p-5 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-primary/5">100% Phi lợi nhuận &amp; Mở</td>
+                  <td className="p-4 font-medium text-foreground">Chi phí sử dụng</td>
+                  <td className="p-4 text-center text-muted-foreground">Miễn phí nhưng tốn thời gian</td>
+                  <td className="p-4 text-center font-semibold text-foreground bg-primary/[0.03]">Miễn phí 100% &amp; Không quảng cáo</td>
                 </tr>
               </tbody>
             </table>
@@ -586,71 +602,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── 6. POPULAR SUBJECT CATEGORIES ── */}
-      <section className="py-14 border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
-            Đang được sinh viên ôn tập sôi nổi trên hệ thống
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2 max-w-3xl mx-auto">
-            {[
-              "Triết học Mác - Lênin",
-              "Cơ sở dữ liệu",
-              "Lập trình Hướng đối tượng",
-              "Mạng máy tính",
-              "Pháp luật đại cương",
-              "Kinh tế chính trị",
-              "Toán rời rạc",
-              "Hệ thống thông tin quản lý",
-              "Kiến trúc máy tính"
-            ].map((subject, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1.5 rounded-xl bg-card border border-border text-xs font-semibold text-foreground hover:border-primary/40 transition-colors shadow-2xs"
-              >
-                📚 {subject}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7. FINAL CALL TO ACTION ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-            Sẵn sàng bứt phá điểm số trong kỳ thi sắp tới?
-          </h2>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-            Không cần thẻ tín dụng, không quảng cáo làm phiền. Tạo tài khoản trong 15 giây và bắt đầu làm bài thi đầu tiên của bạn.
-          </p>
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-all shadow-md active:scale-95"
-            >
-              <span>Đăng ký tài khoản miễn phí</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/dashboard/quizzes"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-sm font-semibold transition-colors shadow-2xs"
-            >
-              <BookOpen className="w-4 h-4 text-primary" />
-              <span>Khám phá kho đề thi mẫu</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. FOOTER ── */}
-      <footer className="mt-auto border-t border-border bg-card text-muted-foreground py-10 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs">
-              <GraduationCap className="w-3.5 h-3.5" />
+      {/* ── 6. SUBJECTS & FINAL CTA ── */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="p-8 sm:p-12 rounded-2xl border border-border bg-card flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+            <div className="space-y-3 max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                Sẵn sàng ôn tập cho kỳ thi học kỳ sắp tới?
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Khởi tạo tài khoản miễn phí trong 15 giây. Truy cập ngay ngân hàng câu hỏi các môn Triết học, Pháp luật đại cương, Cơ sở dữ liệu, Mạng máy tính, Kinh tế chính trị và tự tạo kho đề của riêng bạn.
+              </p>
             </div>
-            <span className="font-bold text-foreground">OpenQuiz</span>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-semibold hover:bg-primary/90 transition-colors"
+              >
+                <span>Đăng ký miễn phí</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/dashboard/quizzes"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-background hover:bg-secondary text-foreground text-xs sm:text-sm font-medium transition-colors"
+              >
+                <Laptop className="w-4 h-4 text-muted-foreground" />
+                <span>Xem danh sách đề thi</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. FOOTER ── */}
+      <footer className="mt-auto border-t border-border bg-card text-muted-foreground py-8 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-md bg-foreground text-background flex items-center justify-center font-mono font-bold text-[11px]">
+              OQ
+            </div>
+            <span className="font-semibold text-foreground">OpenQuiz</span>
             <span>— Nền tảng ôn thi trắc nghiệm mở &amp; phi lợi nhuận.</span>
           </div>
           <div className="flex items-center gap-5 font-medium">
@@ -666,7 +658,7 @@ export default function LandingPage() {
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors"
             >
-              GitHub Repo
+              GitHub
             </a>
           </div>
         </div>

@@ -451,7 +451,7 @@ export default function SettingsPage() {
                     theme === 'system' ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/50"
                   )}
                 >
-                  <div className="w-full h-24 bg-gradient-to-r from-slate-100 to-[#0f172a] rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-border">
+                  <div className="w-full h-24 bg-secondary rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-border">
                     <Monitor className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <span className="font-semibold text-foreground">Theo hệ thống</span>

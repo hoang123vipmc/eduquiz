@@ -828,14 +828,14 @@ export default function QuizPlayerPage() {
 
                   let optHighlight = "hover:bg-[#f3efe4]/80";
                   if (isSelected) {
-                    optHighlight = "bg-[#e8f0fe] font-semibold text-[#0f2e5c] border-l-4 border-[#1a569d] pl-2 sm:pl-2.5";
+                    optHighlight = "bg-[#e8f0fe] font-semibold text-[#0f2e5c] border border-[#1a569d] pl-2 sm:pl-2.5";
                   }
 
                   if (isPractice && hasAnswered) {
                     if (isCorrect) {
-                      optHighlight = "bg-emerald-100 text-emerald-950 font-semibold border-l-4 border-emerald-600 pl-2 sm:pl-2.5";
+                      optHighlight = "bg-emerald-100 text-emerald-950 font-semibold border border-emerald-600 pl-2 sm:pl-2.5";
                     } else if (isSelected && !isCorrect) {
-                      optHighlight = "bg-rose-100 text-rose-950 font-semibold border-l-4 border-rose-600 pl-2 sm:pl-2.5";
+                      optHighlight = "bg-rose-100 text-rose-950 font-semibold border border-rose-600 pl-2 sm:pl-2.5";
                     }
                   }
 
@@ -951,7 +951,7 @@ export default function QuizPlayerPage() {
         {showMobileStudentInfo && (
           <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-xs animate-in fade-in">
             <div className="fixed inset-0" onClick={() => setShowMobileStudentInfo(false)} />
-            <div className="relative w-full max-h-[85vh] bg-[#dfd7c8] border-t-2 border-[#8c8474] rounded-t-xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+            <div className="relative w-full max-h-[85vh] bg-[#dfd7c8] border-t border-[#8c8474] rounded-t-xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
               <div className="bg-[#0a192f] text-[#ffea00] px-4 py-2.5 flex items-center justify-between">
                 <span className="font-bold text-xs">THÔNG TIN THÍ SINH & LƯU BÀI</span>
                 <button 
@@ -1263,7 +1263,7 @@ export default function QuizPlayerPage() {
               onClick={() => handleSubmit()} 
               disabled={submitting} 
               aria-label="Nộp bài thi"
-              className="flex items-center gap-1 sm:gap-2 bg-[#10B981] hover:bg-emerald-600 text-white font-bold px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full shadow-[0_2px_10px_rgba(16,185,129,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              className="flex items-center gap-1 sm:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg shadow-2xs transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               {submitting ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> <span className="hidden sm:inline">Đang nộp...</span></>
@@ -1277,15 +1277,13 @@ export default function QuizPlayerPage() {
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
           <div 
-            className="h-full bg-primary transition-all duration-300 ease-out shadow-[0_0_8px_var(--primary)]"
+            className="h-full bg-primary transition-all duration-300 ease-out"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        {/* Ambient background glow */}
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[800px] h-[800px] rounded-full pointer-events-none opacity-40" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)' }}></div>
 
         {/* LEFT/CENTER: Question Area */}
         <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8 lg:p-12 relative z-10 scrollbar-hide pb-20 md:pb-8">
@@ -1294,16 +1292,16 @@ export default function QuizPlayerPage() {
             className="max-w-4xl mx-auto flex flex-col min-h-full animate-in fade-in slide-in-from-right-3 duration-200 ease-out motion-reduce:animate-none"
           >
             <div className="flex items-center justify-between text-xs sm:text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-4 sm:mb-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span>Câu {currentQuestionIndex + 1} / {questions.length}</span>
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                <span className="font-mono tabular-nums">Câu {currentQuestionIndex + 1} / {questions.length}</span>
                 <button
                   type="button"
                   onClick={toggleFlagCurrent}
                   className={cn(
-                    "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                    "flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer",
                     flaggedQuestions[currentQuestion.id]
-                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-amber-500/10"
-                      : "bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80"
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                      : "bg-secondary/60 text-muted-foreground border-border hover:text-foreground hover:bg-secondary"
                   )}
                   title="Đánh dấu xem lại trong phiên thi hiện tại"
                 >
@@ -1314,15 +1312,15 @@ export default function QuizPlayerPage() {
                   type="button"
                   onClick={() => handleToggleBookmark(currentQuestion.id)}
                   className={cn(
-                    "flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs",
+                    "flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer",
                     bookmarkedIds.includes(currentQuestion.id)
-                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-amber-500/10"
-                      : "bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/80"
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                      : "bg-secondary/60 text-muted-foreground border-border hover:text-foreground hover:bg-secondary"
                   )}
                   title="Lưu câu hỏi này vào Sổ tay câu khó vĩnh viễn"
                 >
                   <Bookmark className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", bookmarkedIds.includes(currentQuestion.id) && "fill-amber-500 text-amber-500")} />
-                  <span>{bookmarkedIds.includes(currentQuestion.id) ? "Sổ tay ✓" : "+ Sổ tay"}</span>
+                  <span>{bookmarkedIds.includes(currentQuestion.id) ? "Đã lưu sổ tay" : "+ Sổ tay"}</span>
                 </button>
 
                 {/* Nút Mẹo nhớ 3s */}
@@ -1332,10 +1330,10 @@ export default function QuizPlayerPage() {
                     setAiModalMode("mnemonic");
                     setShowAskAI(true);
                   }}
-                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-emerald-500/15 to-teal-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 hover:from-emerald-500/25 hover:to-teal-500/25 active:scale-95"
-                  title="Xem mẹo nhớ nhanh 3 giây & thần chú ghi nhớ"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/15"
+                  title="Xem mẹo nhớ nhanh 3 giây & từ khóa ghi nhớ"
                 >
-                  <Lightbulb className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500" />
+                  <Lightbulb className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Mẹo nhớ</span>
                 </button>
 
@@ -1346,14 +1344,14 @@ export default function QuizPlayerPage() {
                     setAiModalMode("explain");
                     setShowAskAI(true);
                   }}
-                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-xs bg-gradient-to-r from-violet-500/15 to-indigo-500/15 text-violet-600 dark:text-violet-400 border-violet-500/40 hover:from-violet-500/25 hover:to-indigo-500/25 active:scale-95"
-                  title="Hỏi AI giải thích hoặc tranh luận đáp án"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
+                  title="Hỏi AI giải thích hoặc kiểm tra đáp án"
                 >
                   <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span>Hỏi AI</span>
                 </button>
               </div>
-              <span className="bg-muted px-2.5 sm:px-3 py-1 rounded-full border border-border text-primary font-bold text-xs">1 Điểm</span>
+              <span className="bg-secondary px-2.5 py-1 rounded-md border border-border text-foreground font-mono font-semibold text-xs tabular-nums">1 Điểm</span>
             </div>
             
             <div className="bg-card rounded-[18px] sm:rounded-[20px] border border-border p-4 sm:p-6 md:p-10 shadow-xs mb-4 sm:mb-6 shrink-0">
